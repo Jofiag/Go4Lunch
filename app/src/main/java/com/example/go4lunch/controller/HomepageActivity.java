@@ -141,7 +141,7 @@ public class HomepageActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (myDrawerLayout.isEnabled())
             myDrawerLayout.closeDrawers();
-        else if (!myDrawerLayout.isEnabled())
+        else
             super.onBackPressed();
     }
 

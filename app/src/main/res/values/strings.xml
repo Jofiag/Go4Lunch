@@ -24,4 +24,12 @@
     <string name="enter_restaurant_name_text">Enter restaurant name</string>
     <string name="search_restaurant_text">Search Panama Restaurant</string>
     <string name="restaurant_name_text">Restaurant name</string>
+    <string name="food_country_and_address_text">French - 12 Rue Faubourg Poissonnière</string>
+    <string name="until_text">Open until 6pm</string>
+    <string name="restaurant_image_text">Restaurant image</string>
+    <string name="m_text">120m</string>
+    <string name="avatar_image_text">Avatar image</string>
+    <string name="parentheses_text">(3)</string>
+    <string name="yellow_start_image_text">Yellow start image</string>
+    <string name="oc_pizza_text">OC PIZZA</string>
 </resources>
