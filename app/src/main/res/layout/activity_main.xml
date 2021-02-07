@@ -1,18 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/oc_pizza_4_1"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
     tools:context=".MainActivity">
+
+    <ImageView
+        android:layout_width="271dp"
+        android:layout_height="271dp"
+        android:src="@drawable/baseline_local_pizza_24"
+        android:contentDescription="@string/image_text" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="@string/go4lunch_text"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="71sp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/find_a_nice_restaurant_text"
+        android:textColor="@color/white"
+        android:textStyle="bold|italic"
+        android:textSize="12sp"/>
+
+    <RelativeLayout
+        android:layout_marginTop="37dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/facebook_image"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="0dp"
+            android:contentDescription="@string/facebook_image_text"
+            android:src="@mipmap/facebook_created_round" />
+
+        <ImageView
+            android:id="@+id/google_image"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:layout_below="@+id/facebook_image"
+            android:layout_marginTop="27dp"
+            android:contentDescription="@string/google_image_text"
+            android:src="@mipmap/google_plus_created_round" />
+
+        <Button
+            android:id="@+id/sign_in_facebook_button"
+            android:layout_width="wrap_content"
+            android:layout_height="37dp"
+            android:text="@string/sign_in_facebook_text"
+            android:textStyle="bold"
+            android:background="@android:color/transparent"
+            android:layout_toEndOf="@+id/facebook_image"/>
+
+        <Button
+            android:id="@+id/sign_in_google_button"
+            android:layout_width="wrap_content"
+            android:layout_height="37dp"
+            android:layout_marginTop="27dp"
+            android:layout_below="@+id/sign_in_facebook_button"
+            android:layout_toEndOf="@+id/google_image"
+            android:background="@android:color/transparent"
+            android:textStyle="bold"
+            android:text="@string/sign_in_google_text" />
+
+    </RelativeLayout>
+
+</LinearLayout>

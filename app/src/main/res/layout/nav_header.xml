@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="257dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/oc_pizza_4_small_flou">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="47dp"
+        android:layout_marginTop="47dp"
+        android:text="@string/go4lunch_text"
+        android:textColor="@color/white"
+        android:textSize="37sp"
+        android:textStyle="bold" />
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profile_circle_image_view"
+        android:layout_width="67dp"
+        android:layout_height="67dp"
+        android:layout_marginTop="57dp"
+        android:layout_marginBottom="7dp"
+        android:layout_marginStart="17dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/title"
+        android:contentDescription="@string/profile_image_text"
+        android:src="@color/purple_200"/>
+
+    <TextView
+        android:id="@+id/name_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="71dp"
+        android:layout_marginStart="17dp"
+        android:layout_below="@+id/title"
+        android:layout_toEndOf="@+id/profile_circle_image_view"
+        tools:text="John SMITH"
+        android:textColor="@color/white"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/email_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:layout_marginStart="17dp"
+        android:layout_below="@+id/name_text"
+        android:layout_toEndOf="@+id/profile_circle_image_view"
+        tools:text="jsmith.1337@gmail.com"
+        android:textColor="@color/white"/>
+
+</RelativeLayout>
