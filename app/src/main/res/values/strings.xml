@@ -32,4 +32,8 @@
     <string name="parentheses_text">(3)</string>
     <string name="yellow_start_image_text">Yellow start image</string>
     <string name="oc_pizza_text">OC PIZZA</string>
+    <string name="scarlett_text">Scarlett</string>
+    <string name="is_eating_text">is eating</string>
+    <string name="french_scarlett_text">French</string>
+    <string name="parentheses_name_text">(Le Zinc)</string>
 </resources>
