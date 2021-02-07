@@ -14,4 +14,5 @@ public class Constants {
     public static final String OPEN_UNTIL_TEXT = "open until ";
     public static final String CLOSE_AND_OPEN_AT_TEXT = "Closed. Open at ";
     public static final String H_TEXT = "h";
+    public static final String WORKMATE_SELECTED_CODE = "workmate selected";
 }

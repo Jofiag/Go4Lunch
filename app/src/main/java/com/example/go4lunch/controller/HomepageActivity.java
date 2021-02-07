@@ -200,19 +200,19 @@ public class HomepageActivity extends AppCompatActivity
         return true;
     }
 
-    private void startRestaurantDetailsActivity(Serializable serializable){
+    private void startRestaurantDetailsActivity(Serializable serializable, String code){
         Intent intent = new Intent(HomepageActivity.this, RestaurantDetailsActivity.class);
-        intent.putExtra(Constants.RESTAURANT_SELECTED_CODE, serializable);
+        intent.putExtra(code, serializable);
         startActivity(intent);
     }
 
     @Override
     public void onRestaurantSelected(Restaurant restaurant) {
-        startRestaurantDetailsActivity(restaurant);
+        startRestaurantDetailsActivity(restaurant, Constants.RESTAURANT_SELECTED_CODE);
     }
 
     @Override
     public void onWorkmateSelected(Workmate workmate) {
-        startRestaurantDetailsActivity(workmate);
+        startRestaurantDetailsActivity(workmate, Constants.WORKMATE_SELECTED_CODE);
     }
 }

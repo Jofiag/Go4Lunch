@@ -3,6 +3,7 @@ package com.example.go4lunch.model;
 import android.net.Uri;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Restaurant implements Serializable {
     private String name;
@@ -13,6 +14,7 @@ public class Restaurant implements Serializable {
     private String howFarFromWorkmate;
     private int numberOfFavorableOpinion;
     private int numberOfInterestedWorkmate;
+    private List<Workmate> workmateList;
 
     public Restaurant() {
     }
@@ -91,5 +93,13 @@ public class Restaurant implements Serializable {
 
     public void setNumberOfInterestedWorkmate(int numberOfInterestedWorkmate) {
         this.numberOfInterestedWorkmate = numberOfInterestedWorkmate;
+    }
+
+    public List<Workmate> getWorkmateList() {
+        return workmateList;
+    }
+
+    public void setWorkmateList(List<Workmate> workmateList) {
+        this.workmateList = workmateList;
     }
 }

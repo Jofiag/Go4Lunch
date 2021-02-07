@@ -1,7 +1,6 @@
 package com.example.go4lunch.model;
 
 import android.net.Uri;
-import android.widget.ImageView;
 
 import java.io.Serializable;
 
