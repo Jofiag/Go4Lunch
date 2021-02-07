@@ -1,6 +1,7 @@
 package com.example.go4lunch.controller;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,15 +20,22 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
+import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
 import com.example.go4lunch.fragment.RestaurantMapViewFragment;
 import com.example.go4lunch.fragment.WorkmateListViewFragment;
+import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
-public class HomepageActivity extends AppCompatActivity {
+import java.io.Serializable;
+
+public class HomepageActivity extends AppCompatActivity
+        implements RestaurantRecyclerViewAdapter.OnRestaurantClickListener, WorkmateRecyclerViewAdapter.OnWorkmateClickListener {
 
     private BottomNavigationView bottomNavigationView;
     private Toolbar myToolbar;
@@ -190,5 +198,21 @@ public class HomepageActivity extends AppCompatActivity {
         materialSearchView.setMenuItem(item);
 
         return true;
+    }
+
+    private void startRestaurantDetailsActivity(Serializable serializable){
+        Intent intent = new Intent(HomepageActivity.this, RestaurantDetailsActivity.class);
+        intent.putExtra(Constants.RESTAURANT_SELECTED_CODE, serializable);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onRestaurantSelected(Restaurant restaurant) {
+        startRestaurantDetailsActivity(restaurant);
+    }
+
+    @Override
+    public void onWorkmateSelected(Workmate workmate) {
+        startRestaurantDetailsActivity(workmate);
     }
 }

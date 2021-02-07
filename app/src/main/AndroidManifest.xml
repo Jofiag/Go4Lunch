@@ -9,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Go4Lunch">
-        <activity android:name=".controller.HomepageActivity"/>
+        <activity android:name=".controller.RestaurantDetailsActivity"></activity>
+        <activity android:name=".controller.HomepageActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -3,7 +3,9 @@ package com.example.go4lunch.model;
 import android.net.Uri;
 import android.widget.ImageView;
 
-public class Workmate {
+import java.io.Serializable;
+
+public class Workmate implements Serializable {
     private String name;
     private Uri imageUri;
     private Restaurant restaurantChosen;

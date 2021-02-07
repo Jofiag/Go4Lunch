@@ -18,16 +18,16 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRecyclerViewAdapter.MyViewHolder> {
 
-    public interface onWorkmateClickListener{
+    public interface OnWorkmateClickListener {
         void onWorkmateSelected(Workmate workmate);
     }
 
     private final List<Workmate> workmateList;
-    private final onWorkmateClickListener mCallback;
+    private final OnWorkmateClickListener mCallback;
 
     public WorkmateRecyclerViewAdapter(Context context, List<Workmate> workmateList) {
         this.workmateList = workmateList;
-        this.mCallback = (onWorkmateClickListener) context;
+        this.mCallback = (OnWorkmateClickListener) context;
     }
 
     @NonNull
