@@ -1,18 +1,19 @@
 package com.example.go4lunch.model;
 
+import android.net.Uri;
 import android.widget.ImageView;
 
 public class Workmate {
     private String name;
-    private ImageView image;
+    private Uri imageUri;
     private Restaurant restaurantChosen;
 
     public Workmate() {
     }
 
-    public Workmate(String name, ImageView image, Restaurant restaurantChosen) {
+    public Workmate(String name, Uri imageUri, Restaurant restaurantChosen) {
         this.name = name;
-        this.image = image;
+        this.imageUri = imageUri;
         this.restaurantChosen = restaurantChosen;
     }
 
@@ -25,12 +26,12 @@ public class Workmate {
         this.name = name;
     }
 
-    public ImageView getImage() {
-        return image;
+    public Uri getImageUri() {
+        return imageUri;
     }
 
-    public void setImage(ImageView image) {
-        this.image = image;
+    public void setImageUri(Uri imageUri) {
+        this.imageUri = imageUri;
     }
 
     public Restaurant getRestaurantChosen() {
