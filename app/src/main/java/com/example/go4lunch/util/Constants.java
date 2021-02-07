@@ -10,4 +10,8 @@ public class Constants {
     public static final String COOKING_IN_PROGRESS_TEXT = "Cooking in progress";
     public static final String SHIPPING_IN_PROGRESS_TEXT = "Shipping in progress";
     public static final String AVAILABLE_WORKMATES_TITLE_TEXT = "Available workmates";
+    public static final String RESTAURANT_SELECTED_CODE = "restaurant selected";
+    public static final String OPEN_UNTIL_TEXT = "open until ";
+    public static final String CLOSE_AND_OPEN_AT_TEXT = "Closed. Open at ";
+    public static final String H_TEXT = "h";
 }
