@@ -110,7 +110,6 @@ public class HomepageActivity extends AppCompatActivity {
     }
 
     private void setMyNavigationView(){
-//        Drawable itemBackground = ResourcesCompat.getDrawable(getResources(), R.drawable.baseline_local_dining_24, null);
         myNavigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
@@ -140,9 +139,9 @@ public class HomepageActivity extends AppCompatActivity {
     @Override
     //Make sure we close the DrawerLayout when the user click on back button
     public void onBackPressed() {
-        if (myDrawerLayout.isLaidOut())
+        if (myDrawerLayout.isEnabled())
             myDrawerLayout.closeDrawers();
-        else
+        else if (!myDrawerLayout.isEnabled())
             super.onBackPressed();
     }
 

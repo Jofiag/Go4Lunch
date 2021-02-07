@@ -4,15 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/oc_pizza_4_1"
+    android:background="@drawable/go4lunch_2_flou"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
     <ImageView
+        android:layout_marginTop="67dp"
         android:layout_width="271dp"
         android:layout_height="271dp"
-        android:src="@drawable/baseline_local_pizza_24"
+        android:src="@drawable/baseline_ramen_dining_24"
         android:contentDescription="@string/image_text" />
 
     <TextView

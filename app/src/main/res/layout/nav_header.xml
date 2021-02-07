@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="257dp"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/oc_pizza_4_small_flou">
+    android:background="@drawable/go4lunch_2_cutted">
 
     <TextView
         android:id="@+id/title"
@@ -29,7 +29,7 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/title"
         android:contentDescription="@string/profile_image_text"
-        android:src="@color/purple_200"/>
+        android:src="#EFA92F"/>
 
     <TextView
         android:id="@+id/name_text"

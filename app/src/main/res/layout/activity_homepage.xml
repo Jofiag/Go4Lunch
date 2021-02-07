@@ -31,10 +31,10 @@
                     android:id="@+id/my_toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#E45252"
+                    android:background="#A9C606"
                     app:navigationIcon="@drawable/baseline_menu_24"
                     app:title="@string/im_hungry_text"
-                    app:titleTextColor="#FFFFFF"/>
+                    app:titleTextColor="#FFFFFF" />
 
                 <com.miguelcatalan.materialsearchview.MaterialSearchView
                     android:id="@+id/my_material_search_view"
@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="#E45252"
+            android:background="#A9C606"
             android:fitsSystemWindows="true"
             app:headerLayout="@layout/nav_header"
             app:itemIconTint="@color/white"
