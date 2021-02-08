@@ -61,6 +61,7 @@
             android:layout_height="37dp"
             android:text="@string/sign_in_facebook_text"
             android:textStyle="bold"
+            android:textColor="@color/white"
             android:background="@android:color/transparent"
             android:layout_toEndOf="@+id/facebook_image"/>
 
@@ -73,6 +74,7 @@
             android:layout_toEndOf="@+id/google_image"
             android:background="@android:color/transparent"
             android:textStyle="bold"
+            android:textColor="@color/white"
             android:text="@string/sign_in_google_text" />
 
     </RelativeLayout>

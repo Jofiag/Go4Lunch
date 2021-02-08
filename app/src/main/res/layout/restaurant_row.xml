@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/white"
     xmlns:tools="http://schemas.android.com/tools">
 
     <RelativeLayout
@@ -22,6 +23,7 @@
             tools:text="@string/oc_pizza_text"
             android:textSize="17sp"
             android:textStyle="bold"
+            android:textColor="#97000000"
             android:maxLines="1"
             android:ellipsize="end"/>
 
@@ -34,6 +36,7 @@
             android:layout_alignParentStart="true"
             tools:text="@string/food_country_and_address_text"
             android:textSize="13sp"
+            android:textColor="#97000000"
             android:maxLines="1"
             android:ellipsize="end"/>
 
@@ -46,6 +49,7 @@
             android:layout_marginBottom="17dp"
             tools:text="@string/until_text"
             android:textSize="13sp"
+            android:textColor="#97000000"
             android:textStyle="italic"/>
 
         <ImageView
@@ -79,6 +83,7 @@
             android:layout_marginTop="13dp"
             android:layout_marginEnd="11dp"
             tools:text="@string/parentheses_text"
+            android:textColor="#97000000"
             android:textSize="12sp"/>
 
         <ImageView

@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="1dp"
+    android:background="@color/white"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
@@ -26,7 +27,8 @@
             android:layout_marginStart="17dp"
             tools:text="@string/scarlett_text"
             android:textSize="17sp"
-            android:textStyle="bold"/>
+            android:textColor="#97000000"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/is_eating"
@@ -36,6 +38,7 @@
             android:layout_marginStart="5dp"
             tools:text="@string/is_eating_text"
             android:textSize="17sp"
+            android:textColor="#97000000"
             android:textStyle="bold"/>
 
         <TextView
@@ -46,6 +49,7 @@
             android:layout_marginStart="5dp"
             tools:text="@string/french_scarlett_text"
             android:textSize="17sp"
+            android:textColor="#97000000"
             android:textStyle="bold"/>
 
         <TextView
@@ -56,6 +60,7 @@
             android:layout_marginStart="5dp"
             tools:text="@string/parentheses_name_text"
             android:textSize="17sp"
+            android:textColor="#97000000"
             android:textStyle="bold"/>
 
     </LinearLayout>
