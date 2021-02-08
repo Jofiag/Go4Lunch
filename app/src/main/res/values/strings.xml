@@ -36,4 +36,10 @@
     <string name="is_eating_text">is eating</string>
     <string name="french_scarlett_text">French</string>
     <string name="parentheses_name_text">(Le Zinc)</string>
+    <string name="yellow_star_text">Yellow star</string>
+    <string name="call_icon_text">Call icon</string>
+    <string name="call_text">CALL</string>
+    <string name="like_text">LIKE</string>
+    <string name="website_text">WEBSITE</string>
+    <string name="check_floating_action_button_text">Check Floating action button</string>
 </resources>

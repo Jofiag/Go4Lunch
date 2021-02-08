@@ -124,6 +124,7 @@ public class HomepageActivity extends AppCompatActivity
             if (id == R.id.your_lunch_item) {
                 //Attach fragment corresponding
                 myDrawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(HomepageActivity.this, RestaurantDetailsActivity.class));
                 return true;
             }
             else if (id == R.id.settings_item) {
