@@ -14,6 +14,7 @@ public class Constants {
     public static final String WORKMATE_SELECTED_CODE = "workmate selected";
     public static final String RESTAURANT_SELECTED_CODE = "restaurant selected";
     public static final String AVAILABLE_WORKMATES_TITLE_TEXT = "Available workmates";
+    public static final String HAS_NOT_DECIDED_YET = " hasn't decided yet";
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();
@@ -41,25 +42,27 @@ public class Constants {
     }
 
     public static List<Workmate> getWorkmateList(){
+        List<Restaurant> restaurantList = getRestaurantList();
+
         List<Workmate> workmateList = new ArrayList<>();
-        workmateList.add(createWorkmate("Angela"));
-        workmateList.add(createWorkmate("Bilikiss"));
-        workmateList.add(createWorkmate("Carole"));
-        workmateList.add(createWorkmate("Dorianne"));
-        workmateList.add(createWorkmate("Elizabet"));
-        workmateList.add(createWorkmate("Florian"));
-        workmateList.add(createWorkmate("Gisele"));
-        workmateList.add(createWorkmate("Hodette"));
-        workmateList.add(createWorkmate("Imen"));
-        workmateList.add(createWorkmate("Jocelyn"));
+        workmateList.add(createWorkmate("Angela", restaurantList.get(0)));
+        workmateList.add(createWorkmate("Bilikiss", restaurantList.get(1)));
+        workmateList.add(createWorkmate("Carole", restaurantList.get(2)));
+        workmateList.add(createWorkmate("Dorianne", restaurantList.get(3)));
+        workmateList.add(createWorkmate("Elizabet", restaurantList.get(4)));
+        workmateList.add(createWorkmate("Florian", restaurantList.get(5)));
+        workmateList.add(createWorkmate("Gisele", restaurantList.get(6)));
+        workmateList.add(createWorkmate("Hodette", null));
+        workmateList.add(createWorkmate("Imen", null));
+        workmateList.add(createWorkmate("Jocelyn", null));
 
         return workmateList;
     }
 
-    private static Workmate createWorkmate(String name){
+    private static Workmate createWorkmate(String name, Restaurant restaurant){
         Workmate workmate = new Workmate();
         workmate.setName(name);
-
+        workmate.setRestaurantChosen(restaurant);
         return workmate;
     }
 }

@@ -4,65 +4,92 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="1dp"
-    android:background="#FFFF"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:backgroundTint="#FFFF"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:targetApi="lollipop">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="7dp"
-        android:orientation="horizontal">
+        android:padding="7dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/workmate_image_view"
-            android:layout_width="77dp"
-            android:layout_height="77dp"
+            android:layout_width="67dp"
+            android:layout_height="67dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:src="@color/yellow_star_background" />
 
         <TextView
             android:id="@+id/workmate_name_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="27dp"
+            android:layout_alignParentTop="true"
             android:layout_marginStart="17dp"
-            tools:text="@string/scarlett_text"
-            android:textSize="17sp"
+            android:layout_marginTop="23dp"
+            android:layout_toEndOf="@id/workmate_image_view"
             android:textColor="#97000000"
-            android:textStyle="bold" />
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            tools:text="@string/scarlett_text" />
 
         <TextView
             android:id="@+id/is_eating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="27dp"
+            android:layout_alignParentTop="true"
             android:layout_marginStart="5dp"
+            android:layout_marginTop="23dp"
+            android:layout_toEndOf="@+id/workmate_name_text_view"
             android:text="@string/is_eating_text"
-            android:textSize="17sp"
             android:textColor="#97000000"
-            android:textStyle="bold"/>
+            android:textSize="15sp"
+            android:maxLines="1"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/food_country_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="27dp"
+            android:layout_alignParentTop="true"
             android:layout_marginStart="5dp"
-            tools:text="@string/french_scarlett_text"
-            android:textSize="17sp"
+            android:layout_marginTop="23dp"
+            android:layout_toEndOf="@+id/is_eating"
             android:textColor="#97000000"
-            android:textStyle="bold"/>
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            tools:text="@string/french_scarlett_text" />
 
         <TextView
             android:id="@+id/restaurant_name_workmate_row"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="27dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
             android:layout_marginStart="5dp"
-            tools:text="@string/parentheses_name_text"
-            android:textSize="17sp"
+            android:layout_marginTop="23dp"
+            android:layout_marginEnd="7dp"
+            android:layout_toEndOf="@+id/food_country_text_view"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textColor="#97000000"
-            android:textStyle="bold"/>
+            android:textSize="15sp"
+            android:textStyle="bold"
+            tools:text="@string/parentheses_name_text" />
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/has_not_decided_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/workmate_image_view"
+            android:layout_marginTop="23dp"
+            android:layout_marginStart="17dp"
+            android:textColor="@color/my_gray"
+            android:textStyle="italic"/>
+
+    </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

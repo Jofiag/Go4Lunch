@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
+import com.example.go4lunch.util.Constants;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -23,10 +25,12 @@ public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRe
         void onWorkmateSelected(Workmate workmate);
     }
 
+    private Context context;
     private final List<Workmate> workmateList;
     private OnWorkmateClickListener mCallback;
 
     public WorkmateRecyclerViewAdapter(Context context, List<Workmate> workmateList) {
+        this.context = context;
         this.workmateList = workmateList;
         this.mCallback = (OnWorkmateClickListener) context;
     }
@@ -50,10 +54,16 @@ public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRe
         Restaurant restaurant = workmate.getRestaurantChosen();
         if (restaurant != null){
             holder.foodCountryTextView.setText(restaurant.getFoodCountry());
-            holder.restaurantNameTextView.setText(restaurant.getName());
+            holder.restaurantNameTextView.setText(MessageFormat.format("({0})", restaurant.getName()));
+            holder.workmateNameTextView.setText(workmate.getName());
         }
-
-        holder.workmateNameTextView.setText(workmate.getName());
+        else {
+            holder.isEatingTextView.setVisibility(View.GONE);
+            holder.foodCountryTextView.setVisibility(View.GONE);
+            holder.restaurantNameTextView.setVisibility(View.GONE);
+            holder.workmateNameTextView.setVisibility(View.GONE);
+            holder.hasNotDecidedTextView.setText(String.format("%s%s", workmate.getName(), Constants.HAS_NOT_DECIDED_YET));
+        }
         holder.circleImageView.setImageURI(workmate.getImageUri());
 
         holder.itemView.setOnClickListener(v -> mCallback.onWorkmateSelected(workmate));
@@ -71,6 +81,8 @@ public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRe
         private TextView foodCountryTextView;
         private TextView workmateNameTextView;
         private TextView restaurantNameTextView;
+        private TextView isEatingTextView;
+        private TextView hasNotDecidedTextView;
         private CircleImageView circleImageView;
 
         public MyViewHolder(@NonNull View itemView) {
@@ -84,6 +96,8 @@ public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRe
             workmateNameTextView = itemView.findViewById(R.id.workmate_name_text_view);
             foodCountryTextView = itemView.findViewById(R.id.food_country_text_view);
             restaurantNameTextView = itemView.findViewById(R.id.restaurant_name_workmate_row);
+            isEatingTextView = itemView.findViewById(R.id.is_eating);
+            hasNotDecidedTextView = itemView.findViewById(R.id.has_not_decided_text_view);
         }
     }
 }
