@@ -15,6 +15,7 @@ public class Constants {
     public static final String RESTAURANT_SELECTED_CODE = "restaurant selected";
     public static final String AVAILABLE_WORKMATES_TITLE_TEXT = "Available workmates";
     public static final String HAS_NOT_DECIDED_YET = " hasn't decided yet";
+    public static final String NO_RESTAURANT_TO_SHOW_TEXT = "No restaurant to show!";
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();

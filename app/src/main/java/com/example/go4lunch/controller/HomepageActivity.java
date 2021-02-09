@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -213,6 +214,9 @@ public class HomepageActivity extends AppCompatActivity
 
     @Override
     public void onWorkmateSelected(Workmate workmate) {
-        startRestaurantDetailsActivity(workmate, Constants.WORKMATE_SELECTED_CODE);
+        if (workmate.getRestaurantChosen() != null)
+            startRestaurantDetailsActivity(workmate, Constants.WORKMATE_SELECTED_CODE);
+        else
+            Toast.makeText(this, Constants.NO_RESTAURANT_TO_SHOW_TEXT, Toast.LENGTH_SHORT).show();
     }
 }
