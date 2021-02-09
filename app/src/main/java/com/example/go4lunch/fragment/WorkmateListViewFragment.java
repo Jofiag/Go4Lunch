@@ -2,23 +2,17 @@ package com.example.go4lunch.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.example.go4lunch.R;
-import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
-import com.example.go4lunch.model.Restaurant;
-import com.example.go4lunch.model.Workmate;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.go4lunch.util.Constants;
 
 public class WorkmateListViewFragment extends Fragment {
 
@@ -40,10 +34,10 @@ public class WorkmateListViewFragment extends Fragment {
 
         RecyclerView recyclerView = view.findViewById(R.id.workmate_list_recycler_view);
 
-        List<Workmate> workmateList = new ArrayList<>();
+//        List<Workmate> workmateList = new ArrayList<>();
         Context context = view.getContext();
 
-        WorkmateRecyclerViewAdapter workmateAdapter = new WorkmateRecyclerViewAdapter(context, workmateList);
+        WorkmateRecyclerViewAdapter workmateAdapter = new WorkmateRecyclerViewAdapter(context, Constants.getWorkmateList());
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));

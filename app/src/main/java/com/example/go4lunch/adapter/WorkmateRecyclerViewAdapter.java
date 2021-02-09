@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
 
 import java.util.List;
@@ -46,13 +47,16 @@ public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRe
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Workmate workmate = workmateList.get(position);
 
-        holder.foodCountryTextView.setText(workmate.getRestaurantChosen().getFoodCountry());
+        Restaurant restaurant = workmate.getRestaurantChosen();
+        if (restaurant != null){
+            holder.foodCountryTextView.setText(restaurant.getFoodCountry());
+            holder.restaurantNameTextView.setText(restaurant.getName());
+        }
+
         holder.workmateNameTextView.setText(workmate.getName());
-        holder.restaurantNameTextView.setText(workmate.getRestaurantChosen().getName());
         holder.circleImageView.setImageURI(workmate.getImageUri());
 
         holder.itemView.setOnClickListener(v -> mCallback.onWorkmateSelected(workmate));
-
     }
 
     @Override

@@ -61,11 +61,11 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
 
         if (bundle != null) {
-            if (bundle.getSerializable(Constants.RESTAURANT_SELECTED_CODE) != null)
-                restaurantSelected = (Restaurant) bundle.getSerializable(Constants.RESTAURANT_SELECTED_CODE);
+            if (bundle.get(Constants.RESTAURANT_SELECTED_CODE) != null)
+                restaurantSelected = (Restaurant) bundle.get(Constants.RESTAURANT_SELECTED_CODE);
 
-            if (bundle.getSerializable(Constants.WORKMATE_SELECTED_CODE) != null) {
-                workmate = (Workmate) bundle.getSerializable(Constants.WORKMATE_SELECTED_CODE);
+            if (bundle.get(Constants.WORKMATE_SELECTED_CODE) != null) {
+                workmate = (Workmate) bundle.get(Constants.WORKMATE_SELECTED_CODE);
                 restaurantSelected = workmate.getRestaurantChosen();
             }
         }
@@ -74,7 +74,11 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     }
 
     private void setRecyclerView(){
-        WorkmateRecyclerViewAdapter workmateAdapter = new WorkmateRecyclerViewAdapter(restaurant.getWorkmateList());
+        WorkmateRecyclerViewAdapter workmateAdapter;
+        if (restaurant != null)
+            workmateAdapter = new WorkmateRecyclerViewAdapter(restaurant.getWorkmateList());
+        else
+            workmateAdapter = new WorkmateRecyclerViewAdapter(new ArrayList<>());
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(RestaurantDetailsActivity.this));

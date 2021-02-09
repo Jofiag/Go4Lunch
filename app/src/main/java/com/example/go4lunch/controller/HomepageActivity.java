@@ -1,7 +1,6 @@
 package com.example.go4lunch.controller;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -37,11 +36,11 @@ import java.io.Serializable;
 public class HomepageActivity extends AppCompatActivity
         implements RestaurantRecyclerViewAdapter.OnRestaurantClickListener, WorkmateRecyclerViewAdapter.OnWorkmateClickListener {
 
-    private BottomNavigationView bottomNavigationView;
     private Toolbar myToolbar;
     private DrawerLayout myDrawerLayout;
     private NavigationView myNavigationView;
     private MaterialSearchView materialSearchView;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

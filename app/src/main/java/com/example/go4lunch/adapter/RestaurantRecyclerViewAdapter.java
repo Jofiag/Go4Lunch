@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.model.OpeningHours;
 import com.example.go4lunch.model.Restaurant;
 
 import java.text.MessageFormat;
@@ -42,10 +43,14 @@ public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<Restaura
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Restaurant restaurant = restaurantList.get(position);
 
+        OpeningHours openingHours = restaurant.getOpeningHours();
+        if (openingHours != null){
+            holder.closeTimeTextView.setText(restaurant.getOpeningHours().getOpeningStatus());
+        }
+
         holder.restaurantNameTextView.setText(restaurant.getName());
         holder.restaurantImage.setImageURI(restaurant.getImageUri());
         holder.howFarFromWorkmateTextView.setText(restaurant.getHowFarFromWorkmate());
-        holder.closeTimeTextView.setText(restaurant.getOpeningHours().getOpeningStatus());
         holder.foodCountryAndAddressTextView.setText(String.format("%s - %s", restaurant.getFoodCountry(), restaurant.getAddress()));
         holder.numberOfInterestedWorkmateTextView.setText(MessageFormat.format("({0})", restaurant.getNumberOfInterestedWorkmate()));
 
