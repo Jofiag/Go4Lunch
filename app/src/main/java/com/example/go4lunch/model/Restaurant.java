@@ -1,8 +1,10 @@
 package com.example.go4lunch.model;
 
 import android.net.Uri;
+import android.provider.ContactsContract;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.List;
 
 public class Restaurant implements Serializable {
@@ -15,21 +17,26 @@ public class Restaurant implements Serializable {
     private int numberOfFavorableOpinion;
     private int numberOfInterestedWorkmate;
     private List<Workmate> workmateList;
+    private String phoneNumber;
+    private URL websiteUrl;
 
     public Restaurant() {
     }
 
-    public Restaurant(String name, String address, Uri imageUri, String foodCountry, OpeningHours openingHours, String howFarFromWorkmate, int numberOfFavorableOpinion, int numberOfInterestedWorkmate) {
+    public Restaurant(String name, String address, Uri imageUri, String foodCountry, OpeningHours openingHours, String howFarFromWorkmate, int numberOfFavorableOpinion, int numberOfInterestedWorkmate, List<Workmate> workmateList, String phoneNumber, URL websiteUrl) {
         this.name = name;
-        this.imageUri = imageUri;
         this.address = address;
+        this.imageUri = imageUri;
+        this.websiteUrl = websiteUrl;
+        this.phoneNumber = phoneNumber;
         this.foodCountry = foodCountry;
         this.openingHours = openingHours;
+        this.workmateList = workmateList;
         this.howFarFromWorkmate = howFarFromWorkmate;
         this.numberOfFavorableOpinion = numberOfFavorableOpinion;
         this.numberOfInterestedWorkmate = numberOfInterestedWorkmate;
-    }
 
+    }
 
     public String getName() {
         return name;
@@ -101,5 +108,21 @@ public class Restaurant implements Serializable {
 
     public void setWorkmateList(List<Workmate> workmateList) {
         this.workmateList = workmateList;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public URL getWebsiteUrl() {
+        return websiteUrl;
+    }
+
+    public void setWebsiteUrl(URL websiteUrl) {
+        this.websiteUrl = websiteUrl;
     }
 }

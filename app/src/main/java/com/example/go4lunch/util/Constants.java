@@ -17,23 +17,25 @@ public class Constants {
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();
-        restaurantList.add(createCRestaurant("Safari"));
-        restaurantList.add(createCRestaurant("Flunch"));
-        restaurantList.add(createCRestaurant("La mama"));
-        restaurantList.add(createCRestaurant("O'tacos"));
-        restaurantList.add(createCRestaurant("Oc pizza"));
-        restaurantList.add(createCRestaurant("O'tantik"));
-        restaurantList.add(createCRestaurant("McDonald"));
-        restaurantList.add(createCRestaurant("Panorama"));
-        restaurantList.add(createCRestaurant("Maman africa"));
-        restaurantList.add(createCRestaurant("Original tacos"));
+        restaurantList.add(createCRestaurant("Safari", "French", "1 Rue Faubourg"));
+        restaurantList.add(createCRestaurant("Flunch", "Italian", "67 Rue Vincent"));
+        restaurantList.add(createCRestaurant("La mama", "French", "13 Ter Richard Mille "));
+        restaurantList.add(createCRestaurant("O'tacos", "French", "51 Avenue de la Liberation"));
+        restaurantList.add(createCRestaurant("Oc pizza", "French", "83 Rue Strasbourg"));
+        restaurantList.add(createCRestaurant("O'tantik", "French", "21 Boulevard François Mitterand"));
+        restaurantList.add(createCRestaurant("McDonald", "American", "43 Rue Jean Jacques Jores"));
+        restaurantList.add(createCRestaurant("Panorama", "French", "31 Rue des filletes"));
+        restaurantList.add(createCRestaurant("Maman africa", "French", "71 Avenue des Paulines"));
+        restaurantList.add(createCRestaurant("Original tacos", "French", "97 Boulevard Resgistre"));
 
         return restaurantList;
     }
 
-    private static Restaurant createCRestaurant(String name){
+    private static Restaurant createCRestaurant(String name, String foodCountry, String address){
         Restaurant restaurant = new Restaurant();
         restaurant.setName(name);
+        restaurant.setFoodCountry(foodCountry);
+        restaurant.setAddress(address);
 
         return restaurant;
     }
