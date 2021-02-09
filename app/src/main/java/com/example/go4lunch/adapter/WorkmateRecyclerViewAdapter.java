@@ -23,11 +23,15 @@ public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRe
     }
 
     private final List<Workmate> workmateList;
-    private final OnWorkmateClickListener mCallback;
+    private OnWorkmateClickListener mCallback;
 
     public WorkmateRecyclerViewAdapter(Context context, List<Workmate> workmateList) {
         this.workmateList = workmateList;
         this.mCallback = (OnWorkmateClickListener) context;
+    }
+
+    public WorkmateRecyclerViewAdapter(List<Workmate> workmateList) {
+        this.workmateList = workmateList;
     }
 
     @NonNull
@@ -53,7 +57,10 @@ public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRe
 
     @Override
     public int getItemCount() {
-        return workmateList.size();
+        if (workmateList != null)
+            return workmateList.size();
+        else
+            return 0;
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{

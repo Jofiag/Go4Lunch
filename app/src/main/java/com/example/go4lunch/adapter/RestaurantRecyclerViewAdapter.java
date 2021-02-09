@@ -14,7 +14,6 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.model.Restaurant;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<RestaurantRecyclerViewAdapter.MyViewHolder> {
@@ -24,7 +23,7 @@ public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<Restaura
     }
 
     private final OnRestaurantClickListener mCallback;
-    private List<Restaurant> restaurantList = new ArrayList<>();
+    private final List<Restaurant> restaurantList;
 
     public RestaurantRecyclerViewAdapter(Context context, List<Restaurant> restaurantList) {
         this.restaurantList = restaurantList;
@@ -58,7 +57,10 @@ public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<Restaura
 
     @Override
     public int getItemCount() {
-        return restaurantList.size();
+        if (restaurantList != null)
+            return restaurantList.size();
+        else
+            return 0;
     }
 
     private void showYellowStar(MyViewHolder holder, int numberOfFavorableOpinion){

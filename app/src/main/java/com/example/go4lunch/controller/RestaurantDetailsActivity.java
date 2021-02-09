@@ -16,6 +16,8 @@ import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+
 public class RestaurantDetailsActivity extends AppCompatActivity {
     private ImageView yellowStar;
     private ImageView callImageView;
@@ -72,7 +74,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     }
 
     private void setRecyclerView(){
-        WorkmateRecyclerViewAdapter workmateAdapter = new WorkmateRecyclerViewAdapter(RestaurantDetailsActivity.this, restaurant.getWorkmateList());
+        WorkmateRecyclerViewAdapter workmateAdapter = new WorkmateRecyclerViewAdapter(restaurant.getWorkmateList());
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(RestaurantDetailsActivity.this));
