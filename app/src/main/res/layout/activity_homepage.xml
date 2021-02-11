@@ -22,27 +22,14 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <FrameLayout
-                android:id="@+id/my_toolbar_container"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/my_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/my_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#A9C606"
-                    app:navigationIcon="@drawable/baseline_menu_24"
-                    app:title="@string/im_hungry_text"
-                    app:titleTextColor="#FFFFFF" />
-
-                <com.miguelcatalan.materialsearchview.MaterialSearchView
-                    android:id="@+id/my_material_search_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"/>
-
-            </FrameLayout>
+                android:layout_height="wrap_content"
+                android:background="#A9C606"
+                app:navigationIcon="@drawable/baseline_menu_24"
+                app:title="@string/im_hungry_text"
+                app:titleTextColor="#FFFFFF" />
 
             <FrameLayout
                 android:id="@+id/fragment_container_homepage_activity"

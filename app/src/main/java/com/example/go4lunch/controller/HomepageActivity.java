@@ -1,17 +1,18 @@
 package com.example.go4lunch.controller;
 
 import android.annotation.SuppressLint;
-import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -30,7 +31,6 @@ import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.io.Serializable;
 
@@ -40,7 +40,6 @@ public class HomepageActivity extends AppCompatActivity
     private Toolbar myToolbar;
     private DrawerLayout myDrawerLayout;
     private NavigationView myNavigationView;
-    private MaterialSearchView materialSearchView;
     private BottomNavigationView bottomNavigationView;
 
     @Override
@@ -60,7 +59,7 @@ public class HomepageActivity extends AppCompatActivity
 
         setMyNavigationView();
 
-        setMaterialSearchView();
+//        setMaterialSearchView();
     }
 
     private void setReferences() {
@@ -68,7 +67,6 @@ public class HomepageActivity extends AppCompatActivity
         myToolbar = findViewById(R.id.my_toolbar);
         myDrawerLayout = findViewById(R.id.my_drawer);
         myNavigationView = findViewById(R.id.my_navigation_view);
-        materialSearchView = findViewById(R.id.my_material_search_view);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -154,52 +152,68 @@ public class HomepageActivity extends AppCompatActivity
             super.onBackPressed();
     }
 
-    private String getRestaurantNameSearchedByUser(){
-        String restaurantName = "";
+//    private String getRestaurantNameSearchedByUser(){
+//        String restaurantName = "";
+//
+//        Intent intent = getIntent();
+//        if (Intent.ACTION_SEARCH.equals(intent.getAction()))
+//            restaurantName = intent.getStringExtra(SearchManager.QUERY);
+//
+//        return restaurantName;
+//    }
+//
+//    private void doMyResearch(String restaurantName){
+//
+//    }
 
-        Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction()))
-            restaurantName = intent.getStringExtra(SearchManager.QUERY);
+//    private void setMaterialSearchView(){
+//        String[] array = new String[]{"Hello", "How", "Are", "You", "Today"};
+//
+//        //materialSearchView.closeSearch();
+//        materialSearchView.setSuggestions(array);
+//        materialSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                //search the query that the user enter to search
+//                materialSearchView.setVisibility(View.VISIBLE);
+//                doMyResearch(getRestaurantNameSearchedByUser());
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                //Make changes in realtime
+//                return false;
+//            }
+//        });
+//    }
 
-        return restaurantName;
-    }
-
-    private void doMyResearch(String restaurantName){
-
-    }
-
-    private void setMaterialSearchView(){
-        String[] array = new String[]{"Hello", "How", "Are", "You", "Today"};
-
-        //materialSearchView.closeSearch();
-        materialSearchView.setSuggestions(array);
-        materialSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                //search the query that the user enter to search
-                materialSearchView.setVisibility(View.VISIBLE);
-                doMyResearch(getRestaurantNameSearchedByUser());
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //Make changes in realtime
-                return false;
-            }
-        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.search_view_menu, menu);
-
-        MenuItem item = menu.findItem(R.id.search_item);
-        materialSearchView.setMenuItem(item);
-
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.search_view_menu, menu);
+//
+//        MenuItem searchItem = menu.findItem(R.id.search_item);
+//
+//        SearchView searchView = (SearchView) searchItem.getActionView();
+//
+//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                //Action after user validate his search text
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                //Real time action
+//                Toast.makeText(HomepageActivity.this, newText, Toast.LENGTH_SHORT).show();
+//                return false;
+//            }
+//        });
+//
+//        return true;
+//    }
 
     private void startRestaurantDetailsActivity(Serializable serializable, String code){
         Intent intent = new Intent(HomepageActivity.this, RestaurantDetailsActivity.class);

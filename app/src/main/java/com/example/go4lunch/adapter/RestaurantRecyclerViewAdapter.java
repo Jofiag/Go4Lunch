@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,11 +15,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.OpeningHours;
 import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.util.Constants;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
-public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<RestaurantRecyclerViewAdapter.MyViewHolder> {
+public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<RestaurantRecyclerViewAdapter.MyViewHolder>
+implements Filterable {
 
     public interface OnRestaurantClickListener{
         void onRestaurantSelected(Restaurant restaurant);
@@ -119,5 +124,46 @@ public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<Restaura
             foodCountryAndAddressTextView = itemView.findViewById(R.id.food_country_and_address_text_view);
             numberOfInterestedWorkmateTextView = itemView.findViewById(R.id.number_of_interested_workmate);
         }
+    }
+
+//    public void replaceList(List<Restaurant> newList){
+//        restaurantList.clear();
+//        restaurantList.addAll(newList);
+//        notifyDataSetChanged();
+//    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                List<Restaurant> restaurantListFiltered = new ArrayList<>();
+                List<Restaurant> restaurantListToFilter = Constants.getRestaurantList();
+
+                if (constraint == null || constraint.length() == 0)
+                    restaurantListFiltered.addAll(restaurantListToFilter);
+                else{
+                    String searchText = constraint.toString().toLowerCase().trim();
+
+                    for (Restaurant restaurant : restaurantListToFilter) {
+                        if (restaurant.getName().toLowerCase().contains(searchText))
+                            restaurantListFiltered.add(restaurant);
+                    }
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = restaurantListFiltered;
+
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                restaurantList.clear();
+                restaurantList.addAll((List<Restaurant>) results.values);
+
+                notifyDataSetChanged();
+            }
+        };
     }
 }
