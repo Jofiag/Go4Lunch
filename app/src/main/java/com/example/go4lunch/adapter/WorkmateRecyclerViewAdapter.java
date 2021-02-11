@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,22 +17,22 @@ import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRecyclerViewAdapter.MyViewHolder> {
+public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRecyclerViewAdapter.MyViewHolder>
+    implements Filterable {
 
     public interface OnWorkmateClickListener {
         void onWorkmateSelected(Workmate workmate);
     }
 
-    private Context context;
     private final List<Workmate> workmateList;
     private OnWorkmateClickListener mCallback;
 
     public WorkmateRecyclerViewAdapter(Context context, List<Workmate> workmateList) {
-        this.context = context;
         this.workmateList = workmateList;
         this.mCallback = (OnWorkmateClickListener) context;
     }
@@ -99,5 +101,43 @@ public class WorkmateRecyclerViewAdapter extends RecyclerView.Adapter<WorkmateRe
             isEatingTextView = itemView.findViewById(R.id.is_eating);
             hasNotDecidedTextView = itemView.findViewById(R.id.has_not_decided_text_view);
         }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                List<Workmate> workmateListFiltered = new ArrayList<>();
+                List<Workmate> workmateListToFilter = Constants.getWorkmateList();
+
+                if (constraint == null || constraint.length() == 0)
+                    workmateListFiltered.addAll(workmateListToFilter);
+                else{
+                    String searchText = constraint.toString().toLowerCase().trim();
+
+                    for (Workmate workmate : workmateListToFilter) {
+                        Restaurant restaurantChosen = workmate.getRestaurantChosen();
+                        if (restaurantChosen != null){
+                            if (restaurantChosen.getName().toLowerCase().contains(searchText))
+                                workmateListFiltered.add(workmate);
+                        }
+                    }
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = workmateListFiltered;
+
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                workmateList.clear();
+                workmateList.addAll((List<Workmate>) results.values);
+
+                notifyDataSetChanged();
+            }
+        };
     }
 }
