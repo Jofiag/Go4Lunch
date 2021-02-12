@@ -2,7 +2,6 @@ package com.example.go4lunch.controller;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -19,8 +18,8 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
-import com.example.go4lunch.fragment.RestaurantMapViewFragment;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
+import com.example.go4lunch.fragment.RestaurantMapViewFragment;
 import com.example.go4lunch.fragment.WorkmateListViewFragment;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
@@ -176,12 +175,9 @@ public class HomepageActivity extends AppCompatActivity
 
         if (errorCode != ConnectionResult.SUCCESS){
             Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(this, errorCode, errorCode,
-                    new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            //Here is what we're going to show to the user if the connection has canceled
-                            Toast.makeText(HomepageActivity.this, "No services", Toast.LENGTH_SHORT).show();
-                        }
+                    dialog -> {
+                        //Here is what we're going to show to the user if the connection has canceled
+                        Toast.makeText(HomepageActivity.this, "No services", Toast.LENGTH_SHORT).show();
                     });
             googleErrorDialog.show();
         }
