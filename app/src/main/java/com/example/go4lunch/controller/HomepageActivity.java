@@ -1,6 +1,8 @@
 package com.example.go4lunch.controller;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -23,6 +25,8 @@ import com.example.go4lunch.fragment.WorkmateListViewFragment;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
@@ -162,5 +166,26 @@ public class HomepageActivity extends AppCompatActivity
             startRestaurantDetailsActivity(workmate, Constants.WORKMATE_SELECTED_CODE);
         else
             Toast.makeText(this, Constants.NO_RESTAURANT_TO_SHOW_TEXT, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        //Testing
+        int errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+
+        if (errorCode != ConnectionResult.SUCCESS){
+            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(this, errorCode, errorCode,
+                    new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            //Here is what we're going to show to the user if the connection has canceled
+                            Toast.makeText(HomepageActivity.this, "No services", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            googleErrorDialog.show();
+        }
+        else
+            Toast.makeText(this, "Google Play services connected", Toast.LENGTH_SHORT).show();
     }
 }

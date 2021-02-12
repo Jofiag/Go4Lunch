@@ -83,6 +83,5 @@ public class RestaurantMapViewFragment extends Fragment {
                 return false;
             }
         });
-
     }
 }
