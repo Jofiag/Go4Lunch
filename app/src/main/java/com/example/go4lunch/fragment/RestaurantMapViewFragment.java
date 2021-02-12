@@ -1,5 +1,6 @@
 package com.example.go4lunch.fragment;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -7,6 +8,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,6 +16,8 @@ import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -83,5 +87,26 @@ public class RestaurantMapViewFragment extends Fragment {
                 return false;
             }
         });
+    }
+
+
+    //Checking google play service access
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        //Testing
+        int errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
+
+        if (errorCode != ConnectionResult.SUCCESS){
+            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), errorCode, errorCode,
+                    dialog -> {
+                        //Here is what we're going to show to the user if the connection has canceled
+                        Toast.makeText(getContext(), "No services", Toast.LENGTH_SHORT).show();
+                    });
+            googleErrorDialog.show();
+        }
+        else
+            Toast.makeText(getContext(), "Google Play services connected", Toast.LENGTH_SHORT).show();
     }
 }

@@ -167,21 +167,4 @@ public class HomepageActivity extends AppCompatActivity
             Toast.makeText(this, Constants.NO_RESTAURANT_TO_SHOW_TEXT, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        //Testing
-        int errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
-
-        if (errorCode != ConnectionResult.SUCCESS){
-            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(this, errorCode, errorCode,
-                    dialog -> {
-                        //Here is what we're going to show to the user if the connection has canceled
-                        Toast.makeText(HomepageActivity.this, "No services", Toast.LENGTH_SHORT).show();
-                    });
-            googleErrorDialog.show();
-        }
-        else
-            Toast.makeText(this, "Google Play services connected", Toast.LENGTH_SHORT).show();
-    }
 }
