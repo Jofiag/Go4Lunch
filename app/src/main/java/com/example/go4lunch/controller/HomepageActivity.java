@@ -17,8 +17,8 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
-import com.example.go4lunch.fragment.RestaurantListViewFragment;
 import com.example.go4lunch.fragment.RestaurantMapViewFragment;
+import com.example.go4lunch.fragment.RestaurantListViewFragment;
 import com.example.go4lunch.fragment.WorkmateListViewFragment;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
@@ -69,6 +69,7 @@ public class HomepageActivity extends AppCompatActivity
             switch (id){
                 case R.id.restaurant_map_view_item:
                     myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
+//                    attachNewFragment(new RestaurantMapViewFragment());
                     attachNewFragment(new RestaurantMapViewFragment());
                     return true;
                 case R.id.restaurant_list_view_item:
