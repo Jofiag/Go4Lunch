@@ -1,7 +1,6 @@
 package com.example.go4lunch.controller;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -24,8 +23,6 @@ import com.example.go4lunch.fragment.WorkmateListViewFragment;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
