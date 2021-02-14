@@ -17,6 +17,8 @@ import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
+import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -47,6 +49,7 @@ public class RestaurantMapViewFragment extends Fragment {
 
     private PlacesClient placesClient;
     private final List<String> placesSuggestion = new ArrayList<>();
+    private RestaurantRecyclerViewAdapter restaurantAdapter;
 
     public RestaurantMapViewFragment() {
     }
@@ -104,6 +107,8 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     private void getPlaceEntered(String query){
+        List<Restaurant> restaurantSuggestions = new ArrayList<>();
+
         AutocompleteSessionToken sessionToken = AutocompleteSessionToken.newInstance();
         RectangularBounds bounds = RectangularBounds.newInstance(new LatLng(45.7833, 3.0833), new LatLng(48.8534, 2.3488));
         FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
@@ -118,7 +123,10 @@ public class RestaurantMapViewFragment extends Fragment {
                 .addOnSuccessListener(response -> {
                     for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
                         placesSuggestion.add(prediction.getPlaceId());
-                        Toast.makeText(getContext(), prediction.getFullText(null), Toast.LENGTH_SHORT).show();
+                        Restaurant restaurant = new Restaurant();
+                        restaurant.setName((prediction.getFullText(null)).toString());
+                        restaurantSuggestions.add(restaurant);
+//                        Toast.makeText(getContext(), prediction.getFullText(null), Toast.LENGTH_SHORT).show();
                         Log.d("PLACE", "getPlaceEntered: " + prediction.getFullText(null));
 
                     }
@@ -127,6 +135,9 @@ public class RestaurantMapViewFragment extends Fragment {
                     if (e instanceof ApiException)
                         Log.d("PLACE", "getPlaceEntered: " + e.getMessage());
                 });
+
+        restaurantAdapter = new RestaurantRecyclerViewAdapter(getContext(), restaurantSuggestions);
+        restaurantAdapter.getFilter().filter(query);
     }
 
     private void setOurSearchView(Menu menu){
