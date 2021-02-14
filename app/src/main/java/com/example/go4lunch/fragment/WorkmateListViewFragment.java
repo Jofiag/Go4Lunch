@@ -26,7 +26,7 @@ import java.util.List;
 public class WorkmateListViewFragment extends Fragment {
 
     private WorkmateRecyclerViewAdapter workmateAdapter;
-    private List<Workmate> workmateList = Constants.getWorkmateList();
+    private final List<Workmate> workmateList = Constants.getWorkmateList();
 
     public WorkmateListViewFragment() {
         // Required empty public constructor
@@ -66,6 +66,7 @@ public class WorkmateListViewFragment extends Fragment {
         MenuItem searchItem = menu.findItem(R.id.search_item);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setQueryHint(Constants.SEARCH_WORKMATES_TEXT);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

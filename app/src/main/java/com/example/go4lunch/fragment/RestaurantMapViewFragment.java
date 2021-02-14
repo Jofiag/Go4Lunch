@@ -1,8 +1,8 @@
 package com.example.go4lunch.fragment;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,53 +13,41 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.util.Constants;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.AutocompleteActivity;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static android.app.Activity.RESULT_CANCELED;
-import static android.app.Activity.RESULT_OK;
-
 public class RestaurantMapViewFragment extends Fragment {
 
-    private final OnMapReadyCallback callback = new OnMapReadyCallback() {
-
-        /**
-         * Manipulates the map once available.
-         * This callback is triggered when the map is ready to be used.
-         * This is where we can add markers or lines, add listeners or move the camera.
-         * In this case, we just add a marker near Sydney, Australia.
-         * If Google Play services is not installed on the device, the user will be prompted to
-         * install it inside the SupportMapFragment. This method will only be triggered once the
-         * user has installed Google Play services and returned to the app.
-         */
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            LatLng sydney = new LatLng(-34, 151);
-            googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        }
+    private final OnMapReadyCallback callback = googleMap -> {
+        LatLng sydney = new LatLng(-34, 151);
+        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     };
+
+    private PlacesClient placesClient;
+    private final List<String> placesSuggestion = new ArrayList<>();
 
     public RestaurantMapViewFragment() {
     }
@@ -90,74 +78,91 @@ public class RestaurantMapViewFragment extends Fragment {
         if (!Places.isInitialized())
             Places.initialize(Objects.requireNonNull(getContext()), getString(R.string.google_maps_key));
 
-        PlacesClient placesClient = Places.createClient(Objects.requireNonNull(getContext()));
-//        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
-//        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
-//        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-//            @Override
-//            public void onPlaceSelected(@NonNull Place place) {
+        placesClient = Places.createClient(Objects.requireNonNull(getContext()));
+    }
+
+    private void getPlaceEntered(String query){
+        AutocompleteSessionToken sessionToken = AutocompleteSessionToken.newInstance();
+        RectangularBounds bounds = RectangularBounds.newInstance(new LatLng(45.7833, 3.0833), new LatLng(48.8534, 2.3488));
+        FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                .setCountry("fr")
+                .setLocationBias(bounds)
+                .setTypeFilter(TypeFilter.ADDRESS)
+                .setSessionToken(sessionToken)
+                .setQuery(query)
+                .build();
+
+        placesClient.findAutocompletePredictions(request)
+                .addOnSuccessListener(response -> {
+                    for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
+                        placesSuggestion.add(prediction.getPlaceId());
+                        Toast.makeText(getContext(), prediction.getFullText(null), Toast.LENGTH_SHORT).show();
+                        Log.d("PLACE", "getPlaceEntered: " + prediction.getFullText(null));
+
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (e instanceof ApiException)
+                        Log.d("PLACE", "getPlaceEntered: " + e.getMessage());
+                });
+    }
+
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//        List<Place.Field> fieldList = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS);
+//        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fieldList).build(Objects.requireNonNull(getContext()));
+//
+//        if (item.getItemId() == R.id.search_place_item)
+//            startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
+//
+//        return true;
+//    }
+//
+//
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE){
+//            if (resultCode == RESULT_OK){
+//                Place place = Autocomplete.getPlaceFromIntent(Objects.requireNonNull(data));
 //                Toast.makeText(getContext(), place.getName(), Toast.LENGTH_SHORT).show();
 //            }
-//
-//            @Override
-//            public void onError(@NonNull Status status) {
+//            else if (resultCode == AutocompleteActivity.RESULT_ERROR){
+//                Status status = Autocomplete.getStatusFromIntent(Objects.requireNonNull(data));
 //                Toast.makeText(getContext(), status.getStatusMessage(), Toast.LENGTH_SHORT).show();
 //            }
-//        });
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        List<Place.Field> fieldList = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS);
-        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fieldList).build(Objects.requireNonNull(getContext()));
-
-        if (item.getItemId() == R.id.search_place_item)
-            startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
-
-        return true;
-    }
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE){
-            if (resultCode == RESULT_OK){
-                Place place = Autocomplete.getPlaceFromIntent(Objects.requireNonNull(data));
-                Toast.makeText(getContext(), place.getName(), Toast.LENGTH_SHORT).show();
-            }
-            else if (resultCode == AutocompleteActivity.RESULT_ERROR){
-                Status status = Autocomplete.getStatusFromIntent(Objects.requireNonNull(data));
-                Toast.makeText(getContext(), status.getStatusMessage(), Toast.LENGTH_SHORT).show();
-            }
-            return;
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+//            return;
+//        }
+//
+//        super.onActivityResult(requestCode, resultCode, data);
+//    }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.search_view_menu, menu);
 
         MenuItem searchItem = menu.findItem(R.id.search_item);
-        MenuItem searchPlaceItem = menu.findItem(R.id.search_place_item);
-        searchItem.setVisible(false);
-        searchPlaceItem.setVisible(true);
-//        SearchView searchView = (SearchView) searchItem.getActionView();
-//
-//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                //Action after user validate his search text
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                //Real time action
-//                return false;
-//            }
-//        });
+//        MenuItem searchPlaceItem = menu.findItem(R.id.search_place_item);
+//        searchItem.setVisible(false);
+//        searchPlaceItem.setVisible(true);
+
+        SearchView searchView = (SearchView) searchItem.getActionView();
+//        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //Action after user validate his search text
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Real time action
+                getPlaceEntered(newText);
+                return false;
+            }
+        });
     }
 
 

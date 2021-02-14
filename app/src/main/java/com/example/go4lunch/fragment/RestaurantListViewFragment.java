@@ -66,6 +66,7 @@ public class RestaurantListViewFragment extends Fragment{
         MenuItem searchItem = menu.findItem(R.id.search_item);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
