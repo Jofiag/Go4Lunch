@@ -22,6 +22,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -41,9 +42,7 @@ import java.util.Objects;
 public class RestaurantMapViewFragment extends Fragment {
 
     private final OnMapReadyCallback callback = googleMap -> {
-        LatLng sydney = new LatLng(-34, 151);
-        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        setGoogleMap(googleMap);
     };
 
     private PlacesClient placesClient;
@@ -68,13 +67,36 @@ public class RestaurantMapViewFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setMapFragment();
+        initializePlaces();
+    }
 
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.search_view_menu, menu);
+        setOurSearchView(menu);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkGooglePlayServices();
+    }
+
+    private void setGoogleMap(GoogleMap googleMap){
+        LatLng sydney = new LatLng(-34, 151);
+        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    private void setMapFragment(){
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_fragment);
 
-        if (mapFragment != null) {
+        if (mapFragment != null)
             mapFragment.getMapAsync(callback);
-        }
+    }
 
+    private void initializePlaces(){
         if (!Places.isInitialized())
             Places.initialize(Objects.requireNonNull(getContext()), getString(R.string.google_maps_key));
 
@@ -107,6 +129,43 @@ public class RestaurantMapViewFragment extends Fragment {
                 });
     }
 
+    private void setOurSearchView(Menu menu){
+        MenuItem searchItem = menu.findItem(R.id.search_item);
+
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //Action after user validate his search text
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Real time action
+                getPlaceEntered(newText);
+                return false;
+            }
+        });
+    }
+
+    private void checkGooglePlayServices(){
+        int errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
+
+        if (errorCode != ConnectionResult.SUCCESS){
+            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), errorCode, errorCode,
+                    dialog -> {
+                        //Here is what we're going to show to the user if the connection has canceled
+                        Toast.makeText(getContext(), "No services", Toast.LENGTH_SHORT).show();
+                    });
+            googleErrorDialog.show();
+        }
+        else
+            Toast.makeText(getContext(), "Google Play services connected", Toast.LENGTH_SHORT).show();
+    }
+
 //    @Override
 //    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 //        List<Place.Field> fieldList = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS);
@@ -135,54 +194,4 @@ public class RestaurantMapViewFragment extends Fragment {
 //
 //        super.onActivityResult(requestCode, resultCode, data);
 //    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.search_view_menu, menu);
-
-        MenuItem searchItem = menu.findItem(R.id.search_item);
-//        MenuItem searchPlaceItem = menu.findItem(R.id.search_place_item);
-//        searchItem.setVisible(false);
-//        searchPlaceItem.setVisible(true);
-
-        SearchView searchView = (SearchView) searchItem.getActionView();
-//        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                //Action after user validate his search text
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //Real time action
-                getPlaceEntered(newText);
-                return false;
-            }
-        });
-    }
-
-
-    //Checking google play service access
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        //Testing
-        int errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
-
-        if (errorCode != ConnectionResult.SUCCESS){
-            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), errorCode, errorCode,
-                    dialog -> {
-                        //Here is what we're going to show to the user if the connection has canceled
-                        Toast.makeText(getContext(), "No services", Toast.LENGTH_SHORT).show();
-                    });
-            googleErrorDialog.show();
-        }
-        else
-            Toast.makeText(getContext(), "Google Play services connected", Toast.LENGTH_SHORT).show();
-    }
 }
