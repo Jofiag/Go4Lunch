@@ -1,7 +1,11 @@
 package com.example.go4lunch.fragment;
 
 import android.app.Dialog;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,6 +24,7 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
+import com.example.go4lunch.util.RestaurantSuggestions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.ApiException;
@@ -143,23 +148,37 @@ public class RestaurantMapViewFragment extends Fragment {
     private void setOurSearchView(Menu menu){
         MenuItem searchItem = menu.findItem(R.id.search_item);
 
+        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 //Action after user validate his search text
+                SearchRecentSuggestions searchRecentSuggestions = new SearchRecentSuggestions(getContext(), RestaurantSuggestions.AUTHORITY, RestaurantSuggestions.MODE);
+                searchRecentSuggestions.saveRecentQuery(query, null);
+                Toast.makeText(getContext(), query, Toast.LENGTH_SHORT).show();
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Real time action
-                getPlaceEntered(newText);
+//                getPlaceEntered(newText);
                 return false;
             }
         });
+
+                // OR
+//        Intent intent = getActivity().getIntent();
+//        if (Intent.ACTION_SEARCH.equals(intent.getAction())){
+//            String query = intent.getStringExtra(SearchManager.QUERY);
+//            SearchRecentSuggestions searchRecentSuggestions = new SearchRecentSuggestions(getContext(), RestaurantSuggestions.AUTHORITY, RestaurantSuggestions.MODE);
+//            searchRecentSuggestions.saveRecentQuery(query, null);
+//            Toast.makeText(getActivity(), query, Toast.LENGTH_SHORT).show();
+//        }
     }
 
     private void checkGooglePlayServices(){

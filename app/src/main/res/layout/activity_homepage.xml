@@ -29,7 +29,7 @@
                 android:background="#A9C606"
                 app:navigationIcon="@drawable/baseline_menu_24"
                 app:title="@string/im_hungry_text"
-                app:titleTextColor="#FFFFFF" />
+                android:theme="@style/Theme.Go4Lunch.AppBarOverlay"/>
 
             <FrameLayout
                 android:id="@+id/fragment_container_homepage_activity"

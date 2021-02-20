@@ -36,14 +36,26 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDbE_wLk3LU6JKmYENegAEhwlJV4OgHeWY" />
+            android:value="@string/google_maps_key" />
 
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity android:name=".controller.RestaurantDetailsActivity" />
-        <activity android:name=".controller.HomepageActivity" />
+        <activity android:name=".controller.HomepageActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+        </activity>
+
+        <provider
+            android:authorities="com.example.go4lunch.util.RestaurantSuggestions"
+            android:name=".util.RestaurantSuggestions"
+            android:exported="false" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
