@@ -3,6 +3,7 @@
     android:label="@string/app_name"
     android:hint="@string/search_restaurant_text"
     android:searchSuggestAuthority="com.example.go4lunch.util.RestaurantSuggestions"
-    android:searchSuggestSelection=" ?">
+    android:searchSuggestIntentAction="android.intent.action.VIEW"
+    android:searchSuggestSelection="word MATCH ?">
 
 </searchable>

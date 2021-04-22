@@ -5,10 +5,12 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.graphics.drawable.Icon;
 import android.icu.text.Transliterator;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.provider.BaseColumns;
 import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,6 +63,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Observable;
+import java.util.Observer;
 
 public class RestaurantMapViewFragment extends Fragment {
 
@@ -247,23 +251,31 @@ public class RestaurantMapViewFragment extends Fragment {
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+        searchView.setIconifiedByDefault(false);
+
+        String[] SUGGESTIONS = {
+                "Bauru", "Sao Paulo", "Rio de Janeiro",
+                "Bahia", "Mato Grosso", "Minas Gerais",
+                "Tocantins", "Rio Grande do Sul"
+        };
 
         String[] columnPlaces = {
-                SearchManager.SUGGEST_COLUMN_TEXT_1,
-                SearchManager.SUGGEST_COLUMN_TEXT_2
+                BaseColumns._ID,
+                SearchManager.SUGGEST_COLUMN_TEXT_1, //The main line of a suggestion (necessary)
+                SearchManager.SUGGEST_COLUMN_TEXT_2  //The second line for a secondary text (optional)
         };
 
         int[] viewIds = {
-                android.R.id.text1,
-                android.R.id.text2
+                R.id.place_name,
+                R.id.place_address
         };
 
         CursorAdapter adapter = new SimpleCursorAdapter(getContext(),
-                android.R.layout.simple_list_item_1,
+                R.layout.suggestion_list_row,
                 null,
                 columnPlaces,
                 viewIds,
-                SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
         searchView.setSuggestionsAdapter(adapter);
 
@@ -275,6 +287,17 @@ public class RestaurantMapViewFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                final MatrixCursor cursor = new MatrixCursor(columnPlaces);
+                int i = 0;
+
+                for (String suggestion : SUGGESTIONS) {
+                    if (suggestion.toLowerCase().startsWith(newText.toLowerCase()))
+                        cursor.addRow(new Object[]{i, suggestion, suggestion});
+                    i++;
+                }
+
+                adapter.changeCursor(cursor);
+
                 return false;
             }
         });
@@ -288,7 +311,10 @@ public class RestaurantMapViewFragment extends Fragment {
             @Override
             public boolean onSuggestionClick(int position) {
                 //when click
-                Toast.makeText(getContext(), adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
+                Cursor cursor = (Cursor) adapter.getItem(position);
+                String text = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1));
+                searchView.setQuery(text, true);
+                Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
