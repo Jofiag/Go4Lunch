@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.cursoradapter.widget.CursorAdapter;
+import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
@@ -247,6 +248,50 @@ public class RestaurantMapViewFragment extends Fragment {
         searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
 
+        String[] columnPlaces = {
+                SearchManager.SUGGEST_COLUMN_TEXT_1,
+                SearchManager.SUGGEST_COLUMN_TEXT_2
+        };
+
+        int[] viewIds = {
+                android.R.id.text1,
+                android.R.id.text2
+        };
+
+        CursorAdapter adapter = new SimpleCursorAdapter(getContext(),
+                android.R.layout.simple_list_item_1,
+                null,
+                columnPlaces,
+                viewIds,
+                SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+
+        searchView.setSuggestionsAdapter(adapter);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                //when click
+                Toast.makeText(getContext(), adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
 
         /*searchView.setSuggestionsAdapter(new CursorAdapter() {
             @Override
@@ -270,8 +315,6 @@ public class RestaurantMapViewFragment extends Fragment {
                 return false;
             }
         });*/
-
-        ;
 
 
 //        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
