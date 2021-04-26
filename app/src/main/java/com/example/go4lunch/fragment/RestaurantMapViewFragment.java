@@ -1,6 +1,5 @@
 package com.example.go4lunch.fragment;
 
-import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -28,8 +27,6 @@ import androidx.fragment.app.Fragment;
 import com.example.go4lunch.R;
 import com.example.go4lunch.util.Constants;
 import com.example.go4lunch.util.RestaurantSuggestions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -54,6 +51,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class RestaurantMapViewFragment extends Fragment {
+    public static final String ADDRESS = "address";
+    public static final String NAME = "name";
 
     private final OnMapReadyCallback callback;
 
@@ -104,14 +103,16 @@ public class RestaurantMapViewFragment extends Fragment {
     public void onResume() {
         super.onResume();
         setMapFragment();
-        checkGooglePlayServices();
+//        checkGooglePlayServices();
     }
 
     private void setGoogleMap(GoogleMap googleMap){
         LatLng jaude = new LatLng(45.7757747, 3.0804423);
         googleMap.addMarker(new MarkerOptions().position(jaude).title("Jaude Clermont-Ferrand"));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jaude, 18));
-        getPlaceEntered(getQuerySearched(), googleMap, null, null);
+
+        if (getQuerySearched() != null)
+            getPlaceEntered(getQuerySearched(), googleMap, null, null);
 //        googleMap.setMyLocationEnabled(true);
 //        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 //        addCustomMarkerOnRestaurantPosition(googleMap);
@@ -168,9 +169,45 @@ public class RestaurantMapViewFragment extends Fragment {
                 });
     }*/
 
+    private String getFromQuery(String query, String wanted){
+        String result;
+        char[] resultArray = new char[query.length()];
+
+
+        //If we want the NAME
+        if (wanted.equals(NAME)){
+            for (int i = 0; i < query.length(); i++){
+                resultArray[i] = query.charAt(i);
+                if (i+1 < query.length() && query.charAt(i+1) == '_')
+                    i = query.length()-1;
+            }
+        }
+        //If we want the address
+        else {
+            int y = 0;
+            int z = 0;
+            for (int i = 0; i < query.length(); i++){
+                if (query.charAt(i) == '_')
+                    y = i;
+
+                if (y != 0 && i > y) {
+                    resultArray[z] = query.charAt(i);
+                    z++;
+                }
+            }
+        }
+
+        result = new String(resultArray).trim();
+
+        Log.d("GETNA", "getFromQuery: " + result);
+        Toast.makeText(getContext(), result, Toast.LENGTH_SHORT).show();
+
+        return result;
+    }
+
     private void getPlaceEntered(String query, GoogleMap googleMap, String[] columnPlaces, CursorAdapter adapter){
         predictionRequest = FindAutocompletePredictionsRequest.builder()
-                .setQuery(query)
+                .setQuery(getFromQuery(query, NAME))
                 .setCountry("fr")
                 .setLocationBias(bounds)
                 .setTypeFilter(TypeFilter.ESTABLISHMENT)
@@ -195,10 +232,10 @@ public class RestaurantMapViewFragment extends Fragment {
 
                                 //Zooming on the query submitted
                                 if (googleMap != null){
-                                    String placeNameInLowercase = place.getName().toLowerCase();
-                                    String queryInLowercase = query.toLowerCase();
+                                    String placeAddressInLowercase = place.getAddress().toLowerCase();
+                                    String queryAddressInLowercase = getFromQuery(query, ADDRESS).toLowerCase();
 
-                                    if (placeNameInLowercase.equals(queryInLowercase))
+                                    if (placeAddressInLowercase.equals(queryAddressInLowercase))
                                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18));
                                     else
                                         Toast.makeText(getContext(), place.getName() + place.getTypes(), Toast.LENGTH_SHORT).show();
@@ -247,7 +284,6 @@ public class RestaurantMapViewFragment extends Fragment {
                 RestaurantSuggestions.MODE);
 
         String query = null;
-//        searchRecentSuggestions.clearHistory();
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())){
             query = intent.getStringExtra(SearchManager.QUERY);
@@ -403,10 +439,15 @@ public class RestaurantMapViewFragment extends Fragment {
 
             @Override
             public boolean onSuggestionClick(int position) {
-                //when user click on a restaurant suggested, set searchView query with the restaurant clicked name
+                //when user click on a restaurant suggested, set searchView query with the restaurant clicked address
                 Cursor cursor = (Cursor) adapter.getItem(position);
-                String text = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1));
-                searchView.setQuery(text, true);
+                String placeName = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1));
+                String placeAddress = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2));
+
+                //We're setting both name and address as query,
+                // because there can be many restaurant with the same name but never with the same address.
+                //Then we can use the address to search for the restaurant in the map.
+                searchView.setQuery(placeName + "_" + placeAddress, true);
                 searchView.setSaveEnabled(true);
 
                 return true;
@@ -436,7 +477,7 @@ public class RestaurantMapViewFragment extends Fragment {
             getPlaceEntered(getQuerySearched(), null, null, null);*/
     }
 
-    private void checkGooglePlayServices(){
+    /*private void checkGooglePlayServices(){
         int errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
 
         if (errorCode != ConnectionResult.SUCCESS){
@@ -449,7 +490,7 @@ public class RestaurantMapViewFragment extends Fragment {
         }
         else
             Toast.makeText(getContext(), "Google Play services connected", Toast.LENGTH_SHORT).show();
-    }
+    }*/
 
 //    @Override
 //    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
