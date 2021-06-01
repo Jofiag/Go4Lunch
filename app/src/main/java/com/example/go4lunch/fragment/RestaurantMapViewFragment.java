@@ -15,7 +15,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,34 +24,34 @@ import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.data.RestaurantBank;
 import com.example.go4lunch.util.Constants;
 import com.example.go4lunch.util.RestaurantSuggestions;
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.model.TypeFilter;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 public class RestaurantMapViewFragment extends Fragment {
-    public static final String ADDRESS = "address";
     public static final String NAME = "name";
+    public static final String ADDRESS = "address";
+    public static final String RESTAURANT_CLICKED_POSITION = "position";
 
     private final OnMapReadyCallback callback;
 
@@ -63,32 +62,30 @@ public class RestaurantMapViewFragment extends Fragment {
     private List<Place.Field> placeFields;
 
     public RestaurantMapViewFragment() {
-        callback = this::setGoogleMap;
-
-        /*callback = new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                setGoogleMap(googleMap);
-            }
-        };*/
+        callback = googleMap -> {
+            setGoogleMap(googleMap);
+            Log.d("ORDER", "onMapReady: ");
+        };
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("ORDER", "onCreate: ");
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-
+        Log.d("ORDER", "onCreateView: ");
         return inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d("ORDER", "onViewCreated: ");
         initializePlaces();
         initializePredictionRequestAndPlaceFields();
     }
@@ -96,23 +93,33 @@ public class RestaurantMapViewFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.search_view_menu, menu);
+        Log.d("ORDER", "onCreateOptionsMenu: ");
         setOurSearchView(menu);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("ORDER", "onResume: ");
         setMapFragment();
 //        checkGooglePlayServices();
     }
 
     private void setGoogleMap(GoogleMap googleMap){
         LatLng jaude = new LatLng(45.7757747, 3.0804423);
-        googleMap.addMarker(new MarkerOptions().position(jaude).title("Jaude Clermont-Ferrand"));
+//        LatLng BrasserieLeLion = new LatLng(45.7765559,3.0805094);
+        addMarkerOnRestaurant(googleMap, jaude, "Jaude Clermont-Ferrand", BitmapDescriptorFactory.HUE_RED);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jaude, 18));
 
-        if (getQuerySearched() != null)
-            getPlaceEntered(getQuerySearched(), googleMap, null, null);
+        RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, restaurantList -> {
+            for (int i = 0; i < 5; i++) {
+                Place restaurant = restaurantList.get(i);
+                Log.d("LIST5", "processFinished: " + restaurant.getName());
+                addMarkerOnRestaurant(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+            }
+        });
+
+        getPlaceEntered(getQuerySearched(), googleMap, null, null);
 //        googleMap.setMyLocationEnabled(true);
 //        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 //        addCustomMarkerOnRestaurantPosition(googleMap);
@@ -138,7 +145,7 @@ public class RestaurantMapViewFragment extends Fragment {
         predictionRequest = FindAutocompletePredictionsRequest.builder()
                 .setCountry("fr")
                 .setLocationBias(bounds)
-                .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                .setTypeFilter(TypeFilter.GEOCODE)
                 .setSessionToken(sessionToken)
                 .build();
 
@@ -146,75 +153,128 @@ public class RestaurantMapViewFragment extends Fragment {
                 Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.TYPES);
     }
 
-    /*private void addCustomMarkerOnRestaurantPosition(GoogleMap googleMap){
-        placesClient.findAutocompletePredictions(predictionRequest)
-                .addOnSuccessListener(response -> {
-                    for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
-                        FetchPlaceRequest placeRequest = FetchPlaceRequest.builder(prediction.getPlaceId(), placeFields).build();
-
-                        placesClient.fetchPlace(placeRequest).addOnSuccessListener(fetchPlaceResponse -> {
-                            Place place = fetchPlaceResponse.getPlace();
-                            if (Objects.requireNonNull(place.getTypes()).contains(Place.Type.RESTAURANT)) {
-
-                                    //Add personal marker on restaurant
-                                    googleMap.addMarker(new MarkerOptions()
-                                            .position(Objects.requireNonNull(place.getLatLng()))
-                                            .title(place.getName())
-                                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
-
-                            }
-                        });
-                    }
-
-                });
-    }*/
-
     private String getFromQuery(String query, String wanted){
-        String result;
-        char[] resultArray = new char[query.length()];
+        String result = null;
+        char[] resultArray;
+
+        if (query != null){
+            resultArray = new char[query.length()];
 
 
-        //If we want the NAME
-        if (wanted.equals(NAME)){
-            for (int i = 0; i < query.length(); i++){
-                resultArray[i] = query.charAt(i);
-                if (i+1 < query.length() && query.charAt(i+1) == '_')
-                    i = query.length()-1;
-            }
-        }
-        //If we want the address
-        else {
-            int y = 0;
-            int z = 0;
-            for (int i = 0; i < query.length(); i++){
-                if (query.charAt(i) == '_')
-                    y = i;
+            //If we want the NAME
+            if (wanted.equals(NAME)){
+                for (int i = 0; i < query.length(); i++){
+                    resultArray[i] = query.charAt(i);                       //We add each query character
 
-                if (y != 0 && i > y) {
-                    resultArray[z] = query.charAt(i);
-                    z++;
+                    if (i+1 < query.length() && query.charAt(i+1) == '_')   //until the next character is '_'
+                        i = query.length()-1;                               //then, we stop adding.
                 }
             }
+            //If we want the address
+            else if (wanted.equals(ADDRESS)){
+                int y = 0, z = 0;                        //We'll use y to save a position and z to re-initialize the resultArray from it's first element
+
+                for (int i = 0; i < query.length(); i++){
+                        if (query.charAt(i) == '_')                             //We find the character '_'
+                            y = i;                                              //then, we save it's position in y.
+
+                    if (y != 0 && i > y) {                                      //When we'r at the character '_' position,
+                        resultArray[z] = query.charAt(i);                       //we save all the character after that position
+
+                        if (i+1 < query.length() && query.charAt(i+1) == '/')   //until the next character is '/'
+                            i = query.length()-1;                               //then, we stop adding
+
+                        z++;                                                    //If the next character isn't '/', we continue adding.
+                    }
+                }
+            }
+            //If we want the restaurant clicked position
+            else{
+                int y = 0, z = 0;                         //We'll use y to save a position and z to re-initialize the resultArray from it's first element
+
+                for (int i = 0; i < query.length(); i++) {
+                    if (query.charAt(i) == '/')             //When we reach the character '/',
+                        y = i;                              //we save it's position
+
+                    if (y != 0 && i > y){                   //When we're at the character '/' position,
+                        resultArray[z] = query.charAt(i);   //we save all the character after that position.
+                        z++;
+                    }
+                }
+                result = new String(resultArray).trim();
+                Log.d("GETNA", "getFromQuery: " + Integer.parseInt(result));
+
+            }
+
+            result = new String(resultArray).trim();
+
+            Log.d("GETNA", "getFromQuery: " + result);
         }
-
-        result = new String(resultArray).trim();
-
-        Log.d("GETNA", "getFromQuery: " + result);
-        Toast.makeText(getContext(), result, Toast.LENGTH_SHORT).show();
 
         return result;
     }
 
-    private void getPlaceEntered(String query, GoogleMap googleMap, String[] columnPlaces, CursorAdapter adapter){
-        predictionRequest = FindAutocompletePredictionsRequest.builder()
-                .setQuery(getFromQuery(query, NAME))
-                .setCountry("fr")
-                .setLocationBias(bounds)
-                .setTypeFilter(TypeFilter.ESTABLISHMENT)
-                .setSessionToken(sessionToken)
-                .build();
+    private void addMarkerOnRestaurant(GoogleMap googleMap, LatLng position, String title, float color){
+        //Adding marker to map
+        Marker marker = googleMap.addMarker(new MarkerOptions()
+                .position(position)
+                .title(title)
+                .icon(BitmapDescriptorFactory.defaultMarker(color)));
 
-        placesClient.findAutocompletePredictions(predictionRequest)
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+    }
+
+    private void getPlaceEntered(String query, GoogleMap googleMap, String[] columnPlaces, CursorAdapter adapter){
+        if (query != null)
+            predictionRequest = FindAutocompletePredictionsRequest.builder()
+                    .setQuery(getFromQuery(query, NAME))
+                    .setCountry("fr")
+                    .setLocationBias(bounds)
+                    .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                    .setSessionToken(sessionToken)
+                    .build();
+
+
+        RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields,
+                restaurantList -> {
+                    if (googleMap != null){
+//                        int position = Integer.parseInt(getFromQuery(query, RESTAURANT_CLICKED_POSITION));
+
+                            for (Place restaurant : restaurantList) {
+                                //Add marker on all restaurant nearby
+                                addMarkerOnRestaurant(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+
+                                //Zooming on the restaurant clicked
+                                if (Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurant.getLatLng(), 20));
+                                    addMarkerOnRestaurant(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+                                }
+                            }
+                    }
+
+                    if (columnPlaces != null && adapter != null){
+                        //When we've got all the restaurant
+                        if (!restaurantList.isEmpty()){
+
+                            //Then we add all of them to our cursor to show it as suggestions to the user
+                            Log.d("LIST", "onQueryTextChange: " + restaurantList.size() + restaurantList);
+                            final MatrixCursor cursor = new MatrixCursor(columnPlaces);
+                            int y = 0;
+                            for (Place placeSuggested : restaurantList) {
+                                if (placeSuggested != null && placeSuggested.getName() != null && query != null) {
+                                    String placeName = placeSuggested.getName();
+                                    if (placeName.toLowerCase().contains(query.toLowerCase()))
+                                        cursor.addRow(new Object[]{y, placeName, placeSuggested.getAddress()});
+                                }
+                                y++;
+                            }
+
+                            adapter.changeCursor(cursor);
+                        }
+                    }
+                });
+
+        /*placesClient.findAutocompletePredictions(predictionRequest)
                 .addOnSuccessListener(response -> {
                     int i = 0;
                     List<Place> placeList = new ArrayList<>();
@@ -235,10 +295,12 @@ public class RestaurantMapViewFragment extends Fragment {
                                     String placeAddressInLowercase = place.getAddress().toLowerCase();
                                     String queryAddressInLowercase = getFromQuery(query, ADDRESS).toLowerCase();
 
+                                    //Adding marker on restaurant
+                                    addMarkerOnRestaurant(googleMap, place.getLatLng(), place.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+
+                                    //Zooming on restaurant searched
                                     if (placeAddressInLowercase.equals(queryAddressInLowercase))
-                                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18));
-                                    else
-                                        Toast.makeText(getContext(), place.getName() + place.getTypes(), Toast.LENGTH_SHORT).show();
+                                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 20));
                                 }
 
                                 if (columnPlaces != null && adapter != null){
@@ -274,7 +336,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 .addOnFailureListener(e -> {
                     if (e instanceof ApiException)
                         Log.d("SUGGESTIONS", "getPlaceEntered: " + e.getMessage());
-                });
+                });*/
     }
 
     private String getQuerySearched(){
@@ -322,7 +384,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 R.id.place_address
         };
 
-        CursorAdapter adapter = new SimpleCursorAdapter(getContext(),
+        CursorAdapter adapter = new SimpleCursorAdapter(Objects.requireNonNull(getContext()),
                 R.layout.suggestion_list_row,
                 null,
                 columnPlaces,
@@ -447,7 +509,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 //We're setting both name and address as query,
                 // because there can be many restaurant with the same name but never with the same address.
                 //Then we can use the address to search for the restaurant in the map.
-                searchView.setQuery(placeName + "_" + placeAddress, true);
+                searchView.setQuery(placeName + "_" + placeAddress + "/" + position, true);
                 searchView.setSaveEnabled(true);
 
                 return true;
