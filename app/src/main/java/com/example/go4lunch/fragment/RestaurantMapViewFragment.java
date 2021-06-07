@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.SearchRecentSuggestions;
@@ -19,6 +22,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
@@ -31,6 +35,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -108,14 +113,14 @@ public class RestaurantMapViewFragment extends Fragment {
     private void setGoogleMap(GoogleMap googleMap){
         LatLng jaude = new LatLng(45.7757747, 3.0804423);
 //        LatLng BrasserieLeLion = new LatLng(45.7765559,3.0805094);
-        addMarkerOnRestaurant(googleMap, jaude, "Jaude Clermont-Ferrand", BitmapDescriptorFactory.HUE_RED);
+        addMarkerOnPosition(googleMap, jaude, "Jaude Clermont-Ferrand", BitmapDescriptorFactory.HUE_RED);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jaude, 18));
 
         RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, restaurantList -> {
             for (int i = 0; i < 5; i++) {
                 Place restaurant = restaurantList.get(i);
                 Log.d("LIST5", "processFinished: " + restaurant.getName());
-                addMarkerOnRestaurant(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+                addMarkerOnPosition(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
             }
         });
 
@@ -214,14 +219,28 @@ public class RestaurantMapViewFragment extends Fragment {
         return result;
     }
 
-    private void addMarkerOnRestaurant(GoogleMap googleMap, LatLng position, String title, float color){
+    private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, float color){
         //Adding marker to map
-        Marker marker = googleMap.addMarker(new MarkerOptions()
+       /* Marker marker = */googleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
+//                .flat(true)
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.orange_restaurant)));
+//                .icon(getBitmapFromVectorAssets(getContext(), R.drawable.green_restaurant_24x24pp)));
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+    }
+
+    private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
+        vectorDrawable.setBounds(0,0,vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     private void getPlaceEntered(String query, GoogleMap googleMap, String[] columnPlaces, CursorAdapter adapter){
@@ -242,12 +261,12 @@ public class RestaurantMapViewFragment extends Fragment {
 
                             for (Place restaurant : restaurantList) {
                                 //Add marker on all restaurant nearby
-                                addMarkerOnRestaurant(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+                                addMarkerOnPosition(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
 
                                 //Zooming on the restaurant clicked
                                 if (Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
                                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurant.getLatLng(), 20));
-                                    addMarkerOnRestaurant(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+                                    addMarkerOnPosition(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
                                 }
                             }
                     }
