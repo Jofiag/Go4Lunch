@@ -1,13 +1,19 @@
 package com.example.go4lunch.fragment;
 
+import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.SearchRecentSuggestions;
@@ -20,8 +26,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.cursoradapter.widget.CursorAdapter;
@@ -40,7 +51,6 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
@@ -54,7 +64,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static android.content.Context.LOCATION_SERVICE;
+
+@RequiresApi(api = Build.VERSION_CODES.M)
 public class RestaurantMapViewFragment extends Fragment {
+    public static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    public static final int REQUEST_LOCATION_PERMISSION_CODE = 5;
     public static final String NAME = "name";
     public static final String ADDRESS = "address";
     public static final String RESTAURANT_CLICKED_POSITION = "position";
@@ -66,6 +81,10 @@ public class RestaurantMapViewFragment extends Fragment {
     private RectangularBounds bounds;
     private FindAutocompletePredictionsRequest predictionRequest;
     private List<Place.Field> placeFields;
+
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private Location deviceLocation;
 
     public RestaurantMapViewFragment() {
         callback = this::setGoogleMap;
@@ -84,10 +103,15 @@ public class RestaurantMapViewFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Log.d("ORDER", "onViewCreated: ");
+
+        setLocationManagerAndListener();
+        requestLocationIfPermissionIsGranted();
+
         initializePlaces();
         initializePredictionRequestAndPlaceFields();
     }
@@ -107,10 +131,14 @@ public class RestaurantMapViewFragment extends Fragment {
 //        checkGooglePlayServices();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void setGoogleMap(GoogleMap googleMap){
-        LatLng jaude = new LatLng(45.7757747, 3.0804423);
-        addMarkerOnPosition(googleMap, jaude, "Jaude Clermont-Ferrand", BitmapDescriptorFactory.HUE_RED);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jaude, 17));
+
+        if (deviceLocation != null){
+            LatLng position = new LatLng(deviceLocation.getLatitude(), deviceLocation.getLongitude());
+            addMarkerOnPosition(googleMap, position, "My position", BitmapDescriptorFactory.HUE_RED);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 17));
+        }
 
         Runnable addOrangeMarkerToRestaurant = () -> {
             try {
@@ -144,9 +172,9 @@ public class RestaurantMapViewFragment extends Fragment {
 
     private void initializePlaces(){
         if (!Places.isInitialized())
-            Places.initialize(Objects.requireNonNull(getContext()), getString(R.string.google_maps_key));
+            Places.initialize(requireContext(), getString(R.string.google_maps_key));
 
-        placesClient = Places.createClient(Objects.requireNonNull(getContext()));
+        placesClient = Places.createClient(requireContext());
     }
     private void initializePredictionRequestAndPlaceFields(){
         sessionToken = AutocompleteSessionToken.newInstance();
@@ -335,7 +363,7 @@ public class RestaurantMapViewFragment extends Fragment {
         return result;
     }
     private String getQuerySearched(){
-        Intent intent = Objects.requireNonNull(getActivity()).getIntent();
+        Intent intent = requireActivity().getIntent();
         SearchRecentSuggestions searchRecentSuggestions = new SearchRecentSuggestions(getContext(),
                 RestaurantSuggestions.AUTHORITY,
                 RestaurantSuggestions.MODE);
@@ -353,7 +381,7 @@ public class RestaurantMapViewFragment extends Fragment {
     private void setOurSearchView(Menu menu){
         MenuItem searchItem = menu.findItem(R.id.search_item);
 
-        SearchManager searchManager = (SearchManager) Objects.requireNonNull(getActivity()).getSystemService(Context.SEARCH_SERVICE);
+        SearchManager searchManager = (SearchManager) requireActivity().getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
@@ -378,7 +406,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 R.id.place_address
         };
 
-        CursorAdapter adapter = new SimpleCursorAdapter(Objects.requireNonNull(getContext()),
+        CursorAdapter adapter = new SimpleCursorAdapter(requireContext(),
                 R.layout.suggestion_list_row,
                 null,
                 columnPlaces,
@@ -554,6 +582,66 @@ public class RestaurantMapViewFragment extends Fragment {
         vectorDrawable.draw(canvas);
 
         return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+
+    private void setLocationManagerAndListener(){
+        locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                deviceLocation = location;
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+    }
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void requestLocationIfPermissionIsGranted() {
+        if (getContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
+            deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+        else{
+            if (shouldShowRequestPermissionRationale(FINE_LOCATION))
+                Toast.makeText(getContext(), "Location permission is required", Toast.LENGTH_SHORT).show();
+
+            requestPermissionLauncher.launch(FINE_LOCATION);
+        }
+
+    }
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), result -> {
+                if (result)
+                    requestLocationIfPermissionIsGranted();
+                else
+                    requestPermissionWithinDialog();
+            }
+    );
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void requestPermissionWithinDialog() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Location permission disable")
+                .setMessage("You denied the location permission. It is required to show your location. Do you want to grant the permission")
+                .setPositiveButton("YES", (dialog, which) -> requestLocationIfPermissionIsGranted())
+                .setNegativeButton("NO", null)
+                .create()
+                .show();
     }
 
     /*private void checkGooglePlayServices(){
