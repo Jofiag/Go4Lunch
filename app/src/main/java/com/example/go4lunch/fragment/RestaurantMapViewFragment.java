@@ -1,15 +1,11 @@
 package com.example.go4lunch.fragment;
 
-import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -26,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -34,7 +29,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.content.ContextCompat;
 import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
@@ -47,7 +41,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -65,15 +58,12 @@ import java.util.List;
 import java.util.Objects;
 
 import static android.content.Context.LOCATION_SERVICE;
+import static com.example.go4lunch.util.Constants.ADDRESS;
+import static com.example.go4lunch.util.Constants.FINE_LOCATION;
+import static com.example.go4lunch.util.Constants.NAME;
 
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class RestaurantMapViewFragment extends Fragment {
-    public static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    public static final int REQUEST_LOCATION_PERMISSION_CODE = 5;
-    public static final String NAME = "name";
-    public static final String ADDRESS = "address";
-    public static final String RESTAURANT_CLICKED_POSITION = "position";
-
     private final OnMapReadyCallback callback;
 
     private PlacesClient placesClient;
@@ -85,6 +75,7 @@ public class RestaurantMapViewFragment extends Fragment {
     private LocationManager locationManager;
     private LocationListener locationListener;
     private Location deviceLocation;
+    private LatLng devicePosition;
 
     public RestaurantMapViewFragment() {
         callback = this::setGoogleMap;
@@ -103,7 +94,6 @@ public class RestaurantMapViewFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -131,13 +121,11 @@ public class RestaurantMapViewFragment extends Fragment {
 //        checkGooglePlayServices();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private void setGoogleMap(GoogleMap googleMap){
 
-        if (deviceLocation != null){
-            LatLng position = new LatLng(deviceLocation.getLatitude(), deviceLocation.getLongitude());
-            addMarkerOnPosition(googleMap, position, "My position", BitmapDescriptorFactory.HUE_RED);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 17));
+        if (devicePosition != null){
+            addMarkerOnPosition(googleMap, devicePosition, "My position", BitmapDescriptorFactory.HUE_RED);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 17));
         }
 
         Runnable addOrangeMarkerToRestaurant = () -> {
@@ -178,7 +166,7 @@ public class RestaurantMapViewFragment extends Fragment {
     }
     private void initializePredictionRequestAndPlaceFields(){
         sessionToken = AutocompleteSessionToken.newInstance();
-        bounds = RectangularBounds.newInstance(LatLngBounds.builder().include(new LatLng(45.7757747, 3.0804423)).build());
+        bounds = RectangularBounds.newInstance(LatLngBounds.builder().include(devicePosition).build());
 
         predictionRequest = FindAutocompletePredictionsRequest.builder()
                 .setCountry("fr")
@@ -207,9 +195,10 @@ public class RestaurantMapViewFragment extends Fragment {
 //                        int position = Integer.parseInt(getFromQuery(query, RESTAURANT_CLICKED_POSITION));
 
                             for (Place restaurant : restaurantList) {
+                                LatLng restaurantPosition = restaurant.getLatLng();
                                 //Zooming on the restaurant clicked
-                                if (Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
-                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurant.getLatLng(), 17));
+                                if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 17));
                                     addMarkerOnPosition(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
                                 }
                             }
@@ -236,70 +225,6 @@ public class RestaurantMapViewFragment extends Fragment {
                         }
                     }
                 });
-
-        /*placesClient.findAutocompletePredictions(predictionRequest)
-                .addOnSuccessListener(response -> {
-                    int i = 0;
-                    List<Place> placeList = new ArrayList<>();
-                    List<AutocompletePrediction> predictionList = response.getAutocompletePredictions();
-
-                    for (AutocompletePrediction prediction : predictionList) {
-                        FetchPlaceRequest placeRequest = FetchPlaceRequest.builder(prediction.getPlaceId(), placeFields).build();
-
-                        int finalI = i;
-                        placesClient.fetchPlace(placeRequest).addOnSuccessListener(fetchPlaceResponse -> {
-                            Place place = fetchPlaceResponse.getPlace();
-                            if (Objects.requireNonNull(place.getTypes()).contains(Place.Type.RESTAURANT)) {
-                                //Adding a place witch is a restaurant in our list
-                                placeList.add(place);
-
-                                //Zooming on the query submitted
-                                if (googleMap != null){
-                                    String placeAddressInLowercase = place.getAddress().toLowerCase();
-                                    String queryAddressInLowercase = getFromQuery(query, ADDRESS).toLowerCase();
-
-                                    //Adding marker on restaurant
-                                    addMarkerOnRestaurant(googleMap, place.getLatLng(), place.getName(), BitmapDescriptorFactory.HUE_ORANGE);
-
-                                    //Zooming on restaurant searched
-                                    if (placeAddressInLowercase.equals(queryAddressInLowercase))
-                                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 20));
-                                }
-
-                                if (columnPlaces != null && adapter != null){
-                                    //When we've got all the restaurant
-                                    if (finalI == response.getAutocompletePredictions().size()-1){
-                                        if (!placeList.isEmpty()){
-
-                                            //Then we add all of them to our cursor to show it as suggestions to the user
-                                            Log.d("LIST", "onQueryTextChange: " + placeList.size() + placeList);
-                                            final MatrixCursor cursor = new MatrixCursor(columnPlaces);
-                                            int y = 0;
-                                            for (Place placeSuggested : placeList) {
-                                                if (placeSuggested != null) {
-                                                    String placeName = placeSuggested.getName();
-                                                    if (placeName.toLowerCase().contains(query.toLowerCase()))
-                                                        cursor.addRow(new Object[]{y, placeName, placeSuggested.getAddress()});
-                                                }
-                                                y++;
-                                            }
-
-                                            adapter.changeCursor(cursor);
-                                        }
-                                    }
-                                }
-                            }
-
-                        });
-
-                        i++;
-                    }
-
-                })
-                .addOnFailureListener(e -> {
-                    if (e instanceof ApiException)
-                        Log.d("SUGGESTIONS", "getPlaceEntered: " + e.getMessage());
-                });*/
     }
 
     private String getFromQuery(String query, String wanted){
@@ -384,7 +309,7 @@ public class RestaurantMapViewFragment extends Fragment {
         SearchManager searchManager = (SearchManager) requireActivity().getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().getComponentName()));
 //        searchView.setIconifiedByDefault(false);
 
         /*String[] SUGGESTIONS = {
@@ -561,9 +486,13 @@ public class RestaurantMapViewFragment extends Fragment {
             getPlaceEntered(getQuerySearched(), null, null, null);*/
     }
 
+    private LatLng getPositionFromLocation(Location location){
+        return new LatLng(location.getLatitude(), location.getLongitude());
+    }
     private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, float color){
         //Adding marker to map
-        /* Marker marker = */googleMap.addMarker(new MarkerOptions()
+        /* Marker marker = */
+        googleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
@@ -573,8 +502,9 @@ public class RestaurantMapViewFragment extends Fragment {
 
 //        googleMap.moveCamera(CameraUpdateFactory.newLatLng(position));
     }
-    private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
+    /*private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
         Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
+        assert vectorDrawable != null;
         vectorDrawable.setBounds(0,0,vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
 
         Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -582,15 +512,27 @@ public class RestaurantMapViewFragment extends Fragment {
         vectorDrawable.draw(canvas);
 
         return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
+    }*/
 
 
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), result -> {
+                if (result)
+                    requestLocationIfPermissionIsGranted();
+                else
+                    requestPermissionWithinDialog();
+            }
+    );
     private void setLocationManagerAndListener(){
-        locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+        locationManager = (LocationManager) requireContext().getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 deviceLocation = location;
+                devicePosition = getPositionFromLocation(location);
+
+                Log.d("LOCATION", "onLocationChanged: " + devicePosition);
+
             }
 
             @Override
@@ -609,11 +551,11 @@ public class RestaurantMapViewFragment extends Fragment {
             }
         };
     }
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private void requestLocationIfPermissionIsGranted() {
-        if (getContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
+        if (requireContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            devicePosition = getPositionFromLocation(deviceLocation);
         }
         else{
             if (shouldShowRequestPermissionRationale(FINE_LOCATION))
@@ -623,19 +565,8 @@ public class RestaurantMapViewFragment extends Fragment {
         }
 
     }
-
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(), result -> {
-                if (result)
-                    requestLocationIfPermissionIsGranted();
-                else
-                    requestPermissionWithinDialog();
-            }
-    );
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private void requestPermissionWithinDialog() {
-        new AlertDialog.Builder(getContext())
+        new AlertDialog.Builder(requireContext())
                 .setTitle("Location permission disable")
                 .setMessage("You denied the location permission. It is required to show your location. Do you want to grant the permission")
                 .setPositiveButton("YES", (dialog, which) -> requestLocationIfPermissionIsGranted())

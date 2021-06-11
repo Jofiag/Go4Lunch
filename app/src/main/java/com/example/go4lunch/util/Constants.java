@@ -1,5 +1,7 @@
 package com.example.go4lunch.util;
 
+import android.Manifest;
+
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
 
@@ -19,6 +21,10 @@ public class Constants {
     public static final int AUTOCOMPLETE_REQUEST_CODE = 1;
     public static final CharSequence SEARCH_RESTAURANTS_TEXT = "Search restaurants";
     public static final CharSequence SEARCH_WORKMATES_TEXT = "Search workmates";
+    public static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    public static final String NAME = "name";
+    public static final String ADDRESS = "address";
+    public static final String RESTAURANT_CLICKED_POSITION = "position";
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();
