@@ -1,5 +1,6 @@
 package com.example.go4lunch.fragment;
 
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -34,33 +35,35 @@ import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
-import com.example.go4lunch.data.RestaurantBank;
+import com.example.go4lunch.data.NearByPlace;
 import com.example.go4lunch.util.Constants;
 import com.example.go4lunch.util.RestaurantSuggestions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static com.example.go4lunch.util.Constants.ADDRESS;
 import static com.example.go4lunch.util.Constants.FINE_LOCATION;
 import static com.example.go4lunch.util.Constants.NAME;
+import static com.example.go4lunch.util.Constants.NEARBY_SEARCH_URL;
+import static com.example.go4lunch.util.Constants.PROXIMITY_RADIUS;
+import static com.example.go4lunch.util.Constants.RESTAURANT;
 
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class RestaurantMapViewFragment extends Fragment {
@@ -77,6 +80,7 @@ public class RestaurantMapViewFragment extends Fragment {
     private Location deviceLocation;
     private LatLng devicePosition;
 
+
     public RestaurantMapViewFragment() {
         callback = this::setGoogleMap;
     }
@@ -84,6 +88,8 @@ public class RestaurantMapViewFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("ORDER", "onCreate: ");
+//        getUrl(latitude, longitude, Restaurant);
     }
 
     @Nullable
@@ -91,6 +97,7 @@ public class RestaurantMapViewFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         Log.d("ORDER", "onCreateView: ");
+
         return inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
     }
 
@@ -100,10 +107,10 @@ public class RestaurantMapViewFragment extends Fragment {
         Log.d("ORDER", "onViewCreated: ");
 
         setLocationManagerAndListener();
-        requestLocationIfPermissionIsGranted();
+        requestLocationIfPermissionIsGranted(null);
 
-        initializePlaces();
-        initializePredictionRequestAndPlaceFields();
+//        initializePlaces();
+//        initializePredictionRequestAndPlaceFields();
     }
 
     @Override
@@ -111,6 +118,7 @@ public class RestaurantMapViewFragment extends Fragment {
         inflater.inflate(R.menu.search_view_menu, menu);
         Log.d("ORDER", "onCreateOptionsMenu: ");
         setOurSearchView(menu);
+
     }
 
     @Override
@@ -118,17 +126,21 @@ public class RestaurantMapViewFragment extends Fragment {
         super.onResume();
         Log.d("ORDER", "onResume: ");
         setMapFragment();
-//        checkGooglePlayServices();
+        checkGooglePlayServices();
     }
 
-    private void setGoogleMap(GoogleMap googleMap){
+    private void setGoogleMap(GoogleMap googleMap) {
+        requestLocationIfPermissionIsGranted(googleMap);
+        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        getRestaurantNearby(googleMap);
 
-        if (devicePosition != null){
+        if (devicePosition != null) {
             addMarkerOnPosition(googleMap, devicePosition, "My position", BitmapDescriptorFactory.HUE_RED);
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 17));
+
         }
 
-        Runnable addOrangeMarkerToRestaurant = () -> {
+        /*Runnable addOrangeMarkerToRestaurant = () -> {
             try {
                 //Adding customized marker on restaurant nearby position
                 RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, restaurantList -> {
@@ -138,19 +150,17 @@ public class RestaurantMapViewFragment extends Fragment {
                     }
                 });
 
-                getPlaceEntered(getQuerySearched(), googleMap, null, null);
+//                getPlaceEntered(getQuerySearched(), googleMap, null, null);
             }
             catch (Exception e) {
-                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.d("THREAD", "setGoogleMap: " + e.getMessage());
             }
         };
 
         Thread secondThread = new Thread(addOrangeMarkerToRestaurant);
-        secondThread.start();
+        secondThread.start();*/
 
 
-//        googleMap.setMyLocationEnabled(true);
-//        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
     }
     private void setMapFragment(){
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_fragment);
@@ -158,38 +168,38 @@ public class RestaurantMapViewFragment extends Fragment {
             mapFragment.getMapAsync(callback);
     }
 
-    private void initializePlaces(){
-        if (!Places.isInitialized())
-            Places.initialize(requireContext(), getString(R.string.google_maps_key));
-
-        placesClient = Places.createClient(requireContext());
-    }
-    private void initializePredictionRequestAndPlaceFields(){
-        sessionToken = AutocompleteSessionToken.newInstance();
-        bounds = RectangularBounds.newInstance(LatLngBounds.builder().include(devicePosition).build());
-
-        predictionRequest = FindAutocompletePredictionsRequest.builder()
-                .setCountry("fr")
-                .setLocationBias(bounds)
-                .setTypeFilter(TypeFilter.GEOCODE)
-                .setSessionToken(sessionToken)
-                .build();
-
-        placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG,
-                Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.TYPES);
-    }
+//    private void initializePlaces(){
+//        if (!Places.isInitialized())
+//            Places.initialize(requireContext(), getString(R.string.google_maps_key));
+//
+//        placesClient = Places.createClient(requireContext());
+//    }
+//    private void initializePredictionRequestAndPlaceFields(){
+//        sessionToken = AutocompleteSessionToken.newInstance();
+//        bounds = RectangularBounds.newInstance(LatLngBounds.builder().include(devicePosition).build());
+//
+//        predictionRequest = FindAutocompletePredictionsRequest.builder()
+//                .setCountry("fr")
+//                .setLocationBias(bounds)
+//                .setTypeFilter(TypeFilter.GEOCODE)
+//                .setSessionToken(sessionToken)
+//                .build();
+//
+//        placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG,
+//                Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.TYPES);
+//    }
     private void getPlaceEntered(String query, GoogleMap googleMap, String[] columnPlaces, CursorAdapter adapter){
-        if (query != null)
+        /*if (query != null)
             predictionRequest = FindAutocompletePredictionsRequest.builder()
                     .setQuery(getFromQuery(query, NAME))
                     .setCountry("fr")
                     .setLocationBias(bounds)
                     .setTypeFilter(TypeFilter.ESTABLISHMENT)
                     .setSessionToken(sessionToken)
-                    .build();
+                    .build();*/
 
 
-        RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields,
+       /* RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields,
                 restaurantList -> {
                     if (googleMap != null){
 //                        int position = Integer.parseInt(getFromQuery(query, RESTAURANT_CLICKED_POSITION));
@@ -224,7 +234,7 @@ public class RestaurantMapViewFragment extends Fragment {
                             adapter.changeCursor(cursor);
                         }
                     }
-                });
+                });*/
     }
 
     private String getFromQuery(String query, String wanted){
@@ -372,7 +382,7 @@ public class RestaurantMapViewFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Show suggestion
-                getPlaceEntered(newText, null, columnPlaces, adapter);
+//                getPlaceEntered(newText, null, columnPlaces, adapter);
 
                 /*predictionRequest = FindAutocompletePredictionsRequest.builder()
                         .setQuery(newText)
@@ -518,7 +528,7 @@ public class RestaurantMapViewFragment extends Fragment {
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> {
                 if (result)
-                    requestLocationIfPermissionIsGranted();
+                    requestLocationIfPermissionIsGranted(null);
                 else
                     requestPermissionWithinDialog();
             }
@@ -551,11 +561,15 @@ public class RestaurantMapViewFragment extends Fragment {
             }
         };
     }
-    private void requestLocationIfPermissionIsGranted() {
+    private void requestLocationIfPermissionIsGranted(GoogleMap googleMap) {
         if (requireContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             devicePosition = getPositionFromLocation(deviceLocation);
+
+            if (googleMap != null) {
+                googleMap.setMyLocationEnabled(true);
+            }
         }
         else{
             if (shouldShowRequestPermissionRationale(FINE_LOCATION))
@@ -569,24 +583,53 @@ public class RestaurantMapViewFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Location permission disable")
                 .setMessage("You denied the location permission. It is required to show your location. Do you want to grant the permission")
-                .setPositiveButton("YES", (dialog, which) -> requestLocationIfPermissionIsGranted())
+                .setPositiveButton("YES", (dialog, which) -> requestLocationIfPermissionIsGranted(null))
                 .setNegativeButton("NO", null)
                 .create()
                 .show();
     }
 
-    /*private void checkGooglePlayServices(){
-        int errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
+    private void checkGooglePlayServices(){
+        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(requireContext());
 
-        if (errorCode != ConnectionResult.SUCCESS){
-            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), errorCode, errorCode,
+        if (resultCode != ConnectionResult.SUCCESS){
+            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(requireActivity(), resultCode, resultCode,
                     dialog -> {
                         //Here is what we're going to show to the user if the connection has canceled
-                        Toast.makeText(getContext(), "No services", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "No Google services!!!", Toast.LENGTH_SHORT).show();
                     });
+            assert googleErrorDialog != null;
             googleErrorDialog.show();
         }
         else
-            Toast.makeText(getContext(), "Google Play services connected", Toast.LENGTH_SHORT).show();
-    }*/
+            Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
+    }
+
+ ////////////////////////////////////////////////////////////////////////////// USING JSON //////////////////////////////////////////////////////////////////////////////
+    private void getRestaurantNearby(GoogleMap googleMap){
+        googleMap.clear();                                      // Removing all marker added
+        String url = getUrl(deviceLocation, RESTAURANT);      // Getting url to get information about nearby restaurant on google maps.
+
+        Object[] dataTransfer = new Object[2];
+        dataTransfer[0] = googleMap;
+        dataTransfer[1] = url;
+
+        NearByPlace nearByPlace = new NearByPlace(googleMap);
+        nearByPlace.execute(dataTransfer);
+    }
+
+    private String getUrl(Location location, String placeType){
+        String url = null;
+
+        url = NEARBY_SEARCH_URL +
+                "location=" + location.getLatitude() + "," + location.getLongitude() +
+                "&radius=" + PROXIMITY_RADIUS +
+                "&type=" + placeType +
+                "&sensor=true" +
+                "&key=" + getString(R.string.google_maps_key);
+
+        Log.d("URL", "getUrl: " + url);
+
+        return url;
+    }
 }
