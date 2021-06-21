@@ -93,6 +93,10 @@ public class RestaurantMapViewFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null)
+            url = savedInstanceState.getString("url");
+
         Log.d("ORDER", "onCreate: ");
     }
 
@@ -112,14 +116,6 @@ public class RestaurantMapViewFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Log.d("ORDER", "onViewCreated: ");
-
-        if (savedInstanceState != null){
-            url = savedInstanceState.getString("url");
-            Parcelable mapS = savedInstanceState.getParcelable("map");
-            GoogleMap map = (GoogleMap) mapS;
-            showAllRestaurantNearby(map);
-            Log.d("U2", "onViewCreated: " + savedInstanceState.getString("url"));
-        }
 
         setLocationManagerAndListener();
         requestLocationIfPermissionIsGranted(null);
@@ -168,26 +164,7 @@ public class RestaurantMapViewFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d("STATE", "onSaveInstanceState: ");
-        Log.d("ORDER", "onSaveInstanceState: ");
-
         outState.putString("url", url);
-        outState.putParcelable("map", (Parcelable) mGoogleMap);
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        Log.d("STATE", "onViewStateRestored: ");
-        Log.d("ORDER", "onViewStateRestored: ");
-
-        if (savedInstanceState != null){
-            url = savedInstanceState.getString("url");
-            Parcelable mapS = savedInstanceState.getParcelable("map");
-            GoogleMap map = (GoogleMap) mapS;
-            showAllRestaurantNearby(map);
-            Log.d("U2", "onViewCreated: " + savedInstanceState.getString("url"));
-        }
     }
 
     private void setGoogleMap(GoogleMap googleMap) {
@@ -211,9 +188,16 @@ public class RestaurantMapViewFragment extends Fragment {
         else
             Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();
 
+        /*String querySearched = getQuerySearched();
 
-        if (getQuerySearched() != null && columnPlaces != null && adapter != null) //If user search for a restaurant nearby
-            ZoomOnRestaurantSearched(googleMap, getQuerySearched());               //then we zoom on that restaurant
+        if (querySearched != null && columnPlaces != null && adapter != null) {
+            //If user search for a restaurant nearby, then we zoom on that restaurant
+            String rl = getActivity().getIntent().getExtras().getString("url");
+            Log.d("URL", "setGoogleMap: rl = " + rl);
+            Log.d("URL", "setGoogleMap: url = " + url);
+            showAllRestaurantNearby(googleMap);
+//            ZoomOnRestaurantSearched(googleMap, querySearched);
+        }*/
 
     }
     private void setMapFragment(){
@@ -357,6 +341,8 @@ public class RestaurantMapViewFragment extends Fragment {
                 RestaurantSuggestions.AUTHORITY,
                 RestaurantSuggestions.MODE);
 
+        intent.putExtra("url", url);
+
         String query = null;
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())){
@@ -403,11 +389,15 @@ public class RestaurantMapViewFragment extends Fragment {
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
         searchView.setSuggestionsAdapter(adapter);
+        searchView.setSubmitButtonEnabled(true);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return false;
+                Toast.makeText(getContext(), "Submitted", Toast.LENGTH_SHORT).show();
+                ZoomOnRestaurantSearched(mGoogleMap, query);
+                showAllRestaurantNearby(mGoogleMap);
+                return true;    //return true so that the fragment won't be restart
             }
 
             @Override
@@ -551,7 +541,7 @@ public class RestaurantMapViewFragment extends Fragment {
  ////////////////////////////////////////////////////////////////////////////// USING JSON //////////////////////////////////////////////////////////////////////////////
     private void showAllRestaurantNearby(GoogleMap googleMap){
         RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, true, restaurantList -> {
-
+//            getActivity().getIntent().
         });
     }
 
@@ -566,7 +556,7 @@ public class RestaurantMapViewFragment extends Fragment {
                     LatLng restaurantPosition = restaurant.getPosition();
                     //Zooming on the restaurant clicked
                     if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 17));
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 14));
                         addMarkerOnPosition(googleMap, restaurantPosition, restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
                     }
 
