@@ -3,6 +3,8 @@ package com.example.go4lunch.model;
 import android.net.Uri;
 import android.provider.ContactsContract;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
@@ -19,6 +21,7 @@ public class Restaurant implements Serializable {
     private List<Workmate> workmateList;
     private String phoneNumber;
     private URL websiteUrl;
+    private LatLng position;
 
     public Restaurant() {
     }
@@ -36,6 +39,14 @@ public class Restaurant implements Serializable {
         this.numberOfFavorableOpinion = numberOfFavorableOpinion;
         this.numberOfInterestedWorkmate = numberOfInterestedWorkmate;
 
+    }
+
+    public LatLng getPosition() {
+        return position;
+    }
+
+    public void setPosition(LatLng position) {
+        this.position = position;
     }
 
     public String getName() {

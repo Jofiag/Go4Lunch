@@ -13,27 +13,19 @@ import android.view.inputmethod.EditorInfo;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
-import com.example.go4lunch.data.RestaurantBank;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class RestaurantListViewFragment extends Fragment{
     private PlacesClient placesClient;
@@ -53,8 +45,8 @@ public class RestaurantListViewFragment extends Fragment{
     public void onCreate(Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         super.onCreate(savedInstanceState);
-        initializePlaces();
-        initializePredictionRequestAndPlaceFields();
+        /*initializePlaces();
+        initializePredictionRequestAndPlaceFields();*/
     }
 
     @Override
@@ -65,7 +57,7 @@ public class RestaurantListViewFragment extends Fragment{
 
         Context context = view.getContext();
 
-        RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, new RestaurantBank.ListAsyncResponse() {
+        /*RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, new RestaurantBank.ListAsyncResponse() {
             @Override
             public void processFinished(List<Place> restaurantList) {
 //                restaurantAdapter = new RestaurantRecyclerViewAdapter(context, (Restaurant)restaurantList);
@@ -74,7 +66,7 @@ public class RestaurantListViewFragment extends Fragment{
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
                 recyclerView.setAdapter(restaurantAdapter);
             }
-        });
+        });*/
 
         return view;
     }
@@ -106,7 +98,7 @@ public class RestaurantListViewFragment extends Fragment{
     }
 
 
-    private void initializePlaces(){
+    /*private void initializePlaces(){
         if (!Places.isInitialized())
             Places.initialize(Objects.requireNonNull(getContext()), getString(R.string.google_maps_key));
 
@@ -125,5 +117,5 @@ public class RestaurantListViewFragment extends Fragment{
 
         placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG,
                 Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.TYPES);
-    }
+    }*/
 }

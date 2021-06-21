@@ -35,13 +35,12 @@ import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
-import com.example.go4lunch.data.NearByPlace;
+import com.example.go4lunch.data.RestaurantNearbyBank;
+import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
 import com.example.go4lunch.util.RestaurantSuggestions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,13 +48,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.util.List;
+import java.util.Objects;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static com.example.go4lunch.util.Constants.ADDRESS;
@@ -63,23 +57,27 @@ import static com.example.go4lunch.util.Constants.FINE_LOCATION;
 import static com.example.go4lunch.util.Constants.NAME;
 import static com.example.go4lunch.util.Constants.NEARBY_SEARCH_URL;
 import static com.example.go4lunch.util.Constants.PROXIMITY_RADIUS;
-import static com.example.go4lunch.util.Constants.RESTAURANT;
 
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class RestaurantMapViewFragment extends Fragment {
     private final OnMapReadyCallback callback;
 
-    private PlacesClient placesClient;
+    /*private PlacesClient placesClient;
     private AutocompleteSessionToken sessionToken;
     private RectangularBounds bounds;
     private FindAutocompletePredictionsRequest predictionRequest;
-    private List<Place.Field> placeFields;
+    private List<Place.Field> placeFields;*/
 
     private LocationManager locationManager;
     private LocationListener locationListener;
     private Location deviceLocation;
     private LatLng devicePosition;
 
+    private int[] viewIds;
+    private CursorAdapter adapter;
+    private String[] columnPlaces;
+    private SearchView searchView;
+    private String url;
 
     public RestaurantMapViewFragment() {
         callback = this::setGoogleMap;
@@ -89,7 +87,6 @@ public class RestaurantMapViewFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("ORDER", "onCreate: ");
-//        getUrl(latitude, longitude, Restaurant);
     }
 
     @Nullable
@@ -97,7 +94,6 @@ public class RestaurantMapViewFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         Log.d("ORDER", "onCreateView: ");
-
         return inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
     }
 
@@ -105,61 +101,67 @@ public class RestaurantMapViewFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Log.d("ORDER", "onViewCreated: ");
-
         setLocationManagerAndListener();
         requestLocationIfPermissionIsGranted(null);
+        initializeSearchViewNeeded();
 
 //        initializePlaces();
 //        initializePredictionRequestAndPlaceFields();
     }
 
+    private void initializeSearchViewNeeded() {
+        columnPlaces = new String[]{
+                BaseColumns._ID,
+                SearchManager.SUGGEST_COLUMN_TEXT_1, //The main line of a suggestion (necessary)
+                SearchManager.SUGGEST_COLUMN_TEXT_2  //The second line for a secondary text (optional)
+        };
+
+        viewIds = new int[]{
+                R.id.place_id,
+                R.id.place_name,
+                R.id.place_address
+        };
+
+        adapter = new SimpleCursorAdapter(requireContext(),
+                R.layout.suggestion_list_row,
+                null,
+                columnPlaces,
+                viewIds,
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+    }
+
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.search_view_menu, menu);
-        Log.d("ORDER", "onCreateOptionsMenu: ");
         setOurSearchView(menu);
-
+        Log.d("ORDER", "onCreateOptionsMenu: ");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("ORDER", "onResume: ");
         setMapFragment();
         checkGooglePlayServices();
+        Log.d("ORDER", "onResume: ");
     }
 
     private void setGoogleMap(GoogleMap googleMap) {
         requestLocationIfPermissionIsGranted(googleMap);
-        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
-        getRestaurantNearby(googleMap);
+        Log.d("ORDER", "setGoogleMap: ");
 
-        if (devicePosition != null) {
+        if (deviceLocation != null) {
+            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
             addMarkerOnPosition(googleMap, devicePosition, "My position", BitmapDescriptorFactory.HUE_RED);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 17));
-
+            url = getUrl(deviceLocation);
+            showAllRestaurantNearby(googleMap);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 11));
         }
+        else
+            Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();
 
-        /*Runnable addOrangeMarkerToRestaurant = () -> {
-            try {
-                //Adding customized marker on restaurant nearby position
-                RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, restaurantList -> {
-                    for (int i = 0; i < restaurantList.size(); i++) {
-                        Place restaurant = restaurantList.get(i);
-                        addMarkerOnPosition(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
-                    }
-                });
 
-//                getPlaceEntered(getQuerySearched(), googleMap, null, null);
-            }
-            catch (Exception e) {
-                Log.d("THREAD", "setGoogleMap: " + e.getMessage());
-            }
-        };
-
-        Thread secondThread = new Thread(addOrangeMarkerToRestaurant);
-        secondThread.start();*/
-
+        if (getQuerySearched() != null && columnPlaces != null && adapter != null) //If user search for a restaurant nearby
+            ZoomOnRestaurantSearched(googleMap, getQuerySearched());               //then we zoom on that restaurant
 
     }
     private void setMapFragment(){
@@ -188,18 +190,18 @@ public class RestaurantMapViewFragment extends Fragment {
 //        placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG,
 //                Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.TYPES);
 //    }
-    private void getPlaceEntered(String query, GoogleMap googleMap, String[] columnPlaces, CursorAdapter adapter){
-        /*if (query != null)
+    /*private void getPlaceEntered(String query, GoogleMap googleMap, String[] columnPlaces, CursorAdapter adapter){
+        if (query != null)
             predictionRequest = FindAutocompletePredictionsRequest.builder()
                     .setQuery(getFromQuery(query, NAME))
                     .setCountry("fr")
                     .setLocationBias(bounds)
                     .setTypeFilter(TypeFilter.ESTABLISHMENT)
                     .setSessionToken(sessionToken)
-                    .build();*/
+                    .build();
 
 
-       /* RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields,
+        RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields,
                 restaurantList -> {
                     if (googleMap != null){
 //                        int position = Integer.parseInt(getFromQuery(query, RESTAURANT_CLICKED_POSITION));
@@ -234,8 +236,8 @@ public class RestaurantMapViewFragment extends Fragment {
                             adapter.changeCursor(cursor);
                         }
                     }
-                });*/
-    }
+                });
+    }*/
 
     private String getFromQuery(String query, String wanted){
         String result = null;
@@ -317,10 +319,10 @@ public class RestaurantMapViewFragment extends Fragment {
         MenuItem searchItem = menu.findItem(R.id.search_item);
 
         SearchManager searchManager = (SearchManager) requireActivity().getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().getComponentName()));
-//        searchView.setIconifiedByDefault(false);
+        searchView.setIconifiedByDefault(false);
 
         /*String[] SUGGESTIONS = {
                 "Pizza",
@@ -329,19 +331,19 @@ public class RestaurantMapViewFragment extends Fragment {
                 "Rice"
         };*/
 
-        String[] columnPlaces = {
+        columnPlaces = new String[]{
                 BaseColumns._ID,
                 SearchManager.SUGGEST_COLUMN_TEXT_1, //The main line of a suggestion (necessary)
                 SearchManager.SUGGEST_COLUMN_TEXT_2  //The second line for a secondary text (optional)
         };
 
-        int[] viewIds = {
+        viewIds = new int[]{
                 R.id.place_id,
                 R.id.place_name,
                 R.id.place_address
         };
 
-        CursorAdapter adapter = new SimpleCursorAdapter(requireContext(),
+        adapter = new SimpleCursorAdapter(requireContext(),
                 R.layout.suggestion_list_row,
                 null,
                 columnPlaces,
@@ -349,29 +351,6 @@ public class RestaurantMapViewFragment extends Fragment {
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
         searchView.setSuggestionsAdapter(adapter);
-
-        /*searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                final MatrixCursor cursor = new MatrixCursor(columnPlaces);
-                int i = 0;
-
-                for (String suggestion : SUGGESTIONS) {
-                    if (suggestion.toLowerCase().startsWith(newText.toLowerCase()))
-                        cursor.addRow(new Object[]{i, suggestion, suggestion});
-                    i++;
-                }
-
-                adapter.changeCursor(cursor);
-
-                return false;
-            }
-        });*/
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -382,69 +361,7 @@ public class RestaurantMapViewFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Show suggestion
-//                getPlaceEntered(newText, null, columnPlaces, adapter);
-
-                /*predictionRequest = FindAutocompletePredictionsRequest.builder()
-                        .setQuery(newText)
-                        .setCountry("fr")
-                        .setLocationBias(bounds)
-                        .setTypeFilter(TypeFilter.ESTABLISHMENT)
-                        .setSessionToken(sessionToken)
-                        .build();
-
-                placesClient.findAutocompletePredictions(predictionRequest)
-                        .addOnSuccessListener(response -> {
-                            int i = 0;
-                            List<AutocompletePrediction> predictionList = response.getAutocompletePredictions();
-
-                            List<Place> placeList = new ArrayList<>();
-
-                            for (AutocompletePrediction prediction : predictionList) {
-                                FetchPlaceRequest placeRequest = FetchPlaceRequest.builder(prediction.getPlaceId(), placeFields).build();
-
-                                int finalI = i;
-                                placesClient.fetchPlace(placeRequest).addOnSuccessListener(fetchPlaceResponse -> {
-                                    Place place = fetchPlaceResponse.getPlace();
-//                                    Place[] placeArray;
-
-                                    if (Objects.requireNonNull(place.getTypes()).contains(Place.Type.RESTAURANT))
-                                        placeList.add(place);
-
-                                    if (finalI == predictionList.size()-1) {
-
-                                        if (!placeList.isEmpty()){
-                                            Log.d("LIST", "onQueryTextChange: " + placeList.size() + placeList);
-                                            final MatrixCursor cursor = new MatrixCursor(columnPlaces);
-                                            int y = 0;
-                                            for (Place placeSuggested : placeList) {
-                                                if (placeSuggested != null) {
-                                                    String placeName = placeSuggested.getName();
-                                                    if (placeName.toLowerCase().startsWith(newText.toLowerCase()))
-                                                        cursor.addRow(new Object[]{y, placeName, placeSuggested.getAddress()});
-                                                }
-                                                y++;
-                                            }
-
-                                            adapter.changeCursor(cursor);
-                                        }
-                                    }
-                                });
-
-                                i++;
-                            }
-
-                        });*/
-
-                ////////////////////////////////////////////////////////////////////////////////////
-                /*final MatrixCursor cursor = new MatrixCursor(columnPlaces);
-                int i = 0;
-                for (String suggestion : SUGGESTIONS) {
-                    if (suggestion.toLowerCase().startsWith(newText.toLowerCase()))
-                        cursor.addRow(new Object[]{i, suggestion, suggestion});
-                    i++;
-                }
-
-                adapter.changeCursor(cursor);*/
+                showSuggestions(newText);
 
                 return false;
             }
@@ -473,44 +390,18 @@ public class RestaurantMapViewFragment extends Fragment {
             }
         });
 
-
-//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                //Action after user validate his search text
-//                SearchRecentSuggestions searchRecentSuggestions = new SearchRecentSuggestions(getContext(), RestaurantSuggestions.AUTHORITY, RestaurantSuggestions.MODE);
-//                searchRecentSuggestions.saveRecentQuery(query, null);
-//                Toast.makeText(getActivity(), query , Toast.LENGTH_SHORT).show();
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                //Real time action
-////                getPlaceEntered(newText);
-//                return false;
-//            }
-//        });
-        /*// OR
-        if (getQuerySearched() != null)
-            getPlaceEntered(getQuerySearched(), null, null, null);*/
     }
 
     private LatLng getPositionFromLocation(Location location){
-        return new LatLng(location.getLatitude(), location.getLongitude());
+        if(location != null)
+            return new LatLng(location.getLatitude(), location.getLongitude());
+        return null;
     }
     private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, float color){
-        //Adding marker to map
-        /* Marker marker = */
         googleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
-//                .flat(true)
-//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.orange_restaurant)));
-//                .icon(getBitmapFromVectorAssets(getContext(), R.drawable.green_restaurant_24x24pp)));
-
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(position));
     }
     /*private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
         Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
@@ -563,7 +454,7 @@ public class RestaurantMapViewFragment extends Fragment {
     }
     private void requestLocationIfPermissionIsGranted(GoogleMap googleMap) {
         if (requireContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             devicePosition = getPositionFromLocation(deviceLocation);
 
@@ -606,30 +497,79 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
  ////////////////////////////////////////////////////////////////////////////// USING JSON //////////////////////////////////////////////////////////////////////////////
-    private void getRestaurantNearby(GoogleMap googleMap){
-        googleMap.clear();                                      // Removing all marker added
-        String url = getUrl(deviceLocation, RESTAURANT);      // Getting url to get information about nearby restaurant on google maps.
+    private void showAllRestaurantNearby(GoogleMap googleMap){
+        RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, true, restaurantList -> {
 
-        Object[] dataTransfer = new Object[2];
-        dataTransfer[0] = googleMap;
-        dataTransfer[1] = url;
-
-        NearByPlace nearByPlace = new NearByPlace(googleMap);
-        nearByPlace.execute(dataTransfer);
+        });
     }
 
-    private String getUrl(Location location, String placeType){
+    private void ZoomOnRestaurantSearched(GoogleMap googleMap, String query){
+        if (googleMap != null){
+            googleMap.clear();                  // Removing all marker added
+            url = getUrl(deviceLocation);      // Getting url to get information about nearby restaurant on google maps.
+
+            RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, false, restaurantList -> {
+
+                for (Restaurant restaurant : restaurantList) {
+                    LatLng restaurantPosition = restaurant.getPosition();
+                    //Zooming on the restaurant clicked
+                    if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 17));
+                        addMarkerOnPosition(googleMap, restaurantPosition, restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+                    }
+
+                    getFromQuery(query, NAME);
+                }
+
+            });
+        }
+    }
+
+    private String getUrl(Location location){
         String url = null;
 
-        url = NEARBY_SEARCH_URL +
-                "location=" + location.getLatitude() + "," + location.getLongitude() +
-                "&radius=" + PROXIMITY_RADIUS +
-                "&type=" + placeType +
-                "&sensor=true" +
-                "&key=" + getString(R.string.google_maps_key);
+        if (location != null){
+            url = NEARBY_SEARCH_URL +
+                    "location=" + location.getLatitude() + "," + location.getLongitude() +
+                    "&radius=" + PROXIMITY_RADIUS +
+                    "&type=" + Constants.RESTAURANT +
+                    "&sensor=true" +
+                    "&key=" + getString(R.string.google_maps_key);
+        }
 
         Log.d("URL", "getUrl: " + url);
 
         return url;
+    }
+
+    private void showSuggestions(String query){
+        RestaurantNearbyBank.getInstance(getContext(), null).getRestaurantNearbyList(url, false, restaurantList -> {
+            if (columnPlaces != null && adapter != null && query != null) {
+                Log.d("SEARCH", "getRestaurantNearby: columnPlaces != null && adapter != null && query != null");
+                //When we've got all the restaurant
+                if (!restaurantList.isEmpty()) {
+                    //Then we add all of them to our cursor to show it as suggestions to the user
+                    final MatrixCursor cursor = new MatrixCursor(columnPlaces);
+                    int y = 0;
+                    for (Restaurant restaurant : restaurantList) {
+                        if (restaurant != null && restaurant.getName() != null) {
+                            String placeName = restaurant.getName();
+                            if (placeName.toLowerCase().contains(query.toLowerCase()))
+                                cursor.addRow(new Object[]{y, placeName, restaurant.getAddress()});
+                            Log.d("SEARCH", "getRestaurantNearby: " + placeName);
+                        }
+                        y++;
+                    }
+
+                    adapter.changeCursor(cursor);
+                }
+                if (searchView != null) {
+                    Log.d("SEARCH", "getRestaurantNearby: searchView != null");
+                    searchView.setSuggestionsAdapter(adapter);
+                }
+                Log.d("SEARCH", "onQueryTextChange: " + query);
+                Log.d("SEARCH", "onQueryTextChange: " + adapter.getCount());
+            }
+        });
     }
 }
