@@ -3,7 +3,6 @@ package com.example.go4lunch.fragment;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -12,9 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.BaseColumns;
-import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -41,7 +37,6 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
-import com.example.go4lunch.util.RestaurantSuggestions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -188,16 +183,16 @@ public class RestaurantMapViewFragment extends Fragment {
         else
             Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();
 
-        /*String querySearched = getQuerySearched();
-
-        if (querySearched != null && columnPlaces != null && adapter != null) {
-            //If user search for a restaurant nearby, then we zoom on that restaurant
-            String rl = getActivity().getIntent().getExtras().getString("url");
-            Log.d("URL", "setGoogleMap: rl = " + rl);
-            Log.d("URL", "setGoogleMap: url = " + url);
-            showAllRestaurantNearby(googleMap);
-//            ZoomOnRestaurantSearched(googleMap, querySearched);
-        }*/
+//        String querySearched = getQuerySearched();
+//
+//        if (querySearched != null && columnPlaces != null && adapter != null) {
+//            //If user search for a restaurant nearby, then we zoom on that restaurant
+//            String rl = getActivity().getIntent().getExtras().getString("url");
+//            Log.d("URL", "setGoogleMap: rl = " + rl);
+//            Log.d("URL", "setGoogleMap: url = " + url);
+//            showAllRestaurantNearby(googleMap);
+////            ZoomOnRestaurantSearched(googleMap, querySearched);
+//        }
 
     }
     private void setMapFragment(){
@@ -335,24 +330,24 @@ public class RestaurantMapViewFragment extends Fragment {
 
         return result;
     }
-    private String getQuerySearched(){
-        Intent intent = requireActivity().getIntent();
-        SearchRecentSuggestions searchRecentSuggestions = new SearchRecentSuggestions(getContext(),
-                RestaurantSuggestions.AUTHORITY,
-                RestaurantSuggestions.MODE);
-
-        intent.putExtra("url", url);
-
-        String query = null;
-
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())){
-            query = intent.getStringExtra(SearchManager.QUERY);
-            searchRecentSuggestions.saveRecentQuery(query, null);
-
-        }
-
-        return query;
-    }
+//    private String getQuerySearched(){
+//        Intent intent = requireActivity().getIntent();
+//        SearchRecentSuggestions searchRecentSuggestions = new SearchRecentSuggestions(getContext(),
+//                RestaurantSuggestions.AUTHORITY,
+//                RestaurantSuggestions.MODE);
+//
+//        intent.putExtra("url", url);
+//
+//        String query = null;
+//
+//        if (Intent.ACTION_SEARCH.equals(intent.getAction())){
+//            query = intent.getStringExtra(SearchManager.QUERY);
+//            searchRecentSuggestions.saveRecentQuery(query, null);
+//
+//        }
+//
+//        return query;
+//    }
     private void setOurSearchView(Menu menu){
         MenuItem searchItem = menu.findItem(R.id.search_item);
 
