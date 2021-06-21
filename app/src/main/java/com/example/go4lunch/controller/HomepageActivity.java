@@ -2,9 +2,11 @@ package com.example.go4lunch.controller;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -28,6 +30,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.io.Serializable;
 
+@RequiresApi(api = Build.VERSION_CODES.M)
 public class HomepageActivity extends AppCompatActivity
         implements RestaurantRecyclerViewAdapter.OnRestaurantClickListener, WorkmateRecyclerViewAdapter.OnWorkmateClickListener {
 
@@ -43,7 +46,7 @@ public class HomepageActivity extends AppCompatActivity
 
         setReferences();
 
-        attachNewFragment(new RestaurantMapViewFragment()); // Showing the RestaurantMapViewFragment when first start the activity
+        attachNewFragment(new RestaurantMapViewFragment());// Showing the RestaurantMapViewFragment when first start the activity
 
         setBottomNavigationView();
 
@@ -55,10 +58,10 @@ public class HomepageActivity extends AppCompatActivity
     }
 
     private void setReferences() {
-        bottomNavigationView = findViewById(R.id.bottom_navigation_view);
         myToolbar = findViewById(R.id.my_toolbar);
         myDrawerLayout = findViewById(R.id.my_drawer);
         myNavigationView = findViewById(R.id.my_navigation_view);
+        bottomNavigationView = findViewById(R.id.bottom_navigation_view);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -69,7 +72,6 @@ public class HomepageActivity extends AppCompatActivity
             switch (id){
                 case R.id.restaurant_map_view_item:
                     myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
-//                    attachNewFragment(new RestaurantMapViewFragment());
                     attachNewFragment(new RestaurantMapViewFragment());
                     return true;
                 case R.id.restaurant_list_view_item:
@@ -87,12 +89,34 @@ public class HomepageActivity extends AppCompatActivity
     }
 
     private void attachNewFragment(Fragment newFragment){
+        /*mapViewFrameLayout.setVisibility(View.GONE);
+        otherFrameLayout.setVisibility(View.VISIBLE);*/
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        fragmentTransaction.replace(R.id.fragment_container_homepage_activity, newFragment)
+        fragmentTransaction.replace(R.id.other_fragment_container_homepage_activity, newFragment)
                 .commit();
     }
+
+    /*private void getMapViewFragmentIfExist(){
+        otherFrameLayout.setVisibility(View.GONE);
+        mapViewFrameLayout.setVisibility(View.VISIBLE);
+
+        FragmentManager fragmentManager =  getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        // Here we are getting the fragment from the manager, but if it's not created before it's going to be null
+        Fragment mapViewFragment = fragmentManager.findFragmentById(R.id.map_view_container_homepage_activity);
+
+        // If the fragment doesn't exist, then we create a new one
+        if (mapViewFragment == null){
+            mapViewFragment = new RestaurantMapViewFragment();
+            fragmentTransaction.replace(R.id.map_view_container_homepage_activity, mapViewFragment)
+                    .commit();
+        }
+
+    }*/
 
     private void setMyToolbarAsAppBar(){
         setSupportActionBar(myToolbar);

@@ -2,6 +2,7 @@ package com.example.go4lunch.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
@@ -90,13 +92,13 @@ public class RestaurantListViewFragment extends Fragment{
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Real time action
-                restaurantAdapter.getFilter().filter(newText);
+                if (restaurantAdapter != null)
+                    restaurantAdapter.getFilter().filter(newText);
                 return false;
             }
         });
 
     }
-
 
     /*private void initializePlaces(){
         if (!Places.isInitialized())

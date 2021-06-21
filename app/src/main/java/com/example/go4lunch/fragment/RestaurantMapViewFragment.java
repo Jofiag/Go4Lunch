@@ -12,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.BaseColumns;
 import android.provider.SearchRecentSuggestions;
 import android.util.Log;
@@ -49,6 +50,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -79,6 +81,8 @@ public class RestaurantMapViewFragment extends Fragment {
     private SearchView searchView;
     private String url;
 
+    private GoogleMap mGoogleMap;
+
     public RestaurantMapViewFragment() {
         callback = this::setGoogleMap;
     }
@@ -101,6 +105,15 @@ public class RestaurantMapViewFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Log.d("ORDER", "onViewCreated: ");
+
+        if (savedInstanceState != null){
+            url = savedInstanceState.getString("url");
+            Parcelable mapS = savedInstanceState.getParcelable("map");
+            GoogleMap map = (GoogleMap) mapS;
+            showAllRestaurantNearby(map);
+            Log.d("U2", "onViewCreated: " + savedInstanceState.getString("url"));
+        }
+
         setLocationManagerAndListener();
         requestLocationIfPermissionIsGranted(null);
         initializeSearchViewNeeded();
@@ -138,6 +151,12 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        Log.d("ORDER", "onAttach: ");
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         setMapFragment();
@@ -145,7 +164,33 @@ public class RestaurantMapViewFragment extends Fragment {
         Log.d("ORDER", "onResume: ");
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d("STATE", "onSaveInstanceState: ");
+        Log.d("ORDER", "onSaveInstanceState: ");
+
+        outState.putString("url", url);
+        outState.putParcelable("map", (Parcelable) mGoogleMap);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        Log.d("STATE", "onViewStateRestored: ");
+        Log.d("ORDER", "onViewStateRestored: ");
+
+        if (savedInstanceState != null){
+            url = savedInstanceState.getString("url");
+            Parcelable mapS = savedInstanceState.getParcelable("map");
+            GoogleMap map = (GoogleMap) mapS;
+            showAllRestaurantNearby(map);
+            Log.d("U2", "onViewCreated: " + savedInstanceState.getString("url"));
+        }
+    }
+
     private void setGoogleMap(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
         requestLocationIfPermissionIsGranted(googleMap);
         Log.d("ORDER", "setGoogleMap: ");
 
