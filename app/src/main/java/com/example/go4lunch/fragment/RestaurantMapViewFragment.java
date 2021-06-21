@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -47,6 +49,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -172,7 +176,7 @@ public class RestaurantMapViewFragment extends Fragment {
 
             locationButton.setOnClickListener(v -> googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
 
-            addMarkerOnPosition(googleMap, devicePosition, "My position", BitmapDescriptorFactory.HUE_RED);
+            addMarkerOnPosition(googleMap, devicePosition, "My position : " + getStreetAddressFromPositions(devicePosition), BitmapDescriptorFactory.HUE_RED);
 
             url = getUrl(deviceLocation);
 
@@ -392,6 +396,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 Toast.makeText(getContext(), "Submitted", Toast.LENGTH_SHORT).show();
                 ZoomOnRestaurantSearched(mGoogleMap, query);
                 showAllRestaurantNearby(mGoogleMap);
+                addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + getStreetAddressFromPositions(devicePosition), BitmapDescriptorFactory.HUE_RED);
                 return true;    //return true so that the fragment won't be restart
             }
 
@@ -608,5 +613,20 @@ public class RestaurantMapViewFragment extends Fragment {
                 Log.d("SEARCH", "onQueryTextChange: " + adapter.getCount());
             }
         });
+    }
+
+    private String getStreetAddressFromPositions(LatLng position) {
+        String address = "";
+        Geocoder geocoder = new Geocoder(getContext());
+        List<Address> addressList;
+
+        try {
+            addressList = geocoder.getFromLocation(position.latitude, position.longitude, 1);
+            address = addressList.get(0).getAddressLine(0);
+        } catch (IOException e) {
+            Log.d("ADDRESS", "getStreetAddressFromPositions: " + e.getMessage());
+        }
+
+        return address;
     }
 }
