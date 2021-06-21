@@ -22,6 +22,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -50,7 +52,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -69,6 +70,8 @@ public class RestaurantMapViewFragment extends Fragment {
     private RectangularBounds bounds;
     private FindAutocompletePredictionsRequest predictionRequest;
     private List<Place.Field> placeFields;*/
+
+    private ImageButton locationButton;
 
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -97,8 +100,12 @@ public class RestaurantMapViewFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
+        locationButton = view.findViewById(R.id.my_location_button);
+
         Log.d("ORDER", "onCreateView: ");
-        return inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
+
+        return view;
     }
 
     @Override
@@ -151,12 +158,6 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        Log.d("ORDER", "onAttach: ");
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         setMapFragment();
@@ -195,10 +196,16 @@ public class RestaurantMapViewFragment extends Fragment {
         Log.d("ORDER", "setGoogleMap: ");
 
         if (deviceLocation != null) {
-            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+            locationButton.setOnClickListener(v -> googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
+
             addMarkerOnPosition(googleMap, devicePosition, "My position", BitmapDescriptorFactory.HUE_RED);
+
             url = getUrl(deviceLocation);
+
             showAllRestaurantNearby(googleMap);
+
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 11));
         }
         else
