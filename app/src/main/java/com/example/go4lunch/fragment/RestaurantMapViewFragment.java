@@ -398,7 +398,6 @@ public class RestaurantMapViewFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(getContext(), "Submitted", Toast.LENGTH_SHORT).show();
                 ZoomOnRestaurantSearched(mGoogleMap, query);
                 showAllRestaurantNearby(mGoogleMap);
                 addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + getStreetAddressFromPositions(devicePosition), BitmapDescriptorFactory.HUE_RED);
@@ -561,7 +560,7 @@ public class RestaurantMapViewFragment extends Fragment {
                     LatLng restaurantPosition = restaurant.getPosition();
                     //Zooming on the restaurant clicked
                     if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 14));
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 20));
                         addMarkerOnPosition(googleMap, restaurantPosition, restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
                     }
 
