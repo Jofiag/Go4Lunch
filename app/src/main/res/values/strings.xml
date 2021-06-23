@@ -43,4 +43,5 @@
     <string name="website_text">WEBSITE</string>
     <string name="check_floating_action_button_text">Check Floating action button</string>
     <string name="show_current_location_button">SHOW CURRENT LOCATION BUTTON</string>
+    <string name="show_all_text">SHOW ALL</string>
 </resources>

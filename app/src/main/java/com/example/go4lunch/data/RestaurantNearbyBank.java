@@ -1,6 +1,5 @@
 package com.example.go4lunch.data;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
@@ -29,21 +28,28 @@ public class RestaurantNearbyBank {
         void processFinished(List<Restaurant> restaurantList);
     }
 
-    private final Context context;
-    private final GoogleMap googleMap;
-    private final RequestQueue requestQueue;
-    @SuppressLint("StaticFieldLeak")
-    private static RestaurantNearbyBank INSTANCE;
+    private GoogleMap mGoogleMap;
+    private final Context mContext;
+    private final RequestQueue mRequestQueue;
     private List<Restaurant> restaurantList = new ArrayList<>();
 
     public RestaurantNearbyBank(Context context, GoogleMap googleMap) {
-        this.context = context;
-        this.googleMap = googleMap;
-        this.requestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
+        mContext = context;
+        mGoogleMap = googleMap;
+        mRequestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
+    }
+
+    public RestaurantNearbyBank(Context context) {
+        mContext = context;
+        mRequestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
     }
 
     public static synchronized RestaurantNearbyBank getInstance(Context context, GoogleMap googleMap){
-        if (INSTANCE == null)
+        RestaurantNearbyBank INSTANCE;
+
+        if (googleMap == null)
+            INSTANCE = new RestaurantNearbyBank(context);
+        else
             INSTANCE = new RestaurantNearbyBank(context, googleMap);
 
         return INSTANCE;
@@ -71,7 +77,7 @@ public class RestaurantNearbyBank {
                             LatLng position = new LatLng(lat, lng);
 
                             if (addMarker)
-                                addMarkerOnPosition(googleMap, position, name);
+                                addMarkerOnPosition(mGoogleMap, position, name);
 
 
                             String address = getStreetAddressFromPositions(position);
@@ -100,13 +106,13 @@ public class RestaurantNearbyBank {
                 },
                 error -> Log.d("VOLLEY", "onErrorResponse: " + error.getMessage()));
 
-        requestQueue.add(jsonObjectRequest);
+        mRequestQueue.add(jsonObjectRequest);
 
     }
 
     private String getStreetAddressFromPositions(LatLng position) {
         String address = "";
-        Geocoder geocoder = new Geocoder(context);
+        Geocoder geocoder = new Geocoder(mContext);
         List<Address> addressList;
 
         try {

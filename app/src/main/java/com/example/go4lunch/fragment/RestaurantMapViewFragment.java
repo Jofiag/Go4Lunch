@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -71,6 +72,7 @@ public class RestaurantMapViewFragment extends Fragment {
     private List<Place.Field> placeFields;*/
 
     private ImageButton locationButton;
+    private TextView showAllTextView;
 
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -105,6 +107,7 @@ public class RestaurantMapViewFragment extends Fragment {
         setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
         locationButton = view.findViewById(R.id.my_location_button);
+        showAllTextView = view.findViewById(R.id.show_all_text_view);
 
         Log.d("ORDER", "onCreateView: ");
 
@@ -175,6 +178,8 @@ public class RestaurantMapViewFragment extends Fragment {
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
 
             locationButton.setOnClickListener(v -> googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
+
+            showAllTextView.setOnClickListener(v -> showAllRestaurantNearby(googleMap));
 
             addMarkerOnPosition(googleMap, devicePosition, "My position : " + getStreetAddressFromPositions(devicePosition), BitmapDescriptorFactory.HUE_RED);
 
@@ -541,7 +546,7 @@ public class RestaurantMapViewFragment extends Fragment {
  ////////////////////////////////////////////////////////////////////////////// USING JSON //////////////////////////////////////////////////////////////////////////////
     private void showAllRestaurantNearby(GoogleMap googleMap){
         RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, true, restaurantList -> {
-//            getActivity().getIntent().
+
         });
     }
 
@@ -585,7 +590,7 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     private void showSuggestions(String query){
-        RestaurantNearbyBank.getInstance(getContext(), null).getRestaurantNearbyList(url, false, restaurantList -> {
+        RestaurantNearbyBank.getInstance(getContext(), mGoogleMap).getRestaurantNearbyList(url, false, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
                 Log.d("SEARCH", "getRestaurantNearby: columnPlaces != null && adapter != null && query != null");
                 //When we've got all the restaurant
