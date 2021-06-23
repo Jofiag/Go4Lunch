@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -77,6 +78,11 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
                 workmate = (Workmate) bundle.get(Constants.WORKMATE_SELECTED_CODE);
                 restaurantSelected = workmate.getRestaurantChosen();
             }
+
+            if (bundle.get(Constants.RESTAURANT_ON_MARKER_CODE) != null){
+                restaurantSelected = (Restaurant) bundle.get(Constants.RESTAURANT_ON_MARKER_CODE);
+                Toast.makeText(this, "Name = " + restaurantSelected.getName(), Toast.LENGTH_SHORT).show();
+            }
         }
 
         return restaurantSelected;
@@ -109,30 +115,23 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     }
 
     private void setCallRestaurantFunction(){
-        callImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Call restaurant if its phone number is available
-            }
+        callImageView.setOnClickListener(v -> {
+            //Call restaurant if
+            //its phone number is available
         });
     }
 
     private void setLikeRestaurantFunction(){
-        starImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Add actual restaurant to the liked restaurant list of the workmate connected
-                //and set yellowStar visibility to VISIBLE
-            }
+        starImageView.setOnClickListener(v -> {
+            //Add actual restaurant to the liked restaurant list of the workmate connected
+            //and set yellowStar visibility to VISIBLE
         });
     }
 
     private void setGoToRestaurantWebsiteFunction(){
-        globeImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Go to restaurant website if its available
-            }
+        globeImageView.setOnClickListener(v -> {
+            //Go to restaurant website if
+            // its available
         });
     }
 

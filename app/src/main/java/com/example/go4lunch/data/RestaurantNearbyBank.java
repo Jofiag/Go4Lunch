@@ -13,6 +13,7 @@ import com.example.go4lunch.util.Constants;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -28,19 +29,26 @@ public class RestaurantNearbyBank {
         void processFinished(List<Restaurant> restaurantList);
     }
 
+    public interface OnMarkerClicked{
+        void onMarkerClickedGetRestaurant(Restaurant restaurant);
+    }
+
     private GoogleMap mGoogleMap;
     private final Context mContext;
     private final RequestQueue mRequestQueue;
-    private List<Restaurant> restaurantList = new ArrayList<>();
+    private List<Restaurant> mRestaurantList = new ArrayList<>();
+    private final OnMarkerClicked mMarkerClickedCallback;
 
     public RestaurantNearbyBank(Context context, GoogleMap googleMap) {
         mContext = context;
         mGoogleMap = googleMap;
+        mMarkerClickedCallback = (OnMarkerClicked) context;
         mRequestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
     }
 
     public RestaurantNearbyBank(Context context) {
         mContext = context;
+        mMarkerClickedCallback = (OnMarkerClicked) context;
         mRequestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
     }
 
@@ -55,14 +63,15 @@ public class RestaurantNearbyBank {
         return INSTANCE;
     }
 
-    public void getRestaurantNearbyList(String url, boolean addMarker, final ListAsyncResponse callback){
+    public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
-                        if (!restaurantList.isEmpty())
-                            restaurantList = new ArrayList<>();
+                        if (!mRestaurantList.isEmpty())
+                            mRestaurantList = new ArrayList<>();
 
                         JSONArray results = response.getJSONArray(Constants.RESULTS);
+                        int restaurantIndex = 0;
                         for (int i = 0; i < results.length(); i++) {
                             JSONObject resultObject = results.getJSONObject(i);
                             String name = resultObject.getString(Constants.NAME);
@@ -76,29 +85,36 @@ public class RestaurantNearbyBank {
                             double lng = location.getDouble(Constants.LONGITUDE);
                             LatLng position = new LatLng(lat, lng);
 
-                            if (addMarker)
-                                addMarkerOnPosition(mGoogleMap, position, name);
-
-
                             String address = getStreetAddressFromPositions(position);
-                            Log.d("JSON1", "\ngeometry : " + geometry + "\n" +
-                                    "location : " + location + "\n" +
-                                    "lat : " + lat + "\n" +
-                                    "lng : " + lng + "\n" +
-                                    "Street address : " + address);
 
                             Restaurant restaurant = new Restaurant();
                             restaurant.setName(name);
                             restaurant.setAddress(address);
                             restaurant.setPosition(position);
 
-//                            addMarkerOnPosition(googleMap, restaurant.getPosition(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+                            mRestaurantList.add(restaurant);
 
-                            restaurantList.add(restaurant);
+                            addMarkerOnPosition(mGoogleMap, position, name, restaurantIndex);
+
+                            restaurantIndex++;
+
                         }
 
-                        if (callback != null)
-                            callback.processFinished(restaurantList);
+                        if (listResponseCallback != null)
+                            listResponseCallback.processFinished(mRestaurantList);
+
+                        if (mMarkerClickedCallback != null) {
+                            mGoogleMap.setOnMarkerClickListener(marker -> {
+                                mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get((Integer) marker.getTag()));
+
+                                /*for (Restaurant restaurant : mRestaurantList) {
+                                    if (restaurant.getPosition() == marker.getPosition())
+                                        mMarkerClickedCallback.onMarkerClickedGetRestaurant(restaurant);
+                                }*/
+
+                                return false;
+                            });
+                        }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -125,10 +141,11 @@ public class RestaurantNearbyBank {
         return address;
     }
 
-    private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title){
+    private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, int restaurantIndex){
         googleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
+        .setTag(restaurantIndex);
     }
 }

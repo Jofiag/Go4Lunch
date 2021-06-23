@@ -544,7 +544,7 @@ public class RestaurantMapViewFragment extends Fragment {
 
  ////////////////////////////////////////////////////////////////////////////// USING JSON //////////////////////////////////////////////////////////////////////////////
     private void showAllRestaurantNearby(GoogleMap googleMap){
-        RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, true, restaurantList -> {
+        RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
         });
     }
@@ -554,7 +554,7 @@ public class RestaurantMapViewFragment extends Fragment {
             googleMap.clear();                  // Removing all marker added
             url = getUrl(deviceLocation);      // Getting url to get information about nearby restaurant on google maps.
 
-            RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, false, restaurantList -> {
+            RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
                 for (Restaurant restaurant : restaurantList) {
                     LatLng restaurantPosition = restaurant.getPosition();
@@ -589,7 +589,7 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     private void showSuggestions(String query){
-        RestaurantNearbyBank.getInstance(getContext(), mGoogleMap).getRestaurantNearbyList(url, false, restaurantList -> {
+        RestaurantNearbyBank.getInstance(getContext(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
                 Log.d("SEARCH", "getRestaurantNearby: columnPlaces != null && adapter != null && query != null");
                 //When we've got all the restaurant

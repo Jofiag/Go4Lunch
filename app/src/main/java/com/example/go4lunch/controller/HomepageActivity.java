@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -19,6 +20,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
+import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
 import com.example.go4lunch.fragment.RestaurantMapViewFragment;
 import com.example.go4lunch.fragment.WorkmateListViewFragment;
@@ -32,7 +34,8 @@ import java.io.Serializable;
 
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class HomepageActivity extends AppCompatActivity
-        implements RestaurantRecyclerViewAdapter.OnRestaurantClickListener, WorkmateRecyclerViewAdapter.OnWorkmateClickListener {
+        implements RestaurantRecyclerViewAdapter.OnRestaurantClickListener, WorkmateRecyclerViewAdapter.OnWorkmateClickListener,
+                   RestaurantNearbyBank.OnMarkerClicked {
 
     private Toolbar myToolbar;
     private DrawerLayout myDrawerLayout;
@@ -169,23 +172,27 @@ public class HomepageActivity extends AppCompatActivity
             super.onBackPressed();
     }
 
-    private void startRestaurantDetailsActivity(Serializable serializable, String code){
+    private void startRestaurantDetailsActivity(String code, Parcelable parcelable){
         Intent intent = new Intent(HomepageActivity.this, RestaurantDetailsActivity.class);
-        intent.putExtra(code, serializable);
+        intent.putExtra(code, parcelable);
         startActivity(intent);
     }
 
     @Override
     public void onRestaurantSelected(Restaurant restaurant) {
-        startRestaurantDetailsActivity(restaurant, Constants.RESTAURANT_SELECTED_CODE);
+        startRestaurantDetailsActivity(Constants.RESTAURANT_SELECTED_CODE, restaurant);
     }
 
     @Override
     public void onWorkmateSelected(Workmate workmate) {
         if (workmate.getRestaurantChosen() != null)
-            startRestaurantDetailsActivity(workmate, Constants.WORKMATE_SELECTED_CODE);
+            startRestaurantDetailsActivity(Constants.WORKMATE_SELECTED_CODE, workmate);
         else
             Toast.makeText(this, Constants.NO_RESTAURANT_TO_SHOW_TEXT, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onMarkerClickedGetRestaurant(Restaurant restaurant) {
+        startRestaurantDetailsActivity(Constants.RESTAURANT_ON_MARKER_CODE, restaurant);
+    }
 }

@@ -1,11 +1,13 @@
 package com.example.go4lunch.model;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class Workmate implements Serializable {
+public class Workmate implements Parcelable {
     private String name;
     private Uri imageUri;
     private Restaurant restaurantChosen;
@@ -20,6 +22,25 @@ public class Workmate implements Serializable {
         this.restaurantChosen = restaurantChosen;
         this.restaurantLikedList = restaurantLikedList;
     }
+
+    protected Workmate(Parcel in) {
+        name = in.readString();
+        imageUri = in.readParcelable(Uri.class.getClassLoader());
+        restaurantChosen = in.readParcelable(Restaurant.class.getClassLoader());
+        restaurantLikedList = in.createTypedArrayList(Restaurant.CREATOR);
+    }
+
+    public static final Creator<Workmate> CREATOR = new Creator<Workmate>() {
+        @Override
+        public Workmate createFromParcel(Parcel in) {
+            return new Workmate(in);
+        }
+
+        @Override
+        public Workmate[] newArray(int size) {
+            return new Workmate[size];
+        }
+    };
 
     public String getName() {
         return name;
@@ -51,5 +72,18 @@ public class Workmate implements Serializable {
 
     public void setRestaurantLikedList(List<Restaurant> restaurantLikedList) {
         this.restaurantLikedList = restaurantLikedList;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeParcelable(imageUri, flags);
+        dest.writeParcelable(restaurantChosen, flags);
+        dest.writeTypedList(restaurantLikedList);
     }
 }

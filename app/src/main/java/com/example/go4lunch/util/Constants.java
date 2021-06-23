@@ -38,6 +38,7 @@ public class Constants {
     public static final String GEOMETRY = "geometry";
     public static final String LOCATION = "location";
     public static final String RESULTS = "results";
+    public static final String RESTAURANT_ON_MARKER_CODE = "restaurant on marker";
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();

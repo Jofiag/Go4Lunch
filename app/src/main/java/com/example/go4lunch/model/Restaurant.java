@@ -1,6 +1,8 @@
 package com.example.go4lunch.model;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.ContactsContract;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -9,7 +11,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
-public class Restaurant implements Serializable {
+public class Restaurant implements Parcelable {
     private String name;
     private String address;
     private Uri imageUri;
@@ -40,6 +42,30 @@ public class Restaurant implements Serializable {
         this.numberOfInterestedWorkmate = numberOfInterestedWorkmate;
 
     }
+
+    protected Restaurant(Parcel in) {
+        name = in.readString();
+        address = in.readString();
+        imageUri = in.readParcelable(Uri.class.getClassLoader());
+        foodCountry = in.readString();
+        howFarFromWorkmate = in.readString();
+        numberOfFavorableOpinion = in.readInt();
+        numberOfInterestedWorkmate = in.readInt();
+        phoneNumber = in.readString();
+        position = in.readParcelable(LatLng.class.getClassLoader());
+    }
+
+    public static final Creator<Restaurant> CREATOR = new Creator<Restaurant>() {
+        @Override
+        public Restaurant createFromParcel(Parcel in) {
+            return new Restaurant(in);
+        }
+
+        @Override
+        public Restaurant[] newArray(int size) {
+            return new Restaurant[size];
+        }
+    };
 
     public LatLng getPosition() {
         return position;
@@ -135,5 +161,23 @@ public class Restaurant implements Serializable {
 
     public void setWebsiteUrl(URL websiteUrl) {
         this.websiteUrl = websiteUrl;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(address);
+        dest.writeParcelable(imageUri, flags);
+        dest.writeString(foodCountry);
+        dest.writeString(howFarFromWorkmate);
+        dest.writeInt(numberOfFavorableOpinion);
+        dest.writeInt(numberOfInterestedWorkmate);
+        dest.writeString(phoneNumber);
+        dest.writeParcelable(position, flags);
     }
 }
