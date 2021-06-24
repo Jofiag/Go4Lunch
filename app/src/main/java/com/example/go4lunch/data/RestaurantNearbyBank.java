@@ -71,6 +71,7 @@ public class RestaurantNearbyBank {
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
+                    Log.d("URL", "getRestaurantNearbyList: " + url);
                     try {
                         if (!mRestaurantList.isEmpty())
                             mRestaurantList = new ArrayList<>();
@@ -90,19 +91,29 @@ public class RestaurantNearbyBank {
                             double lng = location.getDouble(Constants.LONGITUDE);
                             LatLng position = new LatLng(lat, lng);
 
-                            String address = getStreetAddressFromPositions(position);
+                            JSONArray typeArray = resultObject.getJSONArray(Constants.TYPE);
+                            List<String> typeList = new ArrayList<>();
+                            for (int y = 0; y < typeArray.length(); y++){
+                                String type = typeArray.getString(y);
+                                typeList.add(type);
+                            }
 
-                            Restaurant restaurant = new Restaurant();
-                            restaurant.setName(name);
-                            restaurant.setAddress(address);
-                            restaurant.setPosition(position);
+                            if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
 
-                            mRestaurantList.add(restaurant);
+                                String address = getStreetAddressFromPositions(position);
 
-                            if (mGoogleMap != null)
-                                addMarkerOnPosition(mGoogleMap, position, name, restaurantIndex);
+                                Restaurant restaurant = new Restaurant();
+                                restaurant.setName(name);
+                                restaurant.setAddress(address);
+                                restaurant.setPosition(position);
 
-                            restaurantIndex++;
+                                mRestaurantList.add(restaurant);
+
+                                if (mGoogleMap != null)
+                                    addMarkerOnPosition(mGoogleMap, position, name, restaurantIndex);
+
+                                restaurantIndex++;
+                            }
 
                         }
 

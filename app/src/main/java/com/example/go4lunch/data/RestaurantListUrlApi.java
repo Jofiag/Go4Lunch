@@ -36,7 +36,8 @@ public class RestaurantListUrlApi {
         if (location != null){
             url = NEARBY_SEARCH_URL +
                     "location=" + location.getLatitude() + "," + location.getLongitude() +
-                    "&radius=" + PROXIMITY_RADIUS +
+//                    "&rankby=" + Constants.PROMINENCE +
+                    "&radius=" + Constants.PROXIMITY_RADIUS +
                     "&type=" + Constants.RESTAURANT +
                     "&sensor=true" +
                     "&key=" + context.getString(R.string.google_maps_key);
