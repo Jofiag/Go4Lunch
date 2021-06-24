@@ -61,12 +61,6 @@ import static com.example.go4lunch.util.Constants.NAME;
 public class RestaurantMapViewFragment extends Fragment {
     private final OnMapReadyCallback callback;
 
-    /*private PlacesClient placesClient;
-    private AutocompleteSessionToken sessionToken;
-    private RectangularBounds bounds;
-    private FindAutocompletePredictionsRequest predictionRequest;
-    private List<Place.Field> placeFields;*/
-
     private LocationApi locationApi;
     private RestaurantListUrlApi urlApi;
 
@@ -98,7 +92,7 @@ public class RestaurantMapViewFragment extends Fragment {
         urlApi = RestaurantListUrlApi.getInstance(getContext());
 
         if (savedInstanceState != null)
-            url = savedInstanceState.getString("url");
+            url = savedInstanceState.getString(Constants.URL_KEY);
 
         Log.d("ORDER", "onCreate: ");
     }
@@ -124,9 +118,6 @@ public class RestaurantMapViewFragment extends Fragment {
         setLocationManagerAndListener();
         requestLocationIfPermissionIsGranted(null);
         initializeSearchViewNeeded();
-
-//        initializePlaces();
-//        initializePredictionRequestAndPlaceFields();
     }
 
     private void initializeSearchViewNeeded() {
@@ -198,75 +189,6 @@ public class RestaurantMapViewFragment extends Fragment {
             mapFragment.getMapAsync(callback);
     }
 
-//    private void initializePlaces(){
-//        if (!Places.isInitialized())
-//            Places.initialize(requireContext(), getString(R.string.google_maps_key));
-//
-//        placesClient = Places.createClient(requireContext());
-//    }
-//    private void initializePredictionRequestAndPlaceFields(){
-//        sessionToken = AutocompleteSessionToken.newInstance();
-//        bounds = RectangularBounds.newInstance(LatLngBounds.builder().include(devicePosition).build());
-//
-//        predictionRequest = FindAutocompletePredictionsRequest.builder()
-//                .setCountry("fr")
-//                .setLocationBias(bounds)
-//                .setTypeFilter(TypeFilter.GEOCODE)
-//                .setSessionToken(sessionToken)
-//                .build();
-//
-//        placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG,
-//                Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.TYPES);
-//    }
-    /*private void getPlaceEntered(String query, GoogleMap googleMap, String[] columnPlaces, CursorAdapter adapter){
-        if (query != null)
-            predictionRequest = FindAutocompletePredictionsRequest.builder()
-                    .setQuery(getFromQuery(query, NAME))
-                    .setCountry("fr")
-                    .setLocationBias(bounds)
-                    .setTypeFilter(TypeFilter.ESTABLISHMENT)
-                    .setSessionToken(sessionToken)
-                    .build();
-
-
-        RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields,
-                restaurantList -> {
-                    if (googleMap != null){
-//                        int position = Integer.parseInt(getFromQuery(query, RESTAURANT_CLICKED_POSITION));
-
-                            for (Place restaurant : restaurantList) {
-                                LatLng restaurantPosition = restaurant.getLatLng();
-                                //Zooming on the restaurant clicked
-                                if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
-                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 17));
-                                    addMarkerOnPosition(googleMap, restaurant.getLatLng(), restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
-                                }
-                            }
-                    }
-
-                    if (columnPlaces != null && adapter != null){
-                        //When we've got all the restaurant
-                        if (!restaurantList.isEmpty()){
-
-                            //Then we add all of them to our cursor to show it as suggestions to the user
-                            Log.d("LIST", "onQueryTextChange: " + restaurantList.size() + restaurantList);
-                            final MatrixCursor cursor = new MatrixCursor(columnPlaces);
-                            int y = 0;
-                            for (Place placeSuggested : restaurantList) {
-                                if (placeSuggested != null && placeSuggested.getName() != null && query != null) {
-                                    String placeName = placeSuggested.getName();
-                                    if (placeName.toLowerCase().contains(query.toLowerCase()))
-                                        cursor.addRow(new Object[]{y, placeName, placeSuggested.getAddress()});
-                                }
-                                y++;
-                            }
-
-                            adapter.changeCursor(cursor);
-                        }
-                    }
-                });
-    }*/
-
     private String getFromQuery(String query, String wanted){
         String result = null;
         char[] resultArray;
@@ -315,36 +237,16 @@ public class RestaurantMapViewFragment extends Fragment {
                         z++;
                     }
                 }
-                result = new String(resultArray).trim();
-                Log.d("GETNA", "getFromQuery: " + Integer.parseInt(result));
 
             }
 
             result = new String(resultArray).trim();
 
-            Log.d("GETNA", "getFromQuery: " + result);
         }
 
         return result;
     }
-//    private String getQuerySearched(){
-//        Intent intent = requireActivity().getIntent();
-//        SearchRecentSuggestions searchRecentSuggestions = new SearchRecentSuggestions(getContext(),
-//                RestaurantSuggestions.AUTHORITY,
-//                RestaurantSuggestions.MODE);
-//
-//        intent.putExtra("url", url);
-//
-//        String query = null;
-//
-//        if (Intent.ACTION_SEARCH.equals(intent.getAction())){
-//            query = intent.getStringExtra(SearchManager.QUERY);
-//            searchRecentSuggestions.saveRecentQuery(query, null);
-//
-//        }
-//
-//        return query;
-//    }
+
     private void setOurSearchView(Menu menu){
         MenuItem searchItem = menu.findItem(R.id.search_item);
 
@@ -431,19 +333,6 @@ public class RestaurantMapViewFragment extends Fragment {
                 .title(title)
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
     }
-
-    /*private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
-        assert vectorDrawable != null;
-        vectorDrawable.setBounds(0,0,vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
-
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.draw(canvas);
-
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }*/
-
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> {
@@ -581,4 +470,36 @@ public class RestaurantMapViewFragment extends Fragment {
             }
         });
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /*private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
+            Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
+            assert vectorDrawable != null;
+            vectorDrawable.setBounds(0,0,vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+
+            Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            vectorDrawable.draw(canvas);
+
+            return BitmapDescriptorFactory.fromBitmap(bitmap);
+        }
+
+        private String getQuerySearched(){
+            Intent intent = requireActivity().getIntent();
+            SearchRecentSuggestions searchRecentSuggestions = new SearchRecentSuggestions(getContext(),
+                    RestaurantSuggestions.AUTHORITY,
+                    RestaurantSuggestions.MODE);
+
+            intent.putExtra("url", url);
+
+            String query = null;
+
+            if (Intent.ACTION_SEARCH.equals(intent.getAction())){
+                query = intent.getStringExtra(SearchManager.QUERY);
+                searchRecentSuggestions.saveRecentQuery(query, null);
+
+            }
+
+            return query;
+        }*/
 }
