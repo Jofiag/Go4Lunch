@@ -104,7 +104,11 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private void showRestaurantImageNameAndAddress(){
         if (restaurant != null) {
             if (restaurant.getImageUrl() != null)
-                Picasso.get().load(restaurant.getImageUrl()).into(restaurantImageView);
+                Picasso.get().load(restaurant.getImageUrl())
+                        .placeholder(android.R.drawable.stat_sys_download)
+                        .error(android.R.drawable.stat_notify_error)
+                        .resize(445, 445)
+                        .into(restaurantImageView);
 
             if (restaurant.getFoodCountry() != null)
                 RestaurantFoodCountryAndRestaurantAddress.setText(MessageFormat.format("{0} - {1}", restaurant.getFoodCountry(), restaurant.getAddress()));

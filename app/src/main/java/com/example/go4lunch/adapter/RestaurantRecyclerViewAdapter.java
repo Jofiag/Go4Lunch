@@ -63,7 +63,11 @@ implements Filterable {
         holder.numberOfInterestedWorkmateTextView.setText(MessageFormat.format("({0})", restaurant.getNumberOfInterestedWorkmate()));
 
         if (restaurant.getImageUrl() != null)
-            Picasso.get().load(restaurant.getImageUrl()).into(holder.restaurantImage);
+            Picasso.get().load(restaurant.getImageUrl())
+                    .placeholder(android.R.drawable.stat_sys_download)
+                    .error(android.R.drawable.stat_notify_error)
+                    .resize(154, 154)
+                    .into(holder.restaurantImage);
 
         showYellowStar(holder, restaurant.getNumberOfFavorableOpinion());
 

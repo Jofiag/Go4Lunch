@@ -50,8 +50,8 @@ public class Constants {
     public static final String PROMINENCE = "prominence";
     public static final String PHOTOS = "photos";
     public static final String PHOTO_REFERENCE = "photo_reference";
-    public static final int PHOTO_MAX_HEIGHT = 77;
-    public static final int PHOTO_MAX_WIDTH = 77;
+    public static final int PHOTO_MAX_HEIGHT = 1600;
+    public static final int PHOTO_MAX_WIDTH = 1600;
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();
