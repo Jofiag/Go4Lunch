@@ -4,6 +4,8 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
+import android.widget.Filter;
+import android.widget.Filterable;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,6 +32,10 @@ public class RestaurantNearbyBank {
 
     public interface OnMarkerClicked{
         void onMarkerClickedGetRestaurant(Restaurant restaurant);
+    }
+
+    public interface OnFilterableResponse {
+        void onFilterableResponse(Filterable filterable);
     }
 
     private GoogleMap mGoogleMap;
@@ -93,7 +99,8 @@ public class RestaurantNearbyBank {
 
                             mRestaurantList.add(restaurant);
 
-                            addMarkerOnPosition(mGoogleMap, position, name, restaurantIndex);
+                            if (mGoogleMap != null)
+                                addMarkerOnPosition(mGoogleMap, position, name, restaurantIndex);
 
                             restaurantIndex++;
 
@@ -102,14 +109,9 @@ public class RestaurantNearbyBank {
                         if (listResponseCallback != null)
                             listResponseCallback.processFinished(mRestaurantList);
 
-                        if (mMarkerClickedCallback != null) {
+                        if (mMarkerClickedCallback != null && mGoogleMap != null) {
                             mGoogleMap.setOnMarkerClickListener(marker -> {
                                 mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get((Integer) marker.getTag()));
-
-                                /*for (Restaurant restaurant : mRestaurantList) {
-                                    if (restaurant.getPosition() == marker.getPosition())
-                                        mMarkerClickedCallback.onMarkerClickedGetRestaurant(restaurant);
-                                }*/
 
                                 return false;
                             });

@@ -13,9 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.data.RestaurantListUrlApi;
+import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.OpeningHours;
 import com.example.go4lunch.model.Restaurant;
-import com.example.go4lunch.util.Constants;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -28,10 +29,12 @@ implements Filterable {
         void onRestaurantSelected(Restaurant restaurant);
     }
 
-    private final OnRestaurantClickListener mCallback;
+    private final Context context;
     private final List<Restaurant> restaurantList;
+    private final OnRestaurantClickListener mCallback;
 
     public RestaurantRecyclerViewAdapter(Context context, List<Restaurant> restaurantList) {
+        this.context = context;
         this.restaurantList = restaurantList;
         this.mCallback = (OnRestaurantClickListener) context;
     }
@@ -137,22 +140,11 @@ implements Filterable {
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                List<Restaurant> restaurantListFiltered = new ArrayList<>();
-                List<Restaurant> restaurantListToFilter = Constants.getRestaurantList();
-
-                if (constraint == null || constraint.length() == 0)
-                    restaurantListFiltered.addAll(restaurantListToFilter);
-                else{
-                    String searchText = constraint.toString().toLowerCase().trim();
-
-                    for (Restaurant restaurant : restaurantListToFilter) {
-                        if (restaurant.getName().toLowerCase().contains(searchText))
-                            restaurantListFiltered.add(restaurant);
-                    }
-                }
-
+                String url = RestaurantListUrlApi.getInstance(context).getUrlThroughDeviceLocation();
                 FilterResults filterResults = new FilterResults();
-                filterResults.values = restaurantListFiltered;
+
+                RestaurantNearbyBank.getInstance(context, null).getRestaurantNearbyList(url,
+                        restaurantList -> filterResults.values = getFilteredList(constraint, restaurantList));
 
                 return filterResults;
             }
@@ -160,10 +152,27 @@ implements Filterable {
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 restaurantList.clear();
-                restaurantList.addAll((List<Restaurant>) results.values);
+
+                if (results.values != null)
+                    restaurantList.addAll((List<Restaurant>) results.values);
 
                 notifyDataSetChanged();
             }
         };
+    }
+
+    private List<Restaurant> getFilteredList(CharSequence constraint, List<Restaurant> restaurantListToFiltered){
+        List<Restaurant> restaurantListFiltered = new ArrayList<>();
+        String searchText = constraint.toString().toLowerCase().trim();
+
+            if (constraint == null || constraint.length() == 0)
+                restaurantListFiltered.addAll(restaurantListToFiltered);
+            else {
+                for (Restaurant restaurant : restaurantListToFiltered)
+                    if (restaurant.getName().toLowerCase().contains(searchText))
+                        restaurantListFiltered.add(restaurant);
+            }
+
+            return restaurantListFiltered;
     }
 }

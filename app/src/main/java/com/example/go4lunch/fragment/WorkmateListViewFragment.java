@@ -18,12 +18,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
+import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WorkmateListViewFragment extends Fragment {
+
+    private RecyclerView recyclerView;
 
     private WorkmateRecyclerViewAdapter workmateAdapter;
     private final List<Workmate> workmateList = Constants.getWorkmateList();
@@ -45,7 +49,7 @@ public class WorkmateListViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_workmate_list_view, container, false);
 
-        RecyclerView recyclerView = view.findViewById(R.id.workmate_list_recycler_view);
+        recyclerView = view.findViewById(R.id.workmate_list_recycler_view);
 
 //        List<Workmate> workmateList = new ArrayList<>();
         Context context = view.getContext();
@@ -78,10 +82,28 @@ public class WorkmateListViewFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Real time action
-                workmateAdapter.getFilter().filter(newText);
+//                workmateAdapter.getFilter().filter(newText);
+                filterList(newText);
                 return false;
             }
         });
 
+    }
+
+    private void filterList(String query){
+        List<Workmate> listFiltered = new ArrayList<>();
+
+        for (Workmate workmate : workmateList) {
+            Restaurant restaurantChosen = workmate.getRestaurantChosen();
+            if (restaurantChosen != null){
+                String restaurantChosenName = restaurantChosen.getName();
+                if (restaurantChosenName.toLowerCase().contains(query.toLowerCase()))
+                    listFiltered.add(workmate);
+            }
+        }
+
+        workmateAdapter = new WorkmateRecyclerViewAdapter(getContext(), listFiltered);
+        recyclerView.setAdapter(workmateAdapter);
+        workmateAdapter.notifyDataSetChanged();
     }
 }

@@ -43,7 +43,7 @@ public class RestaurantListUrlApi {
         }
     }
 
-    public String getUrlThrowDeviceLocation() {
+    public String getUrlThroughDeviceLocation() {
         setLocation();
         setUrl();
         return url;

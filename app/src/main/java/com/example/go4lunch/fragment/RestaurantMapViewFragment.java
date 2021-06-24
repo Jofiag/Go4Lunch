@@ -141,6 +141,68 @@ public class RestaurantMapViewFragment extends Fragment {
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
     }
 
+    private void setOurSearchView(Menu menu){
+        MenuItem searchItem = menu.findItem(R.id.search_item);
+
+        SearchManager searchManager = (SearchManager) requireActivity().getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) searchItem.getActionView();
+        searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().getComponentName()));
+        searchView.setIconifiedByDefault(false);
+
+        /*String[] SUGGESTIONS = {
+                "Pizza",
+                "Burger",
+                "Salad",
+                "Rice"
+        };*/
+
+        searchView.setSuggestionsAdapter(adapter);
+        searchView.setSubmitButtonEnabled(true);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                ZoomOnRestaurantSearched(mGoogleMap, query);
+                showAllRestaurantNearby(mGoogleMap);
+                addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
+                return true;    //return true so that the fragment won't be restart
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Show suggestion
+                showSuggestions(newText);
+
+                return false;
+            }
+        });
+
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                //when user click on a restaurant suggested, set searchView query with the restaurant clicked address
+                Cursor cursor = (Cursor) adapter.getItem(position);
+                String placeName = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1));
+                String placeAddress = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2));
+
+                //We're setting both name and address as query,
+                // because there can be many restaurant with the same name but never with the same address.
+                //Then we can use the address to search for the restaurant in the map.
+                searchView.setQuery(placeName + "_" + placeAddress + "/" + position, true);
+                searchView.setSaveEnabled(true);
+
+                return true;
+            }
+        });
+
+    }
+
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.search_view_menu, menu);
@@ -175,7 +237,7 @@ public class RestaurantMapViewFragment extends Fragment {
             locationButton.setOnClickListener(v -> googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
             showAllTextView.setOnClickListener(v -> showAllRestaurantNearby(googleMap));
             addMarkerOnPosition(googleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
-            url = urlApi.getUrlThrowDeviceLocation();
+            url = urlApi.getUrlThroughDeviceLocation();
             showAllRestaurantNearby(googleMap);
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 11));
         }
@@ -183,6 +245,7 @@ public class RestaurantMapViewFragment extends Fragment {
             Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();
 
     }
+
     private void setMapFragment(){
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_fragment);
         if (mapFragment != null)
@@ -247,86 +310,6 @@ public class RestaurantMapViewFragment extends Fragment {
         return result;
     }
 
-    private void setOurSearchView(Menu menu){
-        MenuItem searchItem = menu.findItem(R.id.search_item);
-
-        SearchManager searchManager = (SearchManager) requireActivity().getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().getComponentName()));
-        searchView.setIconifiedByDefault(false);
-
-        /*String[] SUGGESTIONS = {
-                "Pizza",
-                "Burger",
-                "Salad",
-                "Rice"
-        };*/
-
-        columnPlaces = new String[]{
-                BaseColumns._ID,
-                SearchManager.SUGGEST_COLUMN_TEXT_1, //The main line of a suggestion (necessary)
-                SearchManager.SUGGEST_COLUMN_TEXT_2  //The second line for a secondary text (optional)
-        };
-
-        viewIds = new int[]{
-                R.id.place_id,
-                R.id.place_name,
-                R.id.place_address
-        };
-
-        adapter = new SimpleCursorAdapter(requireContext(),
-                R.layout.suggestion_list_row,
-                null,
-                columnPlaces,
-                viewIds,
-                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-
-        searchView.setSuggestionsAdapter(adapter);
-        searchView.setSubmitButtonEnabled(true);
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                ZoomOnRestaurantSearched(mGoogleMap, query);
-                showAllRestaurantNearby(mGoogleMap);
-                addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
-                return true;    //return true so that the fragment won't be restart
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //Show suggestion
-                showSuggestions(newText);
-
-                return false;
-            }
-        });
-
-        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
-            @Override
-            public boolean onSuggestionSelect(int position) {
-                return false;
-            }
-
-            @Override
-            public boolean onSuggestionClick(int position) {
-                //when user click on a restaurant suggested, set searchView query with the restaurant clicked address
-                Cursor cursor = (Cursor) adapter.getItem(position);
-                String placeName = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1));
-                String placeAddress = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2));
-
-                //We're setting both name and address as query,
-                // because there can be many restaurant with the same name but never with the same address.
-                //Then we can use the address to search for the restaurant in the map.
-                searchView.setQuery(placeName + "_" + placeAddress + "/" + position, true);
-                searchView.setSaveEnabled(true);
-
-                return true;
-            }
-        });
-
-    }
     private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, float color){
         googleMap.addMarker(new MarkerOptions()
                 .position(position)
@@ -423,7 +406,7 @@ public class RestaurantMapViewFragment extends Fragment {
         if (googleMap != null){
             googleMap.clear();                  // Removing all marker added
 //            url = getUrl(deviceLocation);      // Getting url to get information about nearby restaurant on google maps.
-            url = urlApi.getUrlThrowDeviceLocation();
+            url = urlApi.getUrlThroughDeviceLocation();
 
             RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 

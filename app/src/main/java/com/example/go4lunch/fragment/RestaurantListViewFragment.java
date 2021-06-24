@@ -1,9 +1,7 @@
 package com.example.go4lunch.fragment;
 
 import android.content.Context;
-import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,37 +9,36 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
+import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RestaurantListViewFragment extends Fragment{
-    private PlacesClient placesClient;
+    /*private PlacesClient placesClient;
     private AutocompleteSessionToken sessionToken;
     private RectangularBounds bounds;
     private FindAutocompletePredictionsRequest predictionRequest;
-    private List<Place.Field> placeFields;
+    private List<Place.Field> placeFields;*/
 
     private RestaurantRecyclerViewAdapter restaurantAdapter;
-    private final List<Restaurant> restaurantList = Constants.getRestaurantList();
 
-    private Location location;
+    private String url;
+    private Context context;
+
+    private RecyclerView recyclerView;
 
     public RestaurantListViewFragment() {
         // Required empty public constructor
@@ -51,6 +48,10 @@ public class RestaurantListViewFragment extends Fragment{
     public void onCreate(Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         super.onCreate(savedInstanceState);
+
+        context = getContext();
+        url = RestaurantListUrlApi.getInstance(getContext()).getUrlThroughDeviceLocation();
+
         /*initializePlaces();
         initializePredictionRequestAndPlaceFields();*/
     }
@@ -59,11 +60,15 @@ public class RestaurantListViewFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
 
-        RecyclerView recyclerView = view.findViewById(R.id.restaurant_list_recycler_view);
+        recyclerView = view.findViewById(R.id.restaurant_list_recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        Context context = view.getContext();
-
-//        RestaurantNearbyBank.getInstance(getContext(), null).getRestaurantNearbyList();
+        RestaurantNearbyBank.getInstance(context, null).getRestaurantNearbyList(url, restaurantList -> {
+            restaurantAdapter = new RestaurantRecyclerViewAdapter(context, restaurantList);
+            recyclerView.setAdapter(restaurantAdapter);
+            restaurantAdapter.notifyDataSetChanged();
+        });
 
         /*RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, new RestaurantBank.ListAsyncResponse() {
             @Override
@@ -88,6 +93,7 @@ public class RestaurantListViewFragment extends Fragment{
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
 
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -98,12 +104,30 @@ public class RestaurantListViewFragment extends Fragment{
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Real time action
-                if (restaurantAdapter != null)
-                    restaurantAdapter.getFilter().filter(newText);
+                /*if (restaurantAdapter != null)
+                    restaurantAdapter.getFilter().filter(newText);*/
+
+                filterList(newText);
+
                 return false;
             }
         });
 
+    }
+
+    private void filterList(String query){
+        RestaurantNearbyBank.getInstance(context, null).getRestaurantNearbyList(url, restaurantList -> {
+            List<Restaurant> listFiltered = new ArrayList<>();
+
+            for (Restaurant restaurant : restaurantList)
+                if (restaurant.getName().toLowerCase().contains(query.toLowerCase()))
+                    listFiltered.add(restaurant);
+
+            restaurantAdapter = new RestaurantRecyclerViewAdapter(context, listFiltered);
+            recyclerView.setAdapter(restaurantAdapter);
+            restaurantAdapter.notifyDataSetChanged();
+
+        });
     }
 
     /*private void initializePlaces(){
