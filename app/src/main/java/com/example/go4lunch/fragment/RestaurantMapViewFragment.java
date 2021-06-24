@@ -48,6 +48,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Objects;
@@ -72,7 +73,6 @@ public class RestaurantMapViewFragment extends Fragment {
     private Location deviceLocation;
     private LatLng devicePosition;
 
-    private int[] viewIds;
     private CursorAdapter adapter;
     private String[] columnPlaces;
     private SearchView searchView;
@@ -127,7 +127,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 SearchManager.SUGGEST_COLUMN_TEXT_2  //The second line for a secondary text (optional)
         };
 
-        viewIds = new int[]{
+        int[] viewIds = new int[]{
                 R.id.place_id,
                 R.id.place_name,
                 R.id.place_address
@@ -311,10 +311,13 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, float color){
-        googleMap.addMarker(new MarkerOptions()
+        Marker marker = googleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
+
+        if (position == devicePosition)
+            marker.setTag(-1);
     }
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(

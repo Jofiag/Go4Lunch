@@ -135,7 +135,8 @@ public class RestaurantNearbyBank {
 
                         if (mMarkerClickedCallback != null && mGoogleMap != null) {
                             mGoogleMap.setOnMarkerClickListener(marker -> {
-                                mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get((Integer) marker.getTag()));
+                                if ((Integer)marker.getTag() != -1)
+                                    mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get((Integer) marker.getTag()));
 
                                 return false;
                             });
