@@ -3,18 +3,16 @@ package com.example.go4lunch.model;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.ContactsContract;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
 public class Restaurant implements Parcelable {
     private String name;
     private String address;
-    private Uri imageUri;
+    private String imageUrl;
     private String foodCountry;
     private OpeningHours openingHours;
     private String howFarFromWorkmate;
@@ -28,25 +26,10 @@ public class Restaurant implements Parcelable {
     public Restaurant() {
     }
 
-    public Restaurant(String name, String address, Uri imageUri, String foodCountry, OpeningHours openingHours, String howFarFromWorkmate, int numberOfFavorableOpinion, int numberOfInterestedWorkmate, List<Workmate> workmateList, String phoneNumber, URL websiteUrl) {
-        this.name = name;
-        this.address = address;
-        this.imageUri = imageUri;
-        this.websiteUrl = websiteUrl;
-        this.phoneNumber = phoneNumber;
-        this.foodCountry = foodCountry;
-        this.openingHours = openingHours;
-        this.workmateList = workmateList;
-        this.howFarFromWorkmate = howFarFromWorkmate;
-        this.numberOfFavorableOpinion = numberOfFavorableOpinion;
-        this.numberOfInterestedWorkmate = numberOfInterestedWorkmate;
-
-    }
-
     protected Restaurant(Parcel in) {
         name = in.readString();
         address = in.readString();
-        imageUri = in.readParcelable(Uri.class.getClassLoader());
+        imageUrl = in.readString();
         foodCountry = in.readString();
         howFarFromWorkmate = in.readString();
         numberOfFavorableOpinion = in.readInt();
@@ -91,12 +74,12 @@ public class Restaurant implements Parcelable {
         this.address = address;
     }
 
-    public Uri getImageUri() {
-        return imageUri;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImageUri(Uri imageUri) {
-        this.imageUri = imageUri;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getFoodCountry() {
@@ -172,7 +155,7 @@ public class Restaurant implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeString(address);
-        dest.writeParcelable(imageUri, flags);
+        dest.writeString(imageUrl);
         dest.writeString(foodCountry);
         dest.writeString(howFarFromWorkmate);
         dest.writeInt(numberOfFavorableOpinion);

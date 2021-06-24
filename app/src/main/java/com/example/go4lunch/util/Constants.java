@@ -26,7 +26,8 @@ public class Constants {
     public static final String ADDRESS = "address";
     public static final String RESTAURANT_CLICKED_POSITION = "position";
     public static final String RESTAURANT = "restaurant";
-    public static final String  NEARBY_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+    public static final String NEARBY_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+    public static final String PLACE_PHOTO_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/photo?";
     public static final int PROXIMITY_RADIUS = 4000;
 
     //JSON FILE
@@ -47,6 +48,10 @@ public class Constants {
     public static final String ESTABLISHMENT = "establishment";
     public static final String DISTANCE = "distance";
     public static final String PROMINENCE = "prominence";
+    public static final String PHOTOS = "photos";
+    public static final String PHOTO_REFERENCE = "photo_reference";
+    public static final int PHOTO_MAX_HEIGHT = 77;
+    public static final int PHOTO_MAX_WIDTH = 77;
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();

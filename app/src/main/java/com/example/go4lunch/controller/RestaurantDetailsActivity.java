@@ -16,6 +16,7 @@ import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.squareup.picasso.Picasso;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -102,8 +103,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private void showRestaurantImageNameAndAddress(){
         if (restaurant != null) {
-            if (restaurant.getImageUri() != null)
-                restaurantImageView.setImageURI(restaurant.getImageUri());
+            if (restaurant.getImageUrl() != null)
+                Picasso.get().load(restaurant.getImageUrl()).into(restaurantImageView);
 
             if (restaurant.getFoodCountry() != null)
                 RestaurantFoodCountryAndRestaurantAddress.setText(MessageFormat.format("{0} - {1}", restaurant.getFoodCountry(), restaurant.getAddress()));

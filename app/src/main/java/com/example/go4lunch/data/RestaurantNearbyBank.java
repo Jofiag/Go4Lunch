@@ -10,6 +10,7 @@ import android.widget.Filterable;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.go4lunch.R;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
 import com.google.android.gms.maps.GoogleMap;
@@ -81,9 +82,6 @@ public class RestaurantNearbyBank {
                         for (int i = 0; i < results.length(); i++) {
                             JSONObject resultObject = results.getJSONObject(i);
                             String name = resultObject.getString(Constants.NAME);
-//                            String reference = resultObject.getString(Constants.REFERENCE);
-//                            String vicinity = resultObject.getString(Constants.VICINITY);
-
 
                             JSONObject geometry = resultObject.getJSONObject(Constants.GEOMETRY);
                             JSONObject location = geometry.getJSONObject(Constants.LOCATION);
@@ -100,12 +98,27 @@ public class RestaurantNearbyBank {
 
                             if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
 
+                                String photoReference = "";
+                                JSONArray photoArray = resultObject.getJSONArray(Constants.PHOTOS);
+                                for (int z = 0; z < photoArray.length(); z++){
+                                    JSONObject photoObject = photoArray.getJSONObject(z);
+                                    photoReference = photoObject.getString(Constants.PHOTO_REFERENCE);
+                                }
+
+                                String photoUrl = Constants.PLACE_PHOTO_SEARCH_URL +
+                                        "maxwidth=" + Constants.PHOTO_MAX_WIDTH +
+                                        "&photoreference=" + photoReference +
+                                        "&key=" + mContext.getString(R.string.google_maps_key);
+
+
                                 String address = getStreetAddressFromPositions(position);
 
                                 Restaurant restaurant = new Restaurant();
                                 restaurant.setName(name);
                                 restaurant.setAddress(address);
                                 restaurant.setPosition(position);
+                                if (!photoReference.equals(""))
+                                    restaurant.setImageUrl(photoUrl);
 
                                 mRestaurantList.add(restaurant);
 

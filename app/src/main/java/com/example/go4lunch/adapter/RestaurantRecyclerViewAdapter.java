@@ -17,6 +17,7 @@ import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.OpeningHours;
 import com.example.go4lunch.model.Restaurant;
+import com.squareup.picasso.Picasso;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -57,10 +58,12 @@ implements Filterable {
         }
 
         holder.restaurantNameTextView.setText(restaurant.getName());
-        holder.restaurantImage.setImageURI(restaurant.getImageUri());
         holder.howFarFromWorkmateTextView.setText(restaurant.getHowFarFromWorkmate());
         holder.foodCountryAndAddressTextView.setText(String.format("%s - %s", restaurant.getFoodCountry(), restaurant.getAddress()));
         holder.numberOfInterestedWorkmateTextView.setText(MessageFormat.format("({0})", restaurant.getNumberOfInterestedWorkmate()));
+
+        if (restaurant.getImageUrl() != null)
+            Picasso.get().load(restaurant.getImageUrl()).into(holder.restaurantImage);
 
         showYellowStar(holder, restaurant.getNumberOfFavorableOpinion());
 
