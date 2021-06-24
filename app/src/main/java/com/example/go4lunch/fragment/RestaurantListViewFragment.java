@@ -1,6 +1,7 @@
 package com.example.go4lunch.fragment;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
+import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
@@ -39,6 +41,8 @@ public class RestaurantListViewFragment extends Fragment{
     private RestaurantRecyclerViewAdapter restaurantAdapter;
     private final List<Restaurant> restaurantList = Constants.getRestaurantList();
 
+    private Location location;
+
     public RestaurantListViewFragment() {
         // Required empty public constructor
     }
@@ -58,6 +62,8 @@ public class RestaurantListViewFragment extends Fragment{
         RecyclerView recyclerView = view.findViewById(R.id.restaurant_list_recycler_view);
 
         Context context = view.getContext();
+
+//        RestaurantNearbyBank.getInstance(getContext(), null).getRestaurantNearbyList();
 
         /*RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, new RestaurantBank.ListAsyncResponse() {
             @Override

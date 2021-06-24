@@ -13,7 +13,6 @@ import com.example.go4lunch.util.Constants;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -36,8 +35,8 @@ public class RestaurantNearbyBank {
     private GoogleMap mGoogleMap;
     private final Context mContext;
     private final RequestQueue mRequestQueue;
-    private List<Restaurant> mRestaurantList = new ArrayList<>();
     private final OnMarkerClicked mMarkerClickedCallback;
+    private List<Restaurant> mRestaurantList = new ArrayList<>();
 
     public RestaurantNearbyBank(Context context, GoogleMap googleMap) {
         mContext = context;

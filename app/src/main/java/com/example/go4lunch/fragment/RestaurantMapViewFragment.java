@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -37,6 +35,8 @@ import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.data.LocationApi;
+import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
@@ -50,16 +50,12 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static com.example.go4lunch.util.Constants.ADDRESS;
 import static com.example.go4lunch.util.Constants.FINE_LOCATION;
 import static com.example.go4lunch.util.Constants.NAME;
-import static com.example.go4lunch.util.Constants.NEARBY_SEARCH_URL;
-import static com.example.go4lunch.util.Constants.PROXIMITY_RADIUS;
 
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class RestaurantMapViewFragment extends Fragment {
@@ -70,6 +66,9 @@ public class RestaurantMapViewFragment extends Fragment {
     private RectangularBounds bounds;
     private FindAutocompletePredictionsRequest predictionRequest;
     private List<Place.Field> placeFields;*/
+
+    private LocationApi locationApi;
+    private RestaurantListUrlApi urlApi;
 
     private ImageButton locationButton;
     private TextView showAllTextView;
@@ -94,6 +93,9 @@ public class RestaurantMapViewFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        locationApi = LocationApi.getInstance(getContext());
+        urlApi = RestaurantListUrlApi.getInstance(getContext());
 
         if (savedInstanceState != null)
             url = savedInstanceState.getString("url");
@@ -170,38 +172,24 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     private void setGoogleMap(GoogleMap googleMap) {
-        mGoogleMap = googleMap;
-        requestLocationIfPermissionIsGranted(googleMap);
         Log.d("ORDER", "setGoogleMap: ");
 
+        mGoogleMap = googleMap;
+        requestLocationIfPermissionIsGranted(googleMap);
+
         if (deviceLocation != null) {
+            locationApi.setLocation(deviceLocation);
+            devicePosition = locationApi.getPositionFromLocation();
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-
             locationButton.setOnClickListener(v -> googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
-
             showAllTextView.setOnClickListener(v -> showAllRestaurantNearby(googleMap));
-
-            addMarkerOnPosition(googleMap, devicePosition, "My position : " + getStreetAddressFromPositions(devicePosition), BitmapDescriptorFactory.HUE_RED);
-
-            url = getUrl(deviceLocation);
-
+            addMarkerOnPosition(googleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
+            url = urlApi.getUrlThrowDeviceLocation();
             showAllRestaurantNearby(googleMap);
-
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 11));
         }
         else
             Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();
-
-//        String querySearched = getQuerySearched();
-//
-//        if (querySearched != null && columnPlaces != null && adapter != null) {
-//            //If user search for a restaurant nearby, then we zoom on that restaurant
-//            String rl = getActivity().getIntent().getExtras().getString("url");
-//            Log.d("URL", "setGoogleMap: rl = " + rl);
-//            Log.d("URL", "setGoogleMap: url = " + url);
-//            showAllRestaurantNearby(googleMap);
-////            ZoomOnRestaurantSearched(googleMap, querySearched);
-//        }
 
     }
     private void setMapFragment(){
@@ -400,7 +388,7 @@ public class RestaurantMapViewFragment extends Fragment {
             public boolean onQueryTextSubmit(String query) {
                 ZoomOnRestaurantSearched(mGoogleMap, query);
                 showAllRestaurantNearby(mGoogleMap);
-                addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + getStreetAddressFromPositions(devicePosition), BitmapDescriptorFactory.HUE_RED);
+                addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
                 return true;    //return true so that the fragment won't be restart
             }
 
@@ -437,18 +425,13 @@ public class RestaurantMapViewFragment extends Fragment {
         });
 
     }
-
-    private LatLng getPositionFromLocation(Location location){
-        if(location != null)
-            return new LatLng(location.getLatitude(), location.getLongitude());
-        return null;
-    }
     private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, float color){
         googleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
     }
+
     /*private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
         Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
         assert vectorDrawable != null;
@@ -476,10 +459,8 @@ public class RestaurantMapViewFragment extends Fragment {
             @Override
             public void onLocationChanged(Location location) {
                 deviceLocation = location;
-                devicePosition = getPositionFromLocation(location);
-
-                Log.d("LOCATION", "onLocationChanged: " + devicePosition);
-
+                locationApi.setLocation(location);
+                devicePosition = locationApi.getPositionFromLocation();
             }
 
             @Override
@@ -498,11 +479,12 @@ public class RestaurantMapViewFragment extends Fragment {
             }
         };
     }
+
     private void requestLocationIfPermissionIsGranted(GoogleMap googleMap) {
         if (requireContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            devicePosition = getPositionFromLocation(deviceLocation);
+            locationApi.setLocation(deviceLocation);
 
             if (googleMap != null) {
                 googleMap.setMyLocationEnabled(true);
@@ -542,7 +524,6 @@ public class RestaurantMapViewFragment extends Fragment {
             Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
     }
 
- ////////////////////////////////////////////////////////////////////////////// USING JSON //////////////////////////////////////////////////////////////////////////////
     private void showAllRestaurantNearby(GoogleMap googleMap){
         RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
@@ -552,7 +533,8 @@ public class RestaurantMapViewFragment extends Fragment {
     private void ZoomOnRestaurantSearched(GoogleMap googleMap, String query){
         if (googleMap != null){
             googleMap.clear();                  // Removing all marker added
-            url = getUrl(deviceLocation);      // Getting url to get information about nearby restaurant on google maps.
+//            url = getUrl(deviceLocation);      // Getting url to get information about nearby restaurant on google maps.
+            url = urlApi.getUrlThrowDeviceLocation();
 
             RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
@@ -571,66 +553,32 @@ public class RestaurantMapViewFragment extends Fragment {
         }
     }
 
-    private String getUrl(Location location){
-        String url = null;
-
-        if (location != null){
-            url = NEARBY_SEARCH_URL +
-                    "location=" + location.getLatitude() + "," + location.getLongitude() +
-                    "&radius=" + PROXIMITY_RADIUS +
-                    "&type=" + Constants.RESTAURANT +
-                    "&sensor=true" +
-                    "&key=" + getString(R.string.google_maps_key);
-        }
-
-        Log.d("URL", "getUrl: " + url);
-
-        return url;
-    }
-
     private void showSuggestions(String query){
         RestaurantNearbyBank.getInstance(getContext(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
-                Log.d("SEARCH", "getRestaurantNearby: columnPlaces != null && adapter != null && query != null");
                 //When we've got all the restaurant
                 if (!restaurantList.isEmpty()) {
                     //Then we add all of them to our cursor to show it as suggestions to the user
-                    final MatrixCursor cursor = new MatrixCursor(columnPlaces);
                     int y = 0;
+                    final MatrixCursor cursor = new MatrixCursor(columnPlaces);
+
                     for (Restaurant restaurant : restaurantList) {
                         if (restaurant != null && restaurant.getName() != null) {
                             String placeName = restaurant.getName();
+
                             if (placeName.toLowerCase().contains(query.toLowerCase()))
                                 cursor.addRow(new Object[]{y, placeName, restaurant.getAddress()});
-                            Log.d("SEARCH", "getRestaurantNearby: " + placeName);
                         }
+
                         y++;
                     }
 
                     adapter.changeCursor(cursor);
                 }
-                if (searchView != null) {
-                    Log.d("SEARCH", "getRestaurantNearby: searchView != null");
+
+                if (searchView != null)
                     searchView.setSuggestionsAdapter(adapter);
-                }
-                Log.d("SEARCH", "onQueryTextChange: " + query);
-                Log.d("SEARCH", "onQueryTextChange: " + adapter.getCount());
             }
         });
-    }
-
-    private String getStreetAddressFromPositions(LatLng position) {
-        String address = "";
-        Geocoder geocoder = new Geocoder(getContext());
-        List<Address> addressList;
-
-        try {
-            addressList = geocoder.getFromLocation(position.latitude, position.longitude, 1);
-            address = addressList.get(0).getAddressLine(0);
-        } catch (IOException e) {
-            Log.d("ADDRESS", "getStreetAddressFromPositions: " + e.getMessage());
-        }
-
-        return address;
     }
 }
