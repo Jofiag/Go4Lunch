@@ -135,7 +135,7 @@ public class RestaurantNearbyBank {
 
                         if (mMarkerClickedCallback != null && mGoogleMap != null) {
                             mGoogleMap.setOnMarkerClickListener(marker -> {
-                                if ((Integer)marker.getTag() != -1)
+                                if ((Integer)marker.getTag() != -1) //if the marker doesn't correspond to the device location
                                     mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get((Integer) marker.getTag()));
 
                                 return false;
