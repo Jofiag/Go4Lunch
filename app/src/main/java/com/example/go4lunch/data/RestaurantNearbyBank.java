@@ -4,8 +4,6 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
-import android.widget.Filter;
-import android.widget.Filterable;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -25,6 +23,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RestaurantNearbyBank {
     public interface ListAsyncResponse{
@@ -33,10 +32,6 @@ public class RestaurantNearbyBank {
 
     public interface OnMarkerClicked{
         void onMarkerClickedGetRestaurant(Restaurant restaurant);
-    }
-
-    public interface OnFilterableResponse {
-        void onFilterableResponse(Filterable filterable);
     }
 
     private GoogleMap mGoogleMap;
@@ -110,6 +105,13 @@ public class RestaurantNearbyBank {
                                         "&photoreference=" + photoReference +
                                         "&key=" + mContext.getString(R.string.google_maps_key);
 
+                                float rating = resultObject.getInt(Constants.RATING);
+                                int favorableOpinion;
+
+                                if (rating >= 3)
+                                    favorableOpinion = 3;
+                                else
+                                    favorableOpinion = (int) rating;
 
                                 String address = getStreetAddressFromPositions(position);
 
@@ -117,6 +119,8 @@ public class RestaurantNearbyBank {
                                 restaurant.setName(name);
                                 restaurant.setAddress(address);
                                 restaurant.setPosition(position);
+                                restaurant.setFavorableOpinion(favorableOpinion);
+
                                 if (!photoReference.equals(""))
                                     restaurant.setImageUrl(photoUrl);
 
@@ -135,8 +139,11 @@ public class RestaurantNearbyBank {
 
                         if (mMarkerClickedCallback != null && mGoogleMap != null) {
                             mGoogleMap.setOnMarkerClickListener(marker -> {
-                                if ((Integer)marker.getTag() != -1) //if the marker doesn't correspond to the device location
-                                    mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get((Integer) marker.getTag()));
+                                int tag = -2;
+                                if (marker.getTag() != null)
+                                    tag = (Integer)marker.getTag();
+                                if (tag != -1) //if the marker doesn't correspond to the device location
+                                    mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get(tag));
 
                                 return false;
                             });
@@ -168,10 +175,10 @@ public class RestaurantNearbyBank {
     }
 
     private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, int restaurantIndex){
-        googleMap.addMarker(new MarkerOptions()
+        Objects.requireNonNull(googleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))))
         .setTag(restaurantIndex);
     }
 }

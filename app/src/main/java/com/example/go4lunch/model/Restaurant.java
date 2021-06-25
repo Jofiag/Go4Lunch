@@ -1,6 +1,5 @@
 package com.example.go4lunch.model;
 
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -16,7 +15,7 @@ public class Restaurant implements Parcelable {
     private String foodCountry;
     private OpeningHours openingHours;
     private String howFarFromWorkmate;
-    private int numberOfFavorableOpinion;
+    private int favorableOpinion;
     private int numberOfInterestedWorkmate;
     private List<Workmate> workmateList;
     private String phoneNumber;
@@ -32,7 +31,7 @@ public class Restaurant implements Parcelable {
         imageUrl = in.readString();
         foodCountry = in.readString();
         howFarFromWorkmate = in.readString();
-        numberOfFavorableOpinion = in.readInt();
+        favorableOpinion = in.readInt();
         numberOfInterestedWorkmate = in.readInt();
         phoneNumber = in.readString();
         position = in.readParcelable(LatLng.class.getClassLoader());
@@ -106,12 +105,12 @@ public class Restaurant implements Parcelable {
         this.howFarFromWorkmate = howFarFromWorkmate;
     }
 
-    public int getNumberOfFavorableOpinion() {
-        return numberOfFavorableOpinion;
+    public int getFavorableOpinion() {
+        return favorableOpinion;
     }
 
-    public void setNumberOfFavorableOpinion(int numberOfFavorableOpinion) {
-        this.numberOfFavorableOpinion = numberOfFavorableOpinion;
+    public void setFavorableOpinion(int favorableOpinion) {
+        this.favorableOpinion = favorableOpinion;
     }
 
     public int getNumberOfInterestedWorkmate() {
@@ -158,7 +157,7 @@ public class Restaurant implements Parcelable {
         dest.writeString(imageUrl);
         dest.writeString(foodCountry);
         dest.writeString(howFarFromWorkmate);
-        dest.writeInt(numberOfFavorableOpinion);
+        dest.writeInt(favorableOpinion);
         dest.writeInt(numberOfInterestedWorkmate);
         dest.writeString(phoneNumber);
         dest.writeParcelable(position, flags);

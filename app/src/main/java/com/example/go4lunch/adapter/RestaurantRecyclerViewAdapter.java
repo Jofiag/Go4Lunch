@@ -59,8 +59,14 @@ implements Filterable {
 
         holder.restaurantNameTextView.setText(restaurant.getName());
         holder.howFarFromWorkmateTextView.setText(restaurant.getHowFarFromWorkmate());
-        holder.foodCountryAndAddressTextView.setText(String.format("%s - %s", restaurant.getFoodCountry(), restaurant.getAddress()));
         holder.numberOfInterestedWorkmateTextView.setText(MessageFormat.format("({0})", restaurant.getNumberOfInterestedWorkmate()));
+
+        String foodCountry = restaurant.getFoodCountry();
+        if (foodCountry != null)
+            holder.foodCountryAndAddressTextView.setText(String.format("%s - %s", foodCountry, restaurant.getAddress()));
+        else
+            holder.foodCountryAndAddressTextView.setText(String.format("%s",restaurant.getAddress()));
+
 
         if (restaurant.getImageUrl() != null)
             Picasso.get().load(restaurant.getImageUrl())
@@ -69,7 +75,7 @@ implements Filterable {
                     .resize(154, 154)
                     .into(holder.restaurantImage);
 
-        showYellowStar(holder, restaurant.getNumberOfFavorableOpinion());
+        showYellowStar(holder, restaurant.getFavorableOpinion());
 
         holder.itemView.setOnClickListener(v -> mCallback.onRestaurantSelected(restaurant));
 
@@ -83,14 +89,14 @@ implements Filterable {
             return 0;
     }
 
-    private void showYellowStar(MyViewHolder holder, int numberOfFavorableOpinion){
-        if (numberOfFavorableOpinion == 1)
+    private void showYellowStar(MyViewHolder holder, int favorableOpinion){
+        if (favorableOpinion == 1)
             holder.yellowStar1.setVisibility(View.VISIBLE);
-        else if(numberOfFavorableOpinion == 2){
+        else if(favorableOpinion == 2){
             holder.yellowStar1.setVisibility(View.VISIBLE);
             holder.yellowStar2.setVisibility(View.VISIBLE);
         }
-        else if ( numberOfFavorableOpinion >= 3){
+        else if ( favorableOpinion >= 3){
             holder.yellowStar1.setVisibility(View.VISIBLE);
             holder.yellowStar2.setVisibility(View.VISIBLE);
             holder.yellowStar3.setVisibility(View.VISIBLE);
@@ -172,7 +178,7 @@ implements Filterable {
         List<Restaurant> restaurantListFiltered = new ArrayList<>();
         String searchText = constraint.toString().toLowerCase().trim();
 
-            if (constraint == null || constraint.length() == 0)
+            if (constraint.length() == 0)
                 restaurantListFiltered.addAll(restaurantListToFiltered);
             else {
                 for (Restaurant restaurant : restaurantListToFiltered)

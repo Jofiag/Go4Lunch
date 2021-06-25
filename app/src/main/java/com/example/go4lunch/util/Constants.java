@@ -28,7 +28,8 @@ public class Constants {
     public static final String RESTAURANT = "restaurant";
     public static final String NEARBY_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
     public static final String PLACE_PHOTO_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/photo?";
-    public static final int PROXIMITY_RADIUS = 4000;
+    public static final String PLACE_DETAILS_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/details/json?";
+    public static final int PROXIMITY_RADIUS = 10000;
 
     //JSON FILE
     public static final String PLACE_NAME = "place_name";
@@ -49,6 +50,7 @@ public class Constants {
     public static final String DISTANCE = "distance";
     public static final String PROMINENCE = "prominence";
     public static final String PHOTOS = "photos";
+    public static final String RATING = "rating";
     public static final String PHOTO_REFERENCE = "photo_reference";
     public static final int PHOTO_MAX_HEIGHT = 1600;
     public static final int PHOTO_MAX_WIDTH = 1600;
