@@ -1,6 +1,7 @@
 package com.example.go4lunch.adapter;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +11,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
-import com.example.go4lunch.model.OpeningHours;
+import com.example.go4lunch.model.MyOpeningHours;
 import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.util.Constants;
 import com.squareup.picasso.Picasso;
 
 import java.text.MessageFormat;
@@ -48,13 +51,19 @@ implements Filterable {
         return new MyViewHolder(view);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Restaurant restaurant = restaurantList.get(position);
 
-        OpeningHours openingHours = restaurant.getOpeningHours();
-        if (openingHours != null){
-            holder.closeTimeTextView.setText(restaurant.getOpeningHours().getOpeningStatus());
+        MyOpeningHours myOpeningHours = restaurant.getOpeningHours();
+        if (myOpeningHours != null){
+            String status = myOpeningHours.getOpeningStatus();
+
+            if (status.equals(Constants.CLOSING_SOON))
+                holder.closeTimeTextView.setTextAppearance(R.style.closing_soon_style);
+
+            holder.closeTimeTextView.setText(status);
         }
 
         holder.restaurantNameTextView.setText(restaurant.getName());
@@ -151,6 +160,7 @@ implements Filterable {
     @Override
     public Filter getFilter() {
         return new Filter() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 String url = RestaurantListUrlApi.getInstance(context).getUrlThroughDeviceLocation();

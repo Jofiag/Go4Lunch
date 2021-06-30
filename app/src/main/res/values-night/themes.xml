@@ -15,4 +15,9 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <style name="closing_soon_style">
+        <item name="android:textColor">@color/my_red</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

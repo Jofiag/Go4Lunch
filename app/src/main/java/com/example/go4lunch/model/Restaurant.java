@@ -1,26 +1,28 @@
 package com.example.go4lunch.model;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.net.URL;
 import java.util.List;
 
 public class Restaurant implements Parcelable {
     private String name;
     private String address;
+    private Uri websiteUrl;
+    private String placeId;
     private String imageUrl;
-    private String foodCountry;
-    private OpeningHours openingHours;
-    private String howFarFromWorkmate;
-    private int favorableOpinion;
-    private int numberOfInterestedWorkmate;
-    private List<Workmate> workmateList;
-    private String phoneNumber;
-    private URL websiteUrl;
     private LatLng position;
+    private String foodCountry;
+    private String phoneNumber;
+    private int favorableOpinion;
+    private String howFarFromWorkmate;
+    private List<Workmate> workmateList;
+    private MyOpeningHours myOpeningHours;
+    private int numberOfInterestedWorkmate;
+
 
     public Restaurant() {
     }
@@ -29,11 +31,11 @@ public class Restaurant implements Parcelable {
         name = in.readString();
         address = in.readString();
         imageUrl = in.readString();
-        foodCountry = in.readString();
-        howFarFromWorkmate = in.readString();
-        favorableOpinion = in.readInt();
-        numberOfInterestedWorkmate = in.readInt();
         phoneNumber = in.readString();
+        foodCountry = in.readString();
+        favorableOpinion = in.readInt();
+        howFarFromWorkmate = in.readString();
+        numberOfInterestedWorkmate = in.readInt();
         position = in.readParcelable(LatLng.class.getClassLoader());
     }
 
@@ -48,6 +50,14 @@ public class Restaurant implements Parcelable {
             return new Restaurant[size];
         }
     };
+
+    public String getPlaceId() {
+        return placeId;
+    }
+
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
+    }
 
     public LatLng getPosition() {
         return position;
@@ -89,12 +99,12 @@ public class Restaurant implements Parcelable {
         this.foodCountry = foodCountry;
     }
 
-    public OpeningHours getOpeningHours() {
-        return openingHours;
+    public MyOpeningHours getOpeningHours() {
+        return myOpeningHours;
     }
 
-    public void setOpeningHours(OpeningHours openingHours) {
-        this.openingHours = openingHours;
+    public void setOpeningHours(MyOpeningHours myOpeningHours) {
+        this.myOpeningHours = myOpeningHours;
     }
 
     public String getHowFarFromWorkmate() {
@@ -137,11 +147,11 @@ public class Restaurant implements Parcelable {
         this.phoneNumber = phoneNumber;
     }
 
-    public URL getWebsiteUrl() {
+    public Uri getWebsiteUrl() {
         return websiteUrl;
     }
 
-    public void setWebsiteUrl(URL websiteUrl) {
+    public void setWebsiteUrl(Uri websiteUrl) {
         this.websiteUrl = websiteUrl;
     }
 

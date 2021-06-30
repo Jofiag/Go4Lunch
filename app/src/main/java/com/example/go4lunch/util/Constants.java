@@ -52,8 +52,13 @@ public class Constants {
     public static final String PHOTOS = "photos";
     public static final String RATING = "rating";
     public static final String PHOTO_REFERENCE = "photo_reference";
+    public static final String PLACE_ID = "place_id";
     public static final int PHOTO_MAX_HEIGHT = 1600;
     public static final int PHOTO_MAX_WIDTH = 1600;
+    public static final String OPENING_HOURS = "opening_hours";
+    public static final String RESULT = "result";
+    public static final String CLOSED = "Closed";
+    public static final String CLOSING_SOON = "Closing soon";
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();

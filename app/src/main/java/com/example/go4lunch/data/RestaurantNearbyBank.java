@@ -1,27 +1,47 @@
 package com.example.go4lunch.data;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Parcel;
+import android.text.format.DateUtils;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.go4lunch.R;
+import com.example.go4lunch.model.MyOpeningHours;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.DayOfWeek;
+import com.google.android.libraries.places.api.model.LocalTime;
+import com.google.android.libraries.places.api.model.OpeningHours;
+import com.google.android.libraries.places.api.model.Period;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,6 +59,8 @@ public class RestaurantNearbyBank {
     private final RequestQueue mRequestQueue;
     private final OnMarkerClicked mMarkerClickedCallback;
     private List<Restaurant> mRestaurantList = new ArrayList<>();
+    @SuppressLint("StaticFieldLeak")
+    private static RestaurantNearbyBank INSTANCE;
 
     public RestaurantNearbyBank(Context context, GoogleMap googleMap) {
         mContext = context;
@@ -54,23 +76,24 @@ public class RestaurantNearbyBank {
     }
 
     public static synchronized RestaurantNearbyBank getInstance(Context context, GoogleMap googleMap){
-        RestaurantNearbyBank INSTANCE;
-
-        if (googleMap == null)
-            INSTANCE = new RestaurantNearbyBank(context);
-        else
-            INSTANCE = new RestaurantNearbyBank(context, googleMap);
+        if (INSTANCE == null) {
+            if (googleMap == null)
+                INSTANCE = new RestaurantNearbyBank(context);
+            else
+                INSTANCE = new RestaurantNearbyBank(context, googleMap);
+        }
 
         return INSTANCE;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     Log.d("URL", "getRestaurantNearbyList: " + url);
                     try {
-                        if (!mRestaurantList.isEmpty())
-                            mRestaurantList = new ArrayList<>();
+                        /*if (!mRestaurantList.isEmpty())
+                            mRestaurantList = new ArrayList<>();*/
 
                         JSONArray results = response.getJSONArray(Constants.RESULTS);
                         int restaurantIndex = 0;
@@ -113,16 +136,22 @@ public class RestaurantNearbyBank {
                                 else
                                     favorableOpinion = (int) rating;
 
+
+                                String placeId = resultObject.getString(Constants.PLACE_ID);
                                 String address = getStreetAddressFromPositions(position);
 
                                 Restaurant restaurant = new Restaurant();
                                 restaurant.setName(name);
                                 restaurant.setAddress(address);
                                 restaurant.setPosition(position);
+                                restaurant.setPlaceId(placeId);
                                 restaurant.setFavorableOpinion(favorableOpinion);
-
                                 if (!photoReference.equals(""))
                                     restaurant.setImageUrl(photoUrl);
+//                                Log.d("DETAILS", "getRestaurantNearbyList: ID = " + placeId);
+//                                Log.d("DETAILS", "getRestaurantNearbyList: PLACES = " + url);
+
+                                setMoreRestaurantDetails(restaurant, placeId, listResponseCallback);
 
                                 mRestaurantList.add(restaurant);
 
@@ -134,8 +163,8 @@ public class RestaurantNearbyBank {
 
                         }
 
-                        if (listResponseCallback != null)
-                            listResponseCallback.processFinished(mRestaurantList);
+                        /*if (listResponseCallback != null)
+                            listResponseCallback.processFinished(mRestaurantList);*/
 
                         if (mMarkerClickedCallback != null && mGoogleMap != null) {
                             mGoogleMap.setOnMarkerClickListener(marker -> {
@@ -156,6 +185,122 @@ public class RestaurantNearbyBank {
                 error -> Log.d("VOLLEY", "onErrorResponse: " + error.getMessage()));
 
         mRequestQueue.add(jsonObjectRequest);
+
+    }
+
+     /*private PlacesClient placesClient;
+    private AutocompleteSessionToken sessionToken;
+    private RectangularBounds bounds;
+    private FindAutocompletePredictionsRequest predictionRequest;
+    private List<Place.Field> placeFields;*/
+
+    /*RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, new RestaurantBank.ListAsyncResponse() {
+        @Override
+        public void processFinished(List<Place> restaurantList) {
+//                restaurantAdapter = new RestaurantRecyclerViewAdapter(context, (Restaurant)restaurantList);
+
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            recyclerView.setAdapter(restaurantAdapter);
+        }
+    });*/
+
+    /*private void initializePlaces(){
+        if (!Places.isInitialized())
+            Places.initialize(Objects.requireNonNull(getContext()), getString(R.string.google_maps_key));
+
+        placesClient = Places.createClient(Objects.requireNonNull(getContext()));
+    }
+    private void initializePredictionRequestAndPlaceFields(){
+        sessionToken = AutocompleteSessionToken.newInstance();
+        bounds = RectangularBounds.newInstance(LatLngBounds.builder().include(new LatLng(45.7757747, 3.0804423)).build());
+
+        predictionRequest = FindAutocompletePredictionsRequest.builder()
+                .setCountry("fr")
+                .setLocationBias(bounds)
+                .setTypeFilter(TypeFilter.GEOCODE)
+                .setSessionToken(sessionToken)
+                .build();
+
+        placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG,
+                Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.TYPES);
+    }*/
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void setMoreRestaurantDetails(Restaurant restaurant, String placeId, ListAsyncResponse listResponseCallback){
+        String detailsUrl = Constants.PLACE_DETAILS_SEARCH_URL +
+                "place_id=" + placeId +
+                "&key=" + mContext.getString(R.string.google_maps_key);
+
+//        Log.d("DETAILS", "getOpeningHours: DETAILS = " + detailsUrl);
+
+        if(!Places.isInitialized())
+            Places.initialize(Objects.requireNonNull(mContext), mContext.getString(R.string.google_maps_key));
+
+        PlacesClient placesClient = Places.createClient(Objects.requireNonNull(mContext));
+        List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
+        FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields);
+
+        if (!mRestaurantList.isEmpty())
+            mRestaurantList = new ArrayList<>();
+
+        placesClient.fetchPlace(fetchPlaceRequest)
+                .addOnSuccessListener(response -> {
+                    Place place = response.getPlace();
+
+                    OpeningHours openingHours = place.getOpeningHours();
+                    String phoneNumber = place.getPhoneNumber();
+                    Uri website = place.getWebsiteUri();
+                    String name = place.getName();
+
+                    String currentDayOfWeek = LocalDate.now().getDayOfWeek().toString();
+                    MyOpeningHours myOpeningHours = new MyOpeningHours();
+
+                    if (openingHours != null){
+                        for (int i = 0; i < openingHours.getPeriods().size(); i++) {
+                                Period period = openingHours.getPeriods().get(i);
+                                Period nextPeriod = openingHours.getPeriods().get(i+1);
+                                String openDay = Objects.requireNonNull(period.getOpen()).getDay().toString();
+                                String nextOpenDay = Objects.requireNonNull(nextPeriod.getOpen()).getDay().toString();
+
+                                if (openDay.equals(currentDayOfWeek)){
+                                    if (nextOpenDay.equals(currentDayOfWeek)) {
+
+                                        myOpeningHours.setFirstOpeningTime(period.getOpen().getTime());
+                                        myOpeningHours.setFirstClosingTime(Objects.requireNonNull(period.getClose()).getTime());
+                                        myOpeningHours.setLastOpeningTime(nextPeriod.getOpen().getTime());
+                                        myOpeningHours.setLastClosingTime(Objects.requireNonNull(nextPeriod.getClose()).getTime());
+
+                                    }
+                                    else {
+
+                                        myOpeningHours.setFirstOpeningTime(period.getOpen().getTime());
+                                        myOpeningHours.setFirstClosingTime(Objects.requireNonNull(period.getClose()).getTime());
+                                    }
+
+                                    i = openingHours.getPeriods().size();   //Stopping the for loop
+                                }
+                            }
+                    }
+
+                    if (openingHours != null && name != null && name.toLowerCase().equals("la brasserie bordelaise"))
+                        Log.d("DETAILS", "setMoreRestaurantDetails: PERIODS =  " + openingHours.getPeriods());
+//                            Log.d("DETAILS", "setMoreRestaurantDetails: PERIODS =  " + openingHours.getWeekdayText());
+
+//                    Log.d("DETAILS", "getOpeningHours: \n NAME = " + name);
+//                    Log.d("DETAILS", "getOpeningHours: \n WEBSITE = " + website);
+//                    Log.d("DETAILS", "getOpeningHours: \n PHONE NUMBER = " + phoneNumber);
+//                    Log.d("DETAILS", "getOpeningHours: \n OPENING HOURS = " + openingHours);
+
+                    restaurant.setPhoneNumber(phoneNumber);
+                    restaurant.setWebsiteUrl(website);
+                    restaurant.setOpeningHours(myOpeningHours);
+
+                    mRestaurantList.add(restaurant);
+
+                    if (listResponseCallback != null)
+                        listResponseCallback.processFinished(mRestaurantList);
+                });
 
     }
 
