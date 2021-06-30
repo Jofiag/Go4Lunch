@@ -6,8 +6,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Parcel;
-import android.text.format.DateUtils;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -24,8 +22,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.DayOfWeek;
-import com.google.android.libraries.places.api.model.LocalTime;
 import com.google.android.libraries.places.api.model.OpeningHours;
 import com.google.android.libraries.places.api.model.Period;
 import com.google.android.libraries.places.api.model.Place;
@@ -37,11 +33,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -228,9 +222,9 @@ public class RestaurantNearbyBank {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void setMoreRestaurantDetails(Restaurant restaurant, String placeId, ListAsyncResponse listResponseCallback){
-        String detailsUrl = Constants.PLACE_DETAILS_SEARCH_URL +
+        /*String detailsUrl = Constants.PLACE_DETAILS_SEARCH_URL +
                 "place_id=" + placeId +
-                "&key=" + mContext.getString(R.string.google_maps_key);
+                "&key=" + mContext.getString(R.string.google_maps_key);*/
 
 //        Log.d("DETAILS", "getOpeningHours: DETAILS = " + detailsUrl);
 
