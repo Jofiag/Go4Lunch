@@ -161,6 +161,7 @@ public class RestaurantMapViewFragment extends Fragment {
         searchView.setSubmitButtonEnabled(true);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public boolean onQueryTextSubmit(String query) {
                 ZoomOnRestaurantSearched(mGoogleMap, query);
@@ -169,6 +170,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 return true;    //return true so that the fragment won't be restart
             }
 
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Show suggestion
@@ -224,6 +226,7 @@ public class RestaurantMapViewFragment extends Fragment {
         outState.putString("url", url);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setGoogleMap(GoogleMap googleMap) {
         Log.d("ORDER", "setGoogleMap: ");
 
@@ -277,7 +280,7 @@ public class RestaurantMapViewFragment extends Fragment {
                     if (query.charAt(i) == '_')                             //We find the character '_'
                         y = i;                                              //then, we save it's position in y.
 
-                    if (y != 0 && i > y) {                                      //When we'r at the character '_' position,
+                    if (y != 0 && i > y) {                                      //When we're at the character '_' position,
                         resultArray[z] = query.charAt(i);                       //we save all the character after that position
 
                         if (i+1 < query.length() && query.charAt(i+1) == '/')   //until the next character is '/'
@@ -316,7 +319,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 .title(title)
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
 
-        if (position == devicePosition)
+        if (position == devicePosition && marker != null)
             marker.setTag(-1);          //when the tag equals -1 we know its the device location, so that we won't start the RestaurantDetailsActivity when the user click on his position.
     }
 
@@ -399,12 +402,14 @@ public class RestaurantMapViewFragment extends Fragment {
             Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void showAllRestaurantNearby(GoogleMap googleMap){
         RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void ZoomOnRestaurantSearched(GoogleMap googleMap, String query){
         if (googleMap != null){
             googleMap.clear();                  // Removing all marker added
@@ -428,6 +433,7 @@ public class RestaurantMapViewFragment extends Fragment {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void showSuggestions(String query){
         RestaurantNearbyBank.getInstance(getContext(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
