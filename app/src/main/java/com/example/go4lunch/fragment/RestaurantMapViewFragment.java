@@ -231,18 +231,18 @@ public class RestaurantMapViewFragment extends Fragment {
         Log.d("ORDER", "setGoogleMap: ");
 
         mGoogleMap = googleMap;
-        requestLocationIfPermissionIsGranted(googleMap);
+        requestLocationIfPermissionIsGranted(mGoogleMap);
 
         if (deviceLocation != null) {
             locationApi.setLocation(deviceLocation);
             devicePosition = locationApi.getPositionFromLocation();
-            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-            locationButton.setOnClickListener(v -> googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
-            showAllTextView.setOnClickListener(v -> showAllRestaurantNearby(googleMap));
-            addMarkerOnPosition(googleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
+            mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            locationButton.setOnClickListener(v -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
+            showAllTextView.setOnClickListener(v -> showAllRestaurantNearby(mGoogleMap));
+            addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
             url = urlApi.getUrlThroughDeviceLocation();
-            showAllRestaurantNearby(googleMap);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 11));
+            showAllRestaurantNearby(mGoogleMap);
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 11));
         }
         else
             Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();
@@ -423,7 +423,7 @@ public class RestaurantMapViewFragment extends Fragment {
                     //Zooming on the restaurant clicked
                     if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 20));
-                        addMarkerOnPosition(googleMap, restaurantPosition, restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+                        addMarkerOnPosition(mGoogleMap, restaurantPosition, restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
                     }
 
                     getFromQuery(query, NAME);

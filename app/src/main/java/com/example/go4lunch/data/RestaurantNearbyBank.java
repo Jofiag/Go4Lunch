@@ -48,7 +48,7 @@ public class RestaurantNearbyBank {
         void onMarkerClickedGetRestaurant(Restaurant restaurant);
     }
 
-    private GoogleMap mGoogleMap;
+    private static GoogleMap mGoogleMap;
     private final Context mContext;
     private final RequestQueue mRequestQueue;
     private final OnMarkerClicked mMarkerClickedCallback;
@@ -70,12 +70,17 @@ public class RestaurantNearbyBank {
     }
 
     public static synchronized RestaurantNearbyBank getInstance(Context context, GoogleMap googleMap){
-        if (INSTANCE == null) {
+//        if (INSTANCE != null){
+//            if (googleMap != null && mGoogleMap == null)
+//                INSTANCE = new RestaurantNearbyBank(context, googleMap);
+//        }
+
+//        if (INSTANCE == null) {
             if (googleMap == null)
                 INSTANCE = new RestaurantNearbyBank(context);
             else
                 INSTANCE = new RestaurantNearbyBank(context, googleMap);
-        }
+//        }
 
         return INSTANCE;
     }

@@ -19,13 +19,6 @@ public class MyOpeningHours {
     public MyOpeningHours() {
     }
 
-    public MyOpeningHours(LocalTime firstOpeningTime, LocalTime firstClosingTime, LocalTime lastOpeningTime, LocalTime lastClosingTime) {
-        this.firstOpeningTime = firstOpeningTime;
-        this.firstClosingTime = firstClosingTime;
-        this.lastOpeningTime = lastOpeningTime;
-        this.lastClosingTime = lastClosingTime;
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     public String getOpeningStatus(){
         String status;
@@ -62,11 +55,11 @@ public class MyOpeningHours {
                 status = Constants.OPEN_UNTIL_TEXT + firstClosingTime.getHours() + Constants.H_TEXT + firstClosingTime.getMinutes();
                 openingStatus = closingSoon(currentTime, firstClosingTime, status);
             }
-            else if (compareLocalTime(firstClosingTime, currentTime) <= 0 && compareLocalTime(currentTime, lastClosingTime) < 0){ //If we are at the break time
+            else if (compareLocalTime(firstClosingTime, currentTime) <= 0 && compareLocalTime(currentTime, lastOpeningTime) < 0){ //If we are at the break time
                 //Closed. Open at lastOpeningHour
                 openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + lastOpeningTime.getHours() + Constants.H_TEXT + lastOpeningTime.getMinutes();
             }
-            else if (compareLocalTime(firstOpeningTime, currentTime) <= 0){ //If we are at the second opening time
+            else if (compareLocalTime(lastOpeningTime, currentTime) <= 0){ //If we are at the second opening time
                 //open until lastClosingHour
                 status = Constants.OPEN_UNTIL_TEXT + lastClosingTime.getHours() + Constants.H_TEXT + lastClosingTime.getMinutes();
                 openingStatus = closingSoon(currentTime, lastClosingTime, status);
@@ -130,41 +123,25 @@ public class MyOpeningHours {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private int compareLocalTime(LocalTime l1, LocalTime l2){
-        int comparaison = 0;
+        int compare = 0;
 
         if (l1 != null && l2 != null) {
             l1 = setHourTo24WhenMidnight(l1);
             l2 = setHourTo24WhenMidnight(l2);
 
             if (l1.getHours() < l2.getHours())
-                comparaison = -1;
+                compare = -1;
             else if (l1.getHours() > l2.getHours())
-                comparaison = 1;
+                compare = 1;
             else if (l1.getHours() == l2.getHours()){
                 if (l1.getMinutes() < l2.getMinutes())
-                    comparaison = -1;
+                    compare = -1;
                 else if (l1.getMinutes() > l2.getMinutes())
-                    comparaison = 1;
+                    compare = 1;
             }
         }
 
-        return comparaison;
-    }
-
-    public LocalTime getFirstOpeningTime() {
-        return firstOpeningTime;
-    }
-
-    public LocalTime getFirstClosingTime() {
-        return firstClosingTime;
-    }
-
-    public LocalTime getLastOpeningTime() {
-        return lastOpeningTime;
-    }
-
-    public LocalTime getLastClosingTime() {
-        return lastClosingTime;
+        return compare;
     }
 
     public void setFirstOpeningTime(LocalTime time) {
