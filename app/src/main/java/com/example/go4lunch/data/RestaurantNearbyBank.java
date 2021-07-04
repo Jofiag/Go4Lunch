@@ -256,7 +256,9 @@ public class RestaurantNearbyBank {
                     MyOpeningHours myOpeningHours = new MyOpeningHours();
 
                     if (openingHours != null){
-                        for (int i = 0; i < openingHours.getPeriods().size(); i++) {
+                        int size = openingHours.getPeriods().size();
+                        for (int i = 0; i < size; i++) {
+                            if (size > i+1 ) {
                                 Period period = openingHours.getPeriods().get(i);
                                 Period nextPeriod = openingHours.getPeriods().get(i+1);
                                 String openDay = Objects.requireNonNull(period.getOpen()).getDay().toString();
@@ -280,6 +282,7 @@ public class RestaurantNearbyBank {
                                     i = openingHours.getPeriods().size();   //Stopping the for loop
                                 }
                             }
+                        }
                     }
 
                     if (openingHours != null && name != null && name.toLowerCase().equals("la brasserie bordelaise"))
