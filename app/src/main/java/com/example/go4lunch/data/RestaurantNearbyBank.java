@@ -148,6 +148,7 @@ public class RestaurantNearbyBank {
                                 restaurant.setFavorableOpinion(favorableOpinion);
                                 if (!photoReference.equals(""))
                                     restaurant.setImageUrl(photoUrl);
+
 //                                Log.d("DETAILS", "getRestaurantNearbyList: ID = " + placeId);
 //                                Log.d("DETAILS", "getRestaurantNearbyList: PLACES = " + url);
 
@@ -160,7 +161,6 @@ public class RestaurantNearbyBank {
 
                                 restaurantIndex++;
                             }
-
                         }
 
                         /*if (listResponseCallback != null)
@@ -260,7 +260,8 @@ public class RestaurantNearbyBank {
 
                     if (openingHours != null){
                         int size = openingHours.getPeriods().size();
-                        boolean isOpen = isOpen(openingHours);
+                        boolean isOpen = isOpen(place);
+
 
                         for (int i = 0; i < size; i++) {
                             if (i+1 < size ) {
@@ -319,9 +320,8 @@ public class RestaurantNearbyBank {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private boolean isOpen(OpeningHours placeOpeningHour){
-        boolean isOpen = false;
+    private boolean isOpen(Place place){
+        /*boolean isOpen = false;
         String currentDayOfWeek = LocalDate.now().getDayOfWeek().toString();
 
         int size = placeOpeningHour.getPeriods().size();
@@ -332,9 +332,10 @@ public class RestaurantNearbyBank {
             if (openDay.equals(currentDayOfWeek))
                 isOpen = true;
 
-//            if (i == size-1 && isOpen == false)
-
-        }
+        }*/
+        boolean isOpen = false;
+        if(place.isOpen() != null)
+            isOpen = place.isOpen();
 
         return  isOpen;
     }
