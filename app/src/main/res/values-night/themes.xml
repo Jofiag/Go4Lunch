@@ -20,4 +20,9 @@
         <item name="android:textColor">@color/my_red</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+    <style name="no_closing_soon_style">
+        <item name="android:textColor">@color/my_normal_gray</item>
+        <item name="android:textStyle">normal</item>
+    </style>
 </resources>

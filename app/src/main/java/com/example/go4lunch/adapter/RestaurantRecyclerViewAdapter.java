@@ -62,6 +62,8 @@ implements Filterable {
 
             if (status.equals(Constants.CLOSING_SOON))
                 holder.closeTimeTextView.setTextAppearance(R.style.closing_soon_style);
+            else
+                holder.closeTimeTextView.setTextAppearance(R.style.no_closing_soon_style);
 
             holder.closeTimeTextView.setText(status);
         }
