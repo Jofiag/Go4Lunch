@@ -110,9 +110,9 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
                         .resize(445, 445)
                         .into(restaurantImageView);
 
-            if (restaurant.getFoodCountry() != null)
+            /*if (restaurant.getFoodCountry() != null || restaurant.getFoodCountry().isEmpty())
                 RestaurantFoodCountryAndRestaurantAddress.setText(MessageFormat.format("{0} - {1}", restaurant.getFoodCountry(), restaurant.getAddress()));
-            else
+            else*/
                 RestaurantFoodCountryAndRestaurantAddress.setText(restaurant.getAddress());
 
             restaurantNameTextView.setText(restaurant.getName());

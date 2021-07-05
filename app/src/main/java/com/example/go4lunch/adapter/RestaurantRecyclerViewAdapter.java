@@ -68,10 +68,6 @@ implements Filterable {
             holder.closeTimeTextView.setText(status);
         }
 
-        holder.restaurantNameTextView.setText(restaurant.getName());
-        holder.howFarFromWorkmateTextView.setText(restaurant.getHowFarFromWorkmate());
-        holder.numberOfInterestedWorkmateTextView.setText(MessageFormat.format("({0})", restaurant.getNumberOfInterestedWorkmate()));
-
         String foodCountry = restaurant.getFoodCountry();
         if (foodCountry != null)
             holder.foodCountryAndAddressTextView.setText(String.format("%s - %s", foodCountry, restaurant.getAddress()));
@@ -88,6 +84,11 @@ implements Filterable {
 
         showYellowStar(holder, restaurant.getFavorableOpinion());
 
+        String distanceFromDeviceLocation = String.format("%sm", restaurant.getDistanceFromDeviceLocation());
+        holder.howFarFromRestaurantTextView.setText(distanceFromDeviceLocation);
+
+        holder.restaurantNameTextView.setText(restaurant.getName());
+        holder.numberOfInterestedWorkmateTextView.setText("(0)");
         holder.itemView.setOnClickListener(v -> mCallback.onRestaurantSelected(restaurant));
 
     }
@@ -122,7 +123,7 @@ implements Filterable {
         private ImageView restaurantImage;
         private TextView closeTimeTextView;
         private TextView restaurantNameTextView;
-        private TextView howFarFromWorkmateTextView;
+        private TextView howFarFromRestaurantTextView;
         private TextView foodCountryAndAddressTextView;
         private TextView numberOfInterestedWorkmateTextView;
 
@@ -146,7 +147,7 @@ implements Filterable {
             yellowStar3 = itemView.findViewById(R.id.yellow_star_3);
             restaurantImage = itemView.findViewById(R.id.restaurant_image_view);
             closeTimeTextView = itemView.findViewById(R.id.close_time_text_view);
-            howFarFromWorkmateTextView = itemView.findViewById(R.id.how_far_text_view);
+            howFarFromRestaurantTextView = itemView.findViewById(R.id.how_far_text_view);
             restaurantNameTextView = itemView.findViewById(R.id.restaurant_name_text_view);
             foodCountryAndAddressTextView = itemView.findViewById(R.id.food_country_and_address_text_view);
             numberOfInterestedWorkmateTextView = itemView.findViewById(R.id.number_of_interested_workmate);
@@ -200,4 +201,5 @@ implements Filterable {
 
             return restaurantListFiltered;
     }
+
 }

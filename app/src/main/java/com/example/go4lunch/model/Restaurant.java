@@ -18,10 +18,10 @@ public class Restaurant implements Parcelable {
     private String foodCountry;
     private String phoneNumber;
     private int favorableOpinion;
-    private String howFarFromWorkmate;
     private List<Workmate> workmateList;
     private MyOpeningHours myOpeningHours;
     private int numberOfInterestedWorkmate;
+    private int distanceFromDeviceLocation;
 
 
     public Restaurant() {
@@ -34,9 +34,9 @@ public class Restaurant implements Parcelable {
         phoneNumber = in.readString();
         foodCountry = in.readString();
         favorableOpinion = in.readInt();
-        howFarFromWorkmate = in.readString();
         numberOfInterestedWorkmate = in.readInt();
         position = in.readParcelable(LatLng.class.getClassLoader());
+        distanceFromDeviceLocation = in.readInt();
     }
 
     public static final Creator<Restaurant> CREATOR = new Creator<Restaurant>() {
@@ -50,6 +50,14 @@ public class Restaurant implements Parcelable {
             return new Restaurant[size];
         }
     };
+
+    public float getDistanceFromDeviceLocation() {
+        return distanceFromDeviceLocation;
+    }
+
+    public void setDistanceFromDeviceLocation(int distanceFromDeviceLocation) {
+        this.distanceFromDeviceLocation = distanceFromDeviceLocation;
+    }
 
     public String getPlaceId() {
         return placeId;
@@ -107,14 +115,6 @@ public class Restaurant implements Parcelable {
         this.myOpeningHours = myOpeningHours;
     }
 
-    public String getHowFarFromWorkmate() {
-        return howFarFromWorkmate;
-    }
-
-    public void setHowFarFromWorkmate(String howFarFromWorkmate) {
-        this.howFarFromWorkmate = howFarFromWorkmate;
-    }
-
     public int getFavorableOpinion() {
         return favorableOpinion;
     }
@@ -166,10 +166,10 @@ public class Restaurant implements Parcelable {
         dest.writeString(address);
         dest.writeString(imageUrl);
         dest.writeString(foodCountry);
-        dest.writeString(howFarFromWorkmate);
         dest.writeInt(favorableOpinion);
         dest.writeInt(numberOfInterestedWorkmate);
         dest.writeString(phoneNumber);
         dest.writeParcelable(position, flags);
+        dest.writeInt(distanceFromDeviceLocation);
     }
 }

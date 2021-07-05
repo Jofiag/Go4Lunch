@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -238,7 +239,7 @@ public class RestaurantNearbyBank {
             Places.initialize(Objects.requireNonNull(mContext), mContext.getString(R.string.google_maps_key));
 
         PlacesClient placesClient = Places.createClient(Objects.requireNonNull(mContext));
-        List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
+        List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
         FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields);
 
         if (!mRestaurantList.isEmpty())
@@ -299,6 +300,8 @@ public class RestaurantNearbyBank {
                     restaurant.setPhoneNumber(phoneNumber);
                     restaurant.setWebsiteUrl(website);
                     restaurant.setOpeningHours(myOpeningHours);
+                    if (place.getLatLng() != null)
+                        restaurant.setDistanceFromDeviceLocation(getHowFarFrom(place.getLatLng()));
 
                     mRestaurantList.add(restaurant);
 
@@ -318,6 +321,16 @@ public class RestaurantNearbyBank {
                     }
                 });
 
+    }
+
+    private int getHowFarFrom(LatLng destination){
+        Location deviceLocation = LocationApi.getInstance(mContext).getLocation();
+        Location destinationLocation = new Location("");
+        destinationLocation.setLatitude(destination.latitude);
+        destinationLocation.setLongitude(destination.longitude);
+
+
+        return (int) deviceLocation.distanceTo(destinationLocation);
     }
 
     private boolean isOpen(Place place){
