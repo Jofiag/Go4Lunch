@@ -166,7 +166,7 @@ public class RestaurantNearbyBank {
                         /*if (listResponseCallback != null)
                             listResponseCallback.processFinished(mRestaurantList);*/
 
-                        if (mMarkerClickedCallback != null && mGoogleMap != null) {
+                        /*if (mMarkerClickedCallback != null && mGoogleMap != null) {
                             mGoogleMap.setOnMarkerClickListener(marker -> {
                                 int tag = -2;
                                 if (marker.getTag() != null)
@@ -176,7 +176,7 @@ public class RestaurantNearbyBank {
 
                                 return false;
                             });
-                        }
+                        }*/
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -295,15 +295,6 @@ public class RestaurantNearbyBank {
                         }
                     }
 
-                    if (openingHours != null && name != null && name.toLowerCase().equals("la brasserie bordelaise"))
-                        Log.d("DETAILS", "setMoreRestaurantDetails: PERIODS =  " + openingHours.getPeriods());
-//                            Log.d("DETAILS", "setMoreRestaurantDetails: PERIODS =  " + openingHours.getWeekdayText());
-
-//                    Log.d("DETAILS", "getOpeningHours: \n NAME = " + name);
-//                    Log.d("DETAILS", "getOpeningHours: \n WEBSITE = " + website);
-//                    Log.d("DETAILS", "getOpeningHours: \n PHONE NUMBER = " + phoneNumber);
-//                    Log.d("DETAILS", "getOpeningHours: \n OPENING HOURS = " + openingHours);
-
                     restaurant.setPhoneNumber(phoneNumber);
                     restaurant.setWebsiteUrl(website);
                     restaurant.setOpeningHours(myOpeningHours);
@@ -312,6 +303,18 @@ public class RestaurantNearbyBank {
 
                     if (listResponseCallback != null)
                         listResponseCallback.processFinished(mRestaurantList);
+
+                    if (mMarkerClickedCallback != null && mGoogleMap != null) {
+                        mGoogleMap.setOnMarkerClickListener(marker -> {
+                            int tag = -2;
+                            if (marker.getTag() != null)
+                                tag = (Integer)marker.getTag();
+                            if (tag != -1) //if the marker doesn't correspond to the device location
+                                mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get(tag));
+
+                            return false;
+                        });
+                    }
                 });
 
     }
