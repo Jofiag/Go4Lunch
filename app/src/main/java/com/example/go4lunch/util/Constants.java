@@ -59,6 +59,7 @@ public class Constants {
     public static final String RESULT = "result";
     public static final String CLOSED = "Closed";
     public static final String CLOSING_SOON = "Closing soon";
+    public static final String CLOSED_TODAY = "Closed today";
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();

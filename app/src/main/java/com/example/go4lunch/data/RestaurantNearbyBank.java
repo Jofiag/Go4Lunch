@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.LocalTime;
 import com.google.android.libraries.places.api.model.OpeningHours;
 import com.google.android.libraries.places.api.model.Period;
 import com.google.android.libraries.places.api.model.Place;
@@ -252,35 +253,44 @@ public class RestaurantNearbyBank {
                     Uri website = place.getWebsiteUri();
                     String name = place.getName();
 
+                    Log.d("HOURS", "setMoreRestaurantDetails: " + name + " : " + openingHours);
+
                     String currentDayOfWeek = LocalDate.now().getDayOfWeek().toString();
                     MyOpeningHours myOpeningHours = new MyOpeningHours();
 
                     if (openingHours != null){
                         int size = openingHours.getPeriods().size();
+                        boolean isOpen = isOpen(openingHours);
+
                         for (int i = 0; i < size; i++) {
-                            if (size > i+1 ) {
+                            if (i+1 < size ) {
                                 Period period = openingHours.getPeriods().get(i);
                                 Period nextPeriod = openingHours.getPeriods().get(i+1);
                                 String openDay = Objects.requireNonNull(period.getOpen()).getDay().toString();
                                 String nextOpenDay = Objects.requireNonNull(nextPeriod.getOpen()).getDay().toString();
 
-                                if (openDay.equals(currentDayOfWeek)){
-                                    if (nextOpenDay.equals(currentDayOfWeek)) {
+                                LocalTime firstOpeningTime = period.getOpen().getTime();
+                                LocalTime lastOpeningTime = nextPeriod.getOpen().getTime();
+                                LocalTime firstClosingTime = Objects.requireNonNull(period.getClose()).getTime();
+                                LocalTime lastClosingTime = Objects.requireNonNull(nextPeriod.getClose()).getTime();
 
-                                        myOpeningHours.setFirstOpeningTime(period.getOpen().getTime());
-                                        myOpeningHours.setFirstClosingTime(Objects.requireNonNull(period.getClose()).getTime());
-                                        myOpeningHours.setLastOpeningTime(nextPeriod.getOpen().getTime());
-                                        myOpeningHours.setLastClosingTime(Objects.requireNonNull(nextPeriod.getClose()).getTime());
-
+                                if (isOpen) {
+                                    myOpeningHours.setOpenToday(true);
+                                    if (openDay.equals(currentDayOfWeek) && nextOpenDay.equals(currentDayOfWeek)){
+                                        myOpeningHours.setFirstOpeningTime(firstOpeningTime);
+                                        myOpeningHours.setFirstClosingTime(firstClosingTime);
+                                        myOpeningHours.setLastClosingTime(lastOpeningTime);
+                                        myOpeningHours.setLastClosingTime(lastClosingTime);
                                     }
-                                    else {
-
-                                        myOpeningHours.setFirstOpeningTime(period.getOpen().getTime());
-                                        myOpeningHours.setFirstClosingTime(Objects.requireNonNull(period.getClose()).getTime());
+                                    else if (openDay.equals(currentDayOfWeek)){
+                                        myOpeningHours.setFirstOpeningTime(firstOpeningTime);
+                                        myOpeningHours.setFirstClosingTime(firstClosingTime);
+                                        myOpeningHours.setLastClosingTime(firstOpeningTime);
+                                        myOpeningHours.setLastClosingTime(firstClosingTime);
                                     }
-
-                                    i = openingHours.getPeriods().size();   //Stopping the for loop
                                 }
+                                else
+                                    myOpeningHours.setOpenToday(false);
                             }
                         }
                     }
@@ -304,6 +314,26 @@ public class RestaurantNearbyBank {
                         listResponseCallback.processFinished(mRestaurantList);
                 });
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private boolean isOpen(OpeningHours placeOpeningHour){
+        boolean isOpen = false;
+        String currentDayOfWeek = LocalDate.now().getDayOfWeek().toString();
+
+        int size = placeOpeningHour.getPeriods().size();
+        for (int i = 0; i < size; i++) {
+            Period period = placeOpeningHour.getPeriods().get(i);
+            String openDay = Objects.requireNonNull(period.getOpen()).getDay().toString();
+
+            if (openDay.equals(currentDayOfWeek))
+                isOpen = true;
+
+//            if (i == size-1 && isOpen == false)
+
+        }
+
+        return  isOpen;
     }
 
     private String getStreetAddressFromPositions(LatLng position) {

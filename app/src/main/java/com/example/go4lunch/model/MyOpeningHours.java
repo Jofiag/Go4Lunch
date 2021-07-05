@@ -15,6 +15,7 @@ public class MyOpeningHours {
     private LocalTime firstClosingTime;
     private LocalTime lastOpeningTime;
     private LocalTime lastClosingTime;
+    private boolean isOpenToday = false;
 
     public MyOpeningHours() {
     }
@@ -22,7 +23,7 @@ public class MyOpeningHours {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public String getOpeningStatus(){
         String status;
-        String openingStatus = "No hour found!";
+        String openingStatus = "Opening hour not available!";
         java.time.LocalTime ct = java.time.LocalTime.now();
         LocalTime currentTime = new LocalTime() {
             @Override
@@ -46,38 +47,42 @@ public class MyOpeningHours {
             }
         };
 
-        if (compareLocalTime(currentTime, firstOpeningTime) < 0) // (currentTime < firstOpeningTime) If we do not reach the first opening time
-            openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + firstOpeningTime.getHours() + Constants.H_TEXT + + firstOpeningTime.getMinutes();
+        if (isOpenToday) {
+            if (compareLocalTime(currentTime, firstOpeningTime) < 0) // (currentTime < firstOpeningTime) If we do not reach the first opening time
+                openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + firstOpeningTime.getHours() + Constants.H_TEXT + firstOpeningTime.getMinutes();
 
-        if (compareLocalTime(currentTime, lastClosingTime) < 0){ // (currentTime < lastClosingTime) If we are not at the closing time of the day
-            if (compareLocalTime(firstOpeningTime, currentTime) <= 0 && compareLocalTime(currentTime, firstClosingTime) < 0){ //If we are at the first opening time
-                //open until firstClosingHour
-                status = Constants.OPEN_UNTIL_TEXT + firstClosingTime.getHours() + Constants.H_TEXT + firstClosingTime.getMinutes();
-                openingStatus = closingSoon(currentTime, firstClosingTime, status);
+            if (compareLocalTime(currentTime, lastClosingTime) < 0){ // (currentTime < lastClosingTime) If we are not at the closing time of the day
+                if (compareLocalTime(firstOpeningTime, currentTime) <= 0 && compareLocalTime(currentTime, firstClosingTime) < 0){ //If we are at the first opening time
+                    //open until firstClosingHour
+                    status = Constants.OPEN_UNTIL_TEXT + firstClosingTime.getHours() + Constants.H_TEXT + firstClosingTime.getMinutes();
+                    openingStatus = closingSoon(currentTime, firstClosingTime, status);
+                }
+                else if (compareLocalTime(firstClosingTime, currentTime) <= 0 && compareLocalTime(currentTime, lastOpeningTime) < 0){ //If we are at the break time
+                    //Closed. Open at lastOpeningHour
+                    openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + lastOpeningTime.getHours() + Constants.H_TEXT + lastOpeningTime.getMinutes();
+                }
+                else if (compareLocalTime(lastOpeningTime, currentTime) <= 0){ //If we are at the second opening time
+                    //open until lastClosingHour
+                    status = Constants.OPEN_UNTIL_TEXT + lastClosingTime.getHours() + Constants.H_TEXT + lastClosingTime.getMinutes();
+                    openingStatus = closingSoon(currentTime, lastClosingTime, status);
+                }
             }
-            else if (compareLocalTime(firstClosingTime, currentTime) <= 0 && compareLocalTime(currentTime, lastOpeningTime) < 0){ //If we are at the break time
-                //Closed. Open at lastOpeningHour
-                openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + lastOpeningTime.getHours() + Constants.H_TEXT + lastOpeningTime.getMinutes();
-            }
-            else if (compareLocalTime(lastOpeningTime, currentTime) <= 0){ //If we are at the second opening time
-                //open until lastClosingHour
-                status = Constants.OPEN_UNTIL_TEXT + lastClosingTime.getHours() + Constants.H_TEXT + lastClosingTime.getMinutes();
-                openingStatus = closingSoon(currentTime, lastClosingTime, status);
-            }
+
+            if (compareLocalTime(currentTime, lastClosingTime) > 0) //if we past the closing hour of the day
+                openingStatus = Constants.CLOSED;
         }
-
-        if (compareLocalTime(currentTime, lastClosingTime) > 0) //if we past the closing hour of the day
-            openingStatus = Constants.CLOSED;
+        else
+            openingStatus = Constants.CLOSED_TODAY;
 
         return openingStatus;
     }
 
-    private String closingSoon(LocalTime current, LocalTime closing, String status){
-//        if (current.getHours()+1 == closing.getHours())
+    private String closingSoon(LocalTime current, LocalTime nextClosing, String status){
+//        if (current.getHours()+1 == nextClosing.getHours())
         String result = status;
         int minus;
         int currentMinutes = current.getHours() * 60 + current.getMinutes();
-        int closingMinutes = closing.getHours() * 60 + closing.getMinutes();
+        int closingMinutes = nextClosing.getHours() * 60 + nextClosing.getMinutes();
 
         if (currentMinutes > closingMinutes)
             minus = currentMinutes - closingMinutes;
@@ -93,7 +98,7 @@ public class MyOpeningHours {
     private LocalTime setHourTo24WhenMidnight(LocalTime time){
         int minutesSaved = time.getMinutes();
 
-        if (time.getHours() == 0){
+        if (time.getHours() == 0){ //When we're at midnight
             time = new LocalTime() {
                 @SuppressLint("Range")
                 @Override
@@ -115,7 +120,7 @@ public class MyOpeningHours {
                 public void writeToParcel(Parcel dest, int flags) {
 
                 }
-            };
+            }; //We set the hour to 24 instead of letting it to , so that we can compare localTime.
         }
 
         return time;
@@ -158,5 +163,13 @@ public class MyOpeningHours {
 
     public void setLastClosingTime(LocalTime time) {
         this.lastClosingTime = time;
+    }
+
+    public boolean isOpenToday() {
+        return isOpenToday;
+    }
+
+    public void setOpenToday(boolean openToday) {
+        isOpenToday = openToday;
     }
 }
