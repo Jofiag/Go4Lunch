@@ -261,7 +261,7 @@ public class RestaurantNearbyBank {
 
                     if (openingHours != null){
                         int size = openingHours.getPeriods().size();
-                        boolean isOpen = isOpen(place);
+                        boolean isOpen = isOpenToday(openingHours);
 
 
                         for (int i = 0; i < size; i++) {
@@ -333,8 +333,9 @@ public class RestaurantNearbyBank {
         return (int) deviceLocation.distanceTo(destinationLocation);
     }
 
-    private boolean isOpen(Place place){
-        /*boolean isOpen = false;
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private boolean isOpenToday(OpeningHours placeOpeningHour){
+        boolean isOpen = false;
         String currentDayOfWeek = LocalDate.now().getDayOfWeek().toString();
 
         int size = placeOpeningHour.getPeriods().size();
@@ -345,10 +346,10 @@ public class RestaurantNearbyBank {
             if (openDay.equals(currentDayOfWeek))
                 isOpen = true;
 
-        }*/
-        boolean isOpen = false;
+        }
+        /*boolean isOpen = false;
         if(place.isOpen() != null)
-            isOpen = place.isOpen();
+            isOpen = place.isOpen();*/
 
         return  isOpen;
     }
