@@ -51,7 +51,7 @@ public class Restaurant implements Parcelable {
         }
     };
 
-    public float getDistanceFromDeviceLocation() {
+    public int getDistanceFromDeviceLocation() {
         return distanceFromDeviceLocation;
     }
 
