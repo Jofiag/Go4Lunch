@@ -49,21 +49,20 @@ public class MyOpeningHours {
 
         if (isOpenToday) {
             if (compareLocalTime(currentTime, firstOpeningTime) < 0) // (currentTime < firstOpeningTime) If we do not reach the first opening time
-                openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + firstOpeningTime.getHours() + Constants.H_TEXT + firstOpeningTime.getMinutes();
+                    openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + firstOpeningTime.getHours() + Constants.H_TEXT + getMinuteIfNotZero(firstOpeningTime);
 
             if (compareLocalTime(currentTime, lastClosingTime) < 0){ // (currentTime < lastClosingTime) If we are not at the closing time of the day
                 if (compareLocalTime(firstOpeningTime, currentTime) <= 0 && compareLocalTime(currentTime, firstClosingTime) < 0){ //If we are at the first opening time
                     //open until firstClosingHour
-                    status = Constants.OPEN_UNTIL_TEXT + firstClosingTime.getHours() + Constants.H_TEXT + firstClosingTime.getMinutes();
+                    status = Constants.OPEN_UNTIL_TEXT + firstClosingTime.getHours() + Constants.H_TEXT + getMinuteIfNotZero(firstClosingTime);
                     openingStatus = closingSoon(currentTime, firstClosingTime, status);
                 }
-                else if (compareLocalTime(firstClosingTime, currentTime) <= 0 && compareLocalTime(currentTime, lastOpeningTime) < 0){ //If we are at the break time
+                else if (compareLocalTime(firstClosingTime, currentTime) <= 0 && compareLocalTime(currentTime, lastOpeningTime) < 0) //If we are at the break time
                     //Closed. Open at lastOpeningHour
-                    openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + lastOpeningTime.getHours() + Constants.H_TEXT + lastOpeningTime.getMinutes();
-                }
+                    openingStatus = Constants.CLOSE_AND_OPEN_AT_TEXT + lastOpeningTime.getHours() + Constants.H_TEXT + getMinuteIfNotZero(lastOpeningTime);
                 else if (compareLocalTime(lastOpeningTime, currentTime) <= 0){ //If we are at the second opening time
                     //open until lastClosingHour
-                    status = Constants.OPEN_UNTIL_TEXT + lastClosingTime.getHours() + Constants.H_TEXT + lastClosingTime.getMinutes();
+                    status = Constants.OPEN_UNTIL_TEXT + lastClosingTime.getHours() + Constants.H_TEXT + getMinuteIfNotZero(lastClosingTime);
                     openingStatus = closingSoon(currentTime, lastClosingTime, status);
                 }
             }
@@ -75,6 +74,16 @@ public class MyOpeningHours {
             openingStatus = Constants.CLOSED_TODAY;
 
         return openingStatus;
+    }
+
+    private String getMinuteIfNotZero(LocalTime time){
+        String result ="";
+        int minute = time.getMinutes();
+
+        if (minute != 0)
+            result = String.valueOf(minute);
+
+        return result;
     }
 
     private String closingSoon(LocalTime current, LocalTime nextClosing, String status){
