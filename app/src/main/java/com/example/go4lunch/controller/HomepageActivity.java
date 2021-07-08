@@ -2,12 +2,10 @@ package com.example.go4lunch.controller;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -18,7 +16,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.go4lunch.R;
-import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
@@ -30,12 +27,8 @@ import com.example.go4lunch.util.Constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
-import java.io.Serializable;
-
-@RequiresApi(api = Build.VERSION_CODES.M)
 public class HomepageActivity extends AppCompatActivity
-        implements RestaurantRecyclerViewAdapter.OnRestaurantClickListener, WorkmateRecyclerViewAdapter.OnWorkmateClickListener,
-                   RestaurantNearbyBank.OnMarkerClicked {
+        implements WorkmateRecyclerViewAdapter.OnWorkmateClickListener, RestaurantNearbyBank.OnMarkerClicked {
 
     private Toolbar myToolbar;
     private DrawerLayout myDrawerLayout;
@@ -178,10 +171,6 @@ public class HomepageActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    @Override
-    public void onRestaurantSelected(Restaurant restaurant) {
-        startRestaurantDetailsActivity(Constants.RESTAURANT_SELECTED_CODE, restaurant);
-    }
 
     @Override
     public void onWorkmateSelected(Workmate workmate) {

@@ -1,6 +1,7 @@
 package com.example.go4lunch.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.controller.RestaurantDetailsActivity;
 import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.data.RestaurantSelectedApi;
@@ -82,7 +84,10 @@ implements Filterable {
 
         holder.restaurantNameTextView.setText(restaurant.getName());
         holder.numberOfInterestedWorkmateTextView.setText("(0)");
-        holder.itemView.setOnClickListener(v -> RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant));
+        holder.itemView.setOnClickListener(v -> {
+            RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant);
+            context.startActivity(new Intent(context, RestaurantDetailsActivity.class));
+        });
 
     }
 
