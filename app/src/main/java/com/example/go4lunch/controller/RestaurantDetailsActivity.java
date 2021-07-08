@@ -61,7 +61,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         setReferences();
 
         url = RestaurantListUrlApi.getInstance(this).getUrlThroughDeviceLocation();
-        restaurant = getRestaurantSelected();
+//        restaurant = getRestaurantSelected();
+        restaurant = RestaurantSelectedApi.getInstance().getRestaurantSelected();
 
         showRestaurantImageNameAndAddress();
         setRecyclerView();
@@ -164,19 +165,26 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         //If workmate connected has chosen actual restaurant, set fab visibility to VISIBLE
     }
 
-
+//    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+//            new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
+//                @RequiresApi(api = Build.VERSION_CODES.M)
+//                @Override
+//                public void onActivityResult(Boolean result) {
+//                    if (result)
+//                        callPhoneNumberIfPermissionGranted();
+//                    else
+//                        askPermissionWithinDialog();
+//                }
+//            }
+//    );
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
-                @RequiresApi(api = Build.VERSION_CODES.M)
-                @Override
-                public void onActivityResult(Boolean result) {
-                    if (result)
-                        callPhoneNumberIfPermissionGranted();
-                    else
-                        askPermissionWithinDialog();
-                }
+            new ActivityResultContracts.RequestPermission(), result -> {
+                if (result)
+                    callPhoneNumberIfPermissionGranted();
+                else
+                    askPermissionWithinDialog();
             }
-    );
+);
     private void setCallRestaurantFunction(){
         callImageView.setOnClickListener(v -> {
             //Call restaurant if phone number is available
@@ -187,29 +195,9 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     }
 
     private void call(){
-        String phone = RestaurantSelectedApi.getInstance().getRestaurantSelected().getPhoneNumber();
-        String name = RestaurantSelectedApi.getInstance().getRestaurantSelected().getName();
-
-        Log.d("CALL", "call: " + name + ", " + phone);
-
-        String dial = "tel:" + phone;//"+33 826 82 66 28"; //phoneNumber;
+        String dial = "tel:" + restaurant.getPhoneNumber();
         Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(dial));
         startActivity(callIntent);
-
-//        RestaurantNearbyBank.getInstance(this, null).getRestaurantNearbyList(url, restaurantList -> {
-//            for (Restaurant restaurant1 : restaurantList) {
-//                if (restaurant1.getName().equals(restaurant.getName()) &&
-//                        restaurant1.getAddress().equals(restaurant.getAddress())){
-//                    restaurant.setPhoneNumber(restaurant1.getPhoneNumber());
-//                    restaurant.setWebsiteUrl(restaurant1.getWebsiteUrl());
-//
-//                    String dial = "tel:" + restaurant1.getPhoneNumber();
-//                    Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(dial));
-//                    startActivity(callIntent);
-//                }
-//            }
-//        });
-
     }
 
     private void callPhoneNumberIfPermissionGranted(){

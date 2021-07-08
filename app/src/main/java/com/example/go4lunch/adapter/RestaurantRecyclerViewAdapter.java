@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.go4lunch.R;
 import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
+import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.MyOpeningHours;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
@@ -88,7 +89,10 @@ implements Filterable {
 
         holder.restaurantNameTextView.setText(restaurant.getName());
         holder.numberOfInterestedWorkmateTextView.setText("(0)");
-        holder.itemView.setOnClickListener(v -> mCallback.onRestaurantSelected(restaurant));
+        holder.itemView.setOnClickListener(v -> {
+            RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant);
+            mCallback.onRestaurantSelected(restaurant);
+        });
 
     }
 
