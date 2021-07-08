@@ -1,27 +1,43 @@
 package com.example.go4lunch.controller;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
+import com.example.go4lunch.data.RestaurantListUrlApi;
+import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 
 public class RestaurantDetailsActivity extends AppCompatActivity {
+    public static final String CALL_PERMISSION = Manifest.permission.CALL_PHONE;
+    public static final int PERMISSION_GRANTED = PackageManager.PERMISSION_GRANTED;
+//    public static final String WEB_PERMISSION = Manifest.permission.;
+
     private ImageView yellowStar;
     private ImageView callImageView;
     private ImageView starImageView;
@@ -33,14 +49,19 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private TextView RestaurantFoodCountryAndRestaurantAddress;
 
     private Restaurant restaurant;
+    private String url;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_details);
 
         setReferences();
+
+        url = RestaurantListUrlApi.getInstance(this).getUrlThroughDeviceLocation();
         restaurant = getRestaurantSelected();
+
         showRestaurantImageNameAndAddress();
         setRecyclerView();
         setCallRestaurantFunction();
@@ -83,7 +104,9 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             if (bundle.get(Constants.RESTAURANT_ON_MARKER_CODE) != null){
                 restaurantSelected = (Restaurant) bundle.get(Constants.RESTAURANT_ON_MARKER_CODE);
                 Toast.makeText(this, "Name = " + restaurantSelected.getName(), Toast.LENGTH_SHORT).show();
+
             }
+
         }
 
         return restaurantSelected;
@@ -119,13 +142,6 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void setCallRestaurantFunction(){
-        callImageView.setOnClickListener(v -> {
-            //Call restaurant if
-            //its phone number is available
-        });
-    }
-
     private void setLikeRestaurantFunction(){
         starImageView.setOnClickListener(v -> {
             //Add actual restaurant to the liked restaurant list of the workmate connected
@@ -137,10 +153,92 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         globeImageView.setOnClickListener(v -> {
             //Go to restaurant website if
             // its available
+            Toast.makeText(RestaurantDetailsActivity.this, "Call", Toast.LENGTH_SHORT).show();
+            Log.d("DETAILS", "setGoToRestaurantWebsiteFunction: WEBSITE");
+
         });
     }
 
     private void indicateIfRestaurantIsChosenByWorkmate(){
         //If workmate connected has chosen actual restaurant, set fab visibility to VISIBLE
     }
+
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
+                @RequiresApi(api = Build.VERSION_CODES.M)
+                @Override
+                public void onActivityResult(Boolean result) {
+                    if (result)
+                        callPhoneNumberIfPermissionGranted();
+                    else
+                        askPermissionWithinDialog();
+                }
+            }
+    );
+    private void setCallRestaurantFunction(){
+        callImageView.setOnClickListener(v -> {
+            //Call restaurant if phone number is available
+            Toast.makeText(RestaurantDetailsActivity.this, "Call", Toast.LENGTH_SHORT).show();
+            callPhoneNumberIfPermissionGranted();
+            Log.d("DETAILS", "setCallRestaurantFunction: CALL");
+        });
+    }
+
+    private void call(){
+        String dial = "tel:" + "+33 826 82 66 28"; //phoneNumber;
+        Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(dial));
+        startActivity(callIntent);
+
+//        RestaurantNearbyBank.getInstance(this, null).getRestaurantNearbyList(url, restaurantList -> {
+//            for (Restaurant restaurant1 : restaurantList) {
+//                if (restaurant1.getName().equals(restaurant.getName()) &&
+//                        restaurant1.getAddress().equals(restaurant.getAddress())){
+//                    restaurant.setPhoneNumber(restaurant1.getPhoneNumber());
+//                    restaurant.setWebsiteUrl(restaurant1.getWebsiteUrl());
+//
+//                    String dial = "tel:" + restaurant1.getPhoneNumber();
+//                    Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(dial));
+//                    startActivity(callIntent);
+//                }
+//            }
+//        });
+
+        Log.d("CALL", "call: Phone = " + restaurant.getPhoneNumber());
+        Log.d("CALL", "call: Website = " + restaurant.getWebsiteUrl());
+    }
+
+    private void callPhoneNumberIfPermissionGranted(){
+        if (checkSelfPermission(CALL_PERMISSION) == PERMISSION_GRANTED){
+            call();
+        }
+        else{
+            if (shouldShowRequestPermissionRationale(CALL_PERMISSION))
+                Toast.makeText(this, "Location permission is required", Toast.LENGTH_SHORT).show();
+
+            requestPermissionLauncher.launch(CALL_PERMISSION);
+        }
+    }
+
+    private void askPermissionWithinDialog(){
+        new AlertDialog.Builder(this)
+                .setTitle("Call phone permission disable")
+                .setMessage("You denied the Call phone permission. It is required to to call the restaurant. Do you want to grant the permission")
+                .setPositiveButton("YES", (dialog, which) -> callPhoneNumberIfPermissionGranted())
+                .setNegativeButton("NO", null)
+                .create()
+                .show();
+    }
+
+//    @RequiresApi(api = Build.VERSION_CODES.M)
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (requestCode == REQUEST_CALL_PERMISSION_CODE){
+//            if (grantResults.length > 0 && grantResults[0] == PERMISSION_GRANTED)
+//                call(restaurant.getPhoneNumber());
+//        }
+//        else
+//            askPermissionWithinDialog();
+//    }
 }
