@@ -28,19 +28,12 @@ import java.util.List;
 
 public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<RestaurantRecyclerViewAdapter.MyViewHolder>
 implements Filterable {
-
-    public interface OnRestaurantClickListener{
-        void onRestaurantSelected(Restaurant restaurant);
-    }
-
     private final Context context;
     private final List<Restaurant> restaurantList;
-    private final OnRestaurantClickListener mCallback;
 
     public RestaurantRecyclerViewAdapter(Context context, List<Restaurant> restaurantList) {
         this.context = context;
         this.restaurantList = restaurantList;
-        this.mCallback = (OnRestaurantClickListener) context;
     }
 
     @NonNull
@@ -89,10 +82,7 @@ implements Filterable {
 
         holder.restaurantNameTextView.setText(restaurant.getName());
         holder.numberOfInterestedWorkmateTextView.setText("(0)");
-        holder.itemView.setOnClickListener(v -> {
-            RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant);
-            mCallback.onRestaurantSelected(restaurant);
-        });
+        holder.itemView.setOnClickListener(v -> RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant));
 
     }
 
