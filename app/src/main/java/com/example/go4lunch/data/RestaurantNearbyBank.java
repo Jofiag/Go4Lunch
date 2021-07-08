@@ -305,20 +305,24 @@ public class RestaurantNearbyBank {
 
                     mRestaurantList.add(restaurant);
 
-                    if (listResponseCallback != null)
-                        listResponseCallback.processFinished(mRestaurantList);
 
                     if (mMarkerClickedCallback != null && mGoogleMap != null) {
                         mGoogleMap.setOnMarkerClickListener(marker -> {
                             int tag = -2;
                             if (marker.getTag() != null)
                                 tag = (Integer)marker.getTag();
-                            if (tag != -1) //if the marker doesn't correspond to the device location
-                                mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get(tag));
+                            if (tag != -1){ //if the marker doesn't correspond to the device location
+                                Restaurant restaurantSelected = mRestaurantList.get(tag);
+                                RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurantSelected);
+                                mMarkerClickedCallback.onMarkerClickedGetRestaurant(restaurantSelected);
+                            }
 
                             return false;
                         });
                     }
+
+                    if (listResponseCallback != null)
+                        listResponseCallback.processFinished(mRestaurantList);
                 });
 
     }

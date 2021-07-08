@@ -25,6 +25,7 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
+import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
@@ -186,7 +187,12 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     }
 
     private void call(){
-        String dial = "tel:" + "+33 826 82 66 28"; //phoneNumber;
+        String phone = RestaurantSelectedApi.getInstance().getRestaurantSelected().getPhoneNumber();
+        String name = RestaurantSelectedApi.getInstance().getRestaurantSelected().getName();
+
+        Log.d("CALL", "call: " + name + ", " + phone);
+
+        String dial = "tel:" + phone;//"+33 826 82 66 28"; //phoneNumber;
         Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(dial));
         startActivity(callIntent);
 
@@ -204,8 +210,6 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 //            }
 //        });
 
-        Log.d("CALL", "call: Phone = " + restaurant.getPhoneNumber());
-        Log.d("CALL", "call: Website = " + restaurant.getWebsiteUrl());
     }
 
     private void callPhoneNumberIfPermissionGranted(){
