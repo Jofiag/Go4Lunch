@@ -145,17 +145,16 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private void setGoToRestaurantWebsiteFunction(){
         globeImageView.setOnClickListener(v -> {
-            //Go to restaurant website if
-            // its available
-            Toast.makeText(RestaurantDetailsActivity.this, "Call", Toast.LENGTH_SHORT).show();
-            Log.d("DETAILS", "setGoToRestaurantWebsiteFunction: WEBSITE");
-
+            //Go to restaurant website if its available.
+            startActivity(new Intent(this, RestaurantWebsiteActivity.class));
         });
     }
 
     private void indicateIfRestaurantIsChosenByWorkmate(){
         //If workmate connected has chosen actual restaurant, set fab visibility to VISIBLE
     }
+
+
 
 //    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
 //            new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
