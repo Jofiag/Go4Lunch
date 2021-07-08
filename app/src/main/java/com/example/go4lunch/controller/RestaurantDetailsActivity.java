@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
@@ -23,12 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
-import com.example.go4lunch.data.RestaurantListUrlApi;
-import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.Restaurant;
-import com.example.go4lunch.model.Workmate;
-import com.example.go4lunch.util.Constants;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
@@ -50,7 +45,6 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private TextView RestaurantFoodCountryAndRestaurantAddress;
 
     private Restaurant restaurant;
-    private String url;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -60,8 +54,6 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
         setReferences();
 
-        url = RestaurantListUrlApi.getInstance(this).getUrlThroughDeviceLocation();
-//        restaurant = getRestaurantSelected();
         restaurant = RestaurantSelectedApi.getInstance().getRestaurantSelected();
 
         showRestaurantImageNameAndAddress();
@@ -88,31 +80,31 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         fab.setVisibility(View.GONE);
     }
 
-    private Restaurant getRestaurantSelected(){
-        Restaurant restaurantSelected = new Restaurant();
-        Workmate workmate;
-
-        Bundle bundle = getIntent().getExtras();
-
-        if (bundle != null) {
-            if (bundle.get(Constants.RESTAURANT_SELECTED_CODE) != null)
-                restaurantSelected = (Restaurant) bundle.get(Constants.RESTAURANT_SELECTED_CODE);
-
-            if (bundle.get(Constants.WORKMATE_SELECTED_CODE) != null) {
-                workmate = (Workmate) bundle.get(Constants.WORKMATE_SELECTED_CODE);
-                restaurantSelected = workmate.getRestaurantChosen();
-            }
-
-            if (bundle.get(Constants.RESTAURANT_ON_MARKER_CODE) != null){
-                restaurantSelected = (Restaurant) bundle.get(Constants.RESTAURANT_ON_MARKER_CODE);
-                Toast.makeText(this, "Name = " + restaurantSelected.getName(), Toast.LENGTH_SHORT).show();
-
-            }
-
-        }
-
-        return restaurantSelected;
-    }
+//    private Restaurant getRestaurantSelected(){
+//        Restaurant restaurantSelected = new Restaurant();
+//        Workmate workmate;
+//
+//        Bundle bundle = getIntent().getExtras();
+//
+//        if (bundle != null) {
+//            if (bundle.get(Constants.RESTAURANT_SELECTED_CODE) != null)
+//                restaurantSelected = (Restaurant) bundle.get(Constants.RESTAURANT_SELECTED_CODE);
+//
+//            if (bundle.get(Constants.WORKMATE_SELECTED_CODE) != null) {
+//                workmate = (Workmate) bundle.get(Constants.WORKMATE_SELECTED_CODE);
+//                restaurantSelected = workmate.getRestaurantChosen();
+//            }
+//
+//            if (bundle.get(Constants.RESTAURANT_ON_MARKER_CODE) != null){
+//                restaurantSelected = (Restaurant) bundle.get(Constants.RESTAURANT_ON_MARKER_CODE);
+//                Toast.makeText(this, "Name = " + restaurantSelected.getName(), Toast.LENGTH_SHORT).show();
+//
+//            }
+//
+//        }
+//
+//        return restaurantSelected;
+//    }
 
     private void setRecyclerView(){
         WorkmateRecyclerViewAdapter workmateAdapter;
