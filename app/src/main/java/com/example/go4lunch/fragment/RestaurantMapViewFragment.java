@@ -361,7 +361,7 @@ public class RestaurantMapViewFragment extends Fragment {
 
     private void requestLocationIfPermissionIsGranted(GoogleMap googleMap) {
         if (requireContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 600000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             locationApi.setLocation(deviceLocation);
 
