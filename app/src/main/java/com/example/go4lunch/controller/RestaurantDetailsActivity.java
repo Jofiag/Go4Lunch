@@ -146,7 +146,10 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private void setGoToRestaurantWebsiteFunction(){
         globeImageView.setOnClickListener(v -> {
             //Go to restaurant website if its available.
-            startActivity(new Intent(this, RestaurantWebsiteActivity.class));
+            if(restaurant.getWebsiteUrl() != null)
+                startActivity(new Intent(this, RestaurantWebsiteActivity.class));
+            else
+                Toast.makeText(this, "Website not available for " + restaurant.getName(), Toast.LENGTH_SHORT).show();
         });
     }
 
