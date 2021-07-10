@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
 import java.util.List;
 
 public class Workmate implements Parcelable {
@@ -14,13 +13,6 @@ public class Workmate implements Parcelable {
     private List<Restaurant> restaurantLikedList;
 
     public Workmate() {
-    }
-
-    public Workmate(String name, Uri imageUri, Restaurant restaurantChosen, List<Restaurant> restaurantLikedList) {
-        this.name = name;
-        this.imageUri = imageUri;
-        this.restaurantChosen = restaurantChosen;
-        this.restaurantLikedList = restaurantLikedList;
     }
 
     protected Workmate(Parcel in) {
