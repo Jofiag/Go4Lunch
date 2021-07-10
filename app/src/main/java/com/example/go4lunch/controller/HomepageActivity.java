@@ -143,10 +143,10 @@ public class HomepageActivity extends AppCompatActivity
 
             if (id == R.id.your_lunch_item) {
                 //Attach fragment corresponding
-                myDrawerLayout.closeDrawer(GravityCompat.START);
 
                 if (restaurantChosen != null){
                     RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurantChosen);
+                    myDrawerLayout.closeDrawers(); // OR myDrawerLayout.closeDrawer(GravityCompat.START);
                     startActivity(new Intent(HomepageActivity.this, RestaurantDetailsActivity.class));
                 }
                 else
@@ -161,11 +161,11 @@ public class HomepageActivity extends AppCompatActivity
             }
             else if (id == R.id.logout_item) {
                 //Attach fragment corresponding
+                //TODO : LOGOUT USER FROM FIREBASE AND GO BACK TO MAINACTIVITY
                 myDrawerLayout.closeDrawer(GravityCompat.START);
                 return true;
             }
 
-            myDrawerLayout.closeDrawers(); // OR myDrawerLayout.closeDrawer(GravityCompat.START);
 
             return true;
         });
