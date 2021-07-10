@@ -18,10 +18,12 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.RestaurantNearbyBank;
+import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
 import com.example.go4lunch.fragment.RestaurantMapViewFragment;
 import com.example.go4lunch.fragment.WorkmateListViewFragment;
 import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.model.User;
 import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -35,12 +37,19 @@ public class HomepageActivity extends AppCompatActivity
     private NavigationView myNavigationView;
     private BottomNavigationView bottomNavigationView;
 
+    private Restaurant restaurantChosen;
+    private User user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
 
         setReferences();
+
+        user = new User(); //TODO : get user connected from firebase
+
+        restaurantChosen = user.getRestaurantChosen();
 
         attachNewFragment(new RestaurantMapViewFragment());// Showing the RestaurantMapViewFragment when first start the activity
 
@@ -135,7 +144,14 @@ public class HomepageActivity extends AppCompatActivity
             if (id == R.id.your_lunch_item) {
                 //Attach fragment corresponding
                 myDrawerLayout.closeDrawer(GravityCompat.START);
-                startActivity(new Intent(HomepageActivity.this, RestaurantDetailsActivity.class));
+
+                if (restaurantChosen != null){
+                    RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurantChosen);
+                    startActivity(new Intent(HomepageActivity.this, RestaurantDetailsActivity.class));
+                }
+                else
+                    Toast.makeText(this, "You don't chose any restaurant yet!", Toast.LENGTH_SHORT).show();
+
                 return true;
             }
             else if (id == R.id.settings_item) {
