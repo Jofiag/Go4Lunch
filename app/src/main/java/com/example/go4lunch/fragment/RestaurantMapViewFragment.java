@@ -59,7 +59,6 @@ import static com.example.go4lunch.util.Constants.ADDRESS;
 import static com.example.go4lunch.util.Constants.FINE_LOCATION;
 import static com.example.go4lunch.util.Constants.NAME;
 
-@RequiresApi(api = Build.VERSION_CODES.M)
 public class RestaurantMapViewFragment extends Fragment {
     private final OnMapReadyCallback callback;
 
@@ -227,7 +226,6 @@ public class RestaurantMapViewFragment extends Fragment {
         outState.putString("url", url);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setGoogleMap(GoogleMap googleMap) {
         Log.d("ORDER", "setGoogleMap: ");
 
@@ -403,14 +401,12 @@ public class RestaurantMapViewFragment extends Fragment {
             Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void showAllRestaurantNearby(GoogleMap googleMap){
         RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void ZoomOnRestaurantSearched(GoogleMap googleMap, String query){
         if (googleMap != null){
             googleMap.clear();                  // Removing all marker added
@@ -434,7 +430,6 @@ public class RestaurantMapViewFragment extends Fragment {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void showSuggestions(String query){
         RestaurantNearbyBank.getInstance(getContext(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
