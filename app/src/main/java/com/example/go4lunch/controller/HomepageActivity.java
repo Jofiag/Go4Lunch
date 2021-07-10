@@ -157,6 +157,7 @@ public class HomepageActivity extends AppCompatActivity
             else if (id == R.id.settings_item) {
                 //Attach fragment corresponding
                 myDrawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             }
             else if (id == R.id.logout_item) {
