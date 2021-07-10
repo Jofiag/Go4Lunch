@@ -24,10 +24,12 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.model.User;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RestaurantDetailsActivity extends AppCompatActivity {
     public static final String CALL_PERMISSION = Manifest.permission.CALL_PHONE;
@@ -44,7 +46,10 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private TextView restaurantNameTextView;
     private TextView RestaurantFoodCountryAndRestaurantAddress;
 
+    private List<Restaurant> restaurantLikedList = new ArrayList<>();
+
     private Restaurant restaurant;
+    private User user;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -54,6 +59,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
         setReferences();
 
+        user = getUserConnected();
+        restaurantLikedList = getRestaurantLikedList();
         restaurant = RestaurantSelectedApi.getInstance().getRestaurantSelected();
 
         showRestaurantImageNameAndAddress();
@@ -62,6 +69,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         setLikeRestaurantFunction();
         setGoToRestaurantWebsiteFunction();
         indicateIfRestaurantIsChosenByWorkmate();
+        setYellowStarVisibility();
 
     }
 
@@ -76,11 +84,32 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         restaurantNameTextView = findViewById(R.id.restaurant_name_text_view_details);
         RestaurantFoodCountryAndRestaurantAddress = findViewById(R.id.food_country_and_restaurant_address_details);
 
-        yellowStar.setVisibility(View.GONE);
-        fab.setVisibility(View.GONE);
+
     }
 
-//    private Restaurant getRestaurantSelected(){
+    private User getUserConnected(){
+
+
+        return new User();
+    }
+
+    public List<Restaurant> getRestaurantLikedList() {
+        restaurantLikedList = user.getRestaurantLikedList();
+
+        if (restaurantLikedList == null)
+            restaurantLikedList = new ArrayList<>();
+
+        return restaurantLikedList;
+    }
+
+    private void setYellowStarVisibility(){
+        if (restaurantLikedList.contains(restaurant))
+            yellowStar.setVisibility(View.VISIBLE);
+        else
+            yellowStar.setVisibility(View.INVISIBLE);
+    }
+
+    //    private Restaurant getRestaurantSelected(){
 //        Restaurant restaurantSelected = new Restaurant();
 //        Workmate workmate;
 //
@@ -137,9 +166,29 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     }
 
     private void setLikeRestaurantFunction(){
+
         starImageView.setOnClickListener(v -> {
-            //Add actual restaurant to the liked restaurant list of the workmate connected
-            //and set yellowStar visibility to VISIBLE
+            //Add actual restaurant to the liked restaurant list of the workmate connected and set yellowStar visibility to VISIBLE
+            int visibility = yellowStar.getVisibility();
+            String status = "";
+            if (visibility != View.VISIBLE) {
+                yellowStar.setVisibility(View.VISIBLE);
+
+                if (!restaurantLikedList.contains(restaurant))
+                    restaurantLikedList.add(restaurant);
+
+                status = " added to liked list.";
+            }
+
+            if (visibility != View.INVISIBLE){
+                yellowStar.setVisibility(View.INVISIBLE);
+                restaurantLikedList.remove(restaurant);
+                status = " removed from liked list.";
+            }
+
+            Toast.makeText(this, restaurant.getName() + status, Toast.LENGTH_SHORT).show();
+            user.setRestaurantLikedList(restaurantLikedList);
+            //TODO : update user to firebase
         });
     }
 

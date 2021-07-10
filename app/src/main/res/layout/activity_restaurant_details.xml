@@ -46,7 +46,8 @@
             android:layout_marginTop="11dp"
             android:layout_toEndOf="@+id/restaurant_name_text_view_details"
             android:contentDescription="@string/yellow_star_text"
-            app:srcCompat="@drawable/yellow_star_c_foreground" />
+            app:srcCompat="@drawable/yellow_star_c_foreground"
+            android:visibility="invisible"/>
 
         <TextView
             android:id="@+id/food_country_and_restaurant_address_details"
@@ -162,6 +163,7 @@
         android:contentDescription="@string/check_floating_action_button_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/green_check_foreground" />
+        app:srcCompat="@drawable/green_check_foreground"
+        android:visibility="invisible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
