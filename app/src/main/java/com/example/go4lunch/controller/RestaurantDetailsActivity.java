@@ -72,7 +72,12 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         indicateIfRestaurantIsChosenByWorkmate();
         setYellowStarVisibility();
         setChosenImageViewSource();
+        setRestaurantChosenByWorkmateMarkerInGreen();
 
+    }
+
+    private void setRestaurantChosenByWorkmateMarkerInGreen() {
+        //TODO : Set marker of restaurant chosen by workmate in green
     }
 
     private void setReferences() {
