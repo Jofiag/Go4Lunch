@@ -23,11 +23,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Go4Lunch"
         tools:ignore="AllowBackup">
-        <activity android:name=".controller.RestaurantWebsiteActivity"></activity>
-        <!-- <service -->
-        <!-- android:name=".fragment.RestaurantMapViewFragment" -->
-        <!-- android:foregroundServiceType="location"> -->
-        <!-- </service> -->
+        <activity android:name=".controller.SettingsActivity" />
+        <activity android:name=".controller.RestaurantWebsiteActivity" />
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
