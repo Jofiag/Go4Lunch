@@ -83,8 +83,6 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         restaurantImageView = findViewById(R.id.restaurant_image_view_details);
         restaurantNameTextView = findViewById(R.id.restaurant_name_text_view_details);
         RestaurantFoodCountryAndRestaurantAddress = findViewById(R.id.food_country_and_restaurant_address_details);
-
-
     }
 
     private User getUserConnected(){
@@ -106,7 +104,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         if (restaurantLikedList.contains(restaurant))
             yellowStar.setVisibility(View.VISIBLE);
         else
-            yellowStar.setVisibility(View.INVISIBLE);
+            yellowStar.setVisibility(View.GONE);
     }
 
     //    private Restaurant getRestaurantSelected(){
@@ -180,8 +178,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
                 status = " added to liked list.";
             }
 
-            if (visibility != View.INVISIBLE){
-                yellowStar.setVisibility(View.INVISIBLE);
+            if (visibility == View.VISIBLE){
+                yellowStar.setVisibility(View.GONE);
                 restaurantLikedList.remove(restaurant);
                 status = " removed from liked list.";
             }
