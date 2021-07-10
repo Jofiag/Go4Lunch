@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.go4lunch.R;
 
@@ -30,10 +31,12 @@ public class SettingsActivity extends AppCompatActivity {
     private void manageNotifications(){
         notificationsOnTextView.setOnClickListener(v -> {
             //TODO: turn off notifications
+            Toast.makeText(this, "Notification ON", Toast.LENGTH_SHORT).show();
         });
 
         notificationsOffTextView.setOnClickListener(v -> {
             //TODO: turn off notifications
+            Toast.makeText(this, "Notification OFF", Toast.LENGTH_SHORT).show();
         });
     }
 }
