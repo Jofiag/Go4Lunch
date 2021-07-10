@@ -154,16 +154,30 @@
         app:layout_constraintTop_toBottomOf="@+id/like_text_view"
         tools:listitem="@layout/workmate_row" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="271dp"
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/circleImageView"
+        android:layout_width="71dp"
+        android:layout_height="71dp"
+        android:layout_marginTop="261dp"
         android:layout_marginEnd="12dp"
-        android:contentDescription="@string/check_floating_action_button_text"
+        android:src="@color/google_plus_created_background"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/green_check_foreground"
-        android:visibility="gone"/>
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/chosenImageView"
+        android:layout_width="31dp"
+        android:layout_height="31dp"
+        app:layout_constraintBottom_toBottomOf="@+id/circleImageView"
+        app:layout_constraintEnd_toEndOf="@+id/circleImageView"
+        app:layout_constraintStart_toStartOf="@+id/circleImageView"
+        app:layout_constraintTop_toTopOf="@+id/circleImageView" />
+
+<!--    android:src="@mipmap/red_unchecked"-->
+<!--    android:src="@mipmap/green_check_round"-->
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

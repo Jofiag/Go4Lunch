@@ -25,11 +25,12 @@ import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.User;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class RestaurantDetailsActivity extends AppCompatActivity {
     public static final String CALL_PERMISSION = Manifest.permission.CALL_PHONE;
@@ -40,7 +41,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private ImageView callImageView;
     private ImageView starImageView;
     private ImageView globeImageView;
-    private FloatingActionButton fab;
+    private CircleImageView chosenImageView;
     private RecyclerView recyclerView;
     private ImageView restaurantImageView;
     private TextView restaurantNameTextView;
@@ -70,11 +71,12 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         setGoToRestaurantWebsiteFunction();
         indicateIfRestaurantIsChosenByWorkmate();
         setYellowStarVisibility();
+        setChosenImageViewSource();
 
     }
 
     private void setReferences() {
-        fab = findViewById(R.id.fab);
+        chosenImageView = findViewById(R.id.chosenImageView);
         yellowStar = findViewById(R.id.yellow_star);
         globeImageView = findViewById(R.id.globe_image_view);
         starImageView = findViewById(R.id.green_star_image_view);
@@ -105,6 +107,13 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             yellowStar.setVisibility(View.VISIBLE);
         else
             yellowStar.setVisibility(View.GONE);
+    }
+
+    private void setChosenImageViewSource(){
+        if (user.getRestaurantChosen() == restaurant)
+            chosenImageView.setImageResource(R.mipmap.green_check_round);
+        else
+            chosenImageView.setImageResource(R.mipmap.red_unchecked);
     }
 
     //    private Restaurant getRestaurantSelected(){
@@ -202,6 +211,25 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private void indicateIfRestaurantIsChosenByWorkmate(){
         //If workmate connected has chosen actual restaurant, set fab visibility to VISIBLE
+        chosenImageView.setOnClickListener(v -> {
+            String status;
+            Restaurant restaurantTemp;
+
+            if (user.getRestaurantChosen() == restaurant){
+                chosenImageView.setImageResource(R.mipmap.red_unchecked);
+                restaurantTemp = null;
+                status = " not chosen anymore.";
+            }
+            else{
+                chosenImageView.setImageResource(R.mipmap.green_check_round);
+                restaurantTemp = restaurant;
+                status = " chosen.";
+            }
+
+            Toast.makeText(RestaurantDetailsActivity.this, restaurant.getName() + status, Toast.LENGTH_SHORT).show();
+            user.setRestaurantChosen(restaurantTemp);
+            //TODO : update user to firebase
+        });
     }
 
 
