@@ -25,6 +25,7 @@ import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
 import com.squareup.picasso.Picasso;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,8 +83,12 @@ implements Filterable {
         String distanceFromDeviceLocation = String.format("%sm", restaurant.getDistanceFromDeviceLocation());
         holder.howFarFromRestaurantTextView.setText(distanceFromDeviceLocation);
 
+        int interested = 0;
+        if (restaurant.getNumberOfInterestedWorkmate() != 0)
+            interested = restaurant.getNumberOfInterestedWorkmate();
+        holder.numberOfInterestedWorkmateTextView.setText(MessageFormat.format("({0})", interested));
+
         holder.restaurantNameTextView.setText(restaurant.getName());
-        holder.numberOfInterestedWorkmateTextView.setText("(0)");
         holder.itemView.setOnClickListener(v -> {
             RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant);
             context.startActivity(new Intent(context, RestaurantDetailsActivity.class));
