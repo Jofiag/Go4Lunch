@@ -180,20 +180,6 @@ public class RestaurantNearbyBank {
                             Restaurant restaurant = new Restaurant();
                             JSONObject resultObject = results.getJSONObject(i);
                             getAndSetRestaurantAttributes(restaurant, resultObject, getPlaceTypeList(resultObject), listResponseCallback);
-
-                            /*if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
-                                getAndSetRestaurantName(restaurant, resultObject);
-                                getAndSetRestaurantPositionAndAddress(restaurant, resultObject);
-
-                                if (mGoogleMap != null)
-                                    addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), restaurant.getName(), restaurant.getAddress());
-
-                                getAndSetRestaurantImageUrl(restaurant, resultObject);
-                                getAndSetRestaurantRating(restaurant, resultObject);
-                                getAndSetRestaurantPlaceID(restaurant, resultObject);
-
-                                setMoreRestaurantDetails(restaurant, restaurant.getPlaceId(), listResponseCallback);
-                            }*/
                         }
 
                     } catch (JSONException e) {
