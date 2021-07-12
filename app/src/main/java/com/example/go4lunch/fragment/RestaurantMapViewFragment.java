@@ -254,7 +254,7 @@ public class RestaurantMapViewFragment extends Fragment {
             addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
             url = urlApi.getUrlThroughDeviceLocation();
             showAllRestaurantNearbyWithMarker(mGoogleMap);
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 11));
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 14));
         }
         else
             Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();
