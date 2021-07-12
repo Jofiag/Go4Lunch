@@ -142,6 +142,17 @@ public class RestaurantNearbyBank {
         restaurant.setPlaceId(placeId);
     }
 
+    private List<String> getPlaceTypeList(JSONObject jsonObject) throws JSONException {
+        JSONArray typeArray = jsonObject.getJSONArray(Constants.TYPE);
+        List<String> typeList = new ArrayList<>();
+        for (int y = 0; y < typeArray.length(); y++){
+            String type = typeArray.getString(y);
+            typeList.add(type);
+        }
+
+        return  typeList;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -155,13 +166,7 @@ public class RestaurantNearbyBank {
                             Restaurant restaurant = new Restaurant();
 
                             JSONObject resultObject = results.getJSONObject(i);
-
-                            JSONArray typeArray = resultObject.getJSONArray(Constants.TYPE);
-                            List<String> typeList = new ArrayList<>();
-                            for (int y = 0; y < typeArray.length(); y++){
-                                String type = typeArray.getString(y);
-                                typeList.add(type);
-                            }
+                            List<String> typeList = getPlaceTypeList(resultObject);
 
                             if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
                                 getAndSetRestaurantName(restaurant, resultObject);
