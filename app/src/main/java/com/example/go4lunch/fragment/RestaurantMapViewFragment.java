@@ -49,8 +49,21 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
+import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.Objects;
 
@@ -430,7 +443,73 @@ public class RestaurantMapViewFragment extends Fragment {
         }
     }
 
+   /* public static LatLng addDistanceToPosition(LatLng originPosition, long distanceOnLat, long distanceOnLng) {
+        double latOrigin = originPosition.latitude;
+        double lngOrigin = originPosition.longitude;
+
+        double lat = latOrigin + (180 / Math.PI) * (distanceOnLat / 6378137.0);
+        double lng = lngOrigin + (180 / Math.PI) * (distanceOnLng / 6378137.0) / Math.cos(latOrigin);
+
+        return new LatLng(lat, lng);
+    }*/
+
     private void showSuggestions(String query){
+       /* AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+        RectangularBounds bounds = RectangularBounds.newInstance(
+                addDistanceToPosition(devicePosition, - 1000, - 1000),
+                addDistanceToPosition(devicePosition, 1000, 1000)
+        );
+        String country = requireContext().getResources().getConfiguration().getLocales().get(0).getCountry();//.getCountry();
+//        String countryCode = String.valueOf(country.charAt(0) + country.charAt(1)).toUpperCase();
+        Log.d("COUNTRY", "showSuggestions: " + country);
+        FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                .setLocationRestriction(bounds)
+                .setOrigin(devicePosition)
+                .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                .setSessionToken(token)
+                .setCountry(country)
+                .setQuery(query)
+                .build();
+
+//        FetchPlaceRequest request1 = FetchPlaceRequest.
+
+        if(!Places.isInitialized())
+            Places.initialize(requireContext(), requireContext().getString(R.string.google_maps_key));
+
+        PlacesClient placesClient = Places.createClient(requireContext());
+        placesClient.findAutocompletePredictions(request).addOnSuccessListener(findAutocompletePredictionsResponse -> {
+            int y = 0;
+            final MatrixCursor cursor = new MatrixCursor(columnPlaces);
+            for (AutocompletePrediction prediction : findAutocompletePredictionsResponse.getAutocompletePredictions()) {
+                if (prediction.getPlaceTypes().contains(Place.Type.RESTAURANT)) {
+                    Log.d("PREDICTION", "onSuccess: Primary : " + prediction.getPrimaryText(null).toString());
+                    Log.d("PREDICTION", "onSuccess: Secondary : " + prediction.getSecondaryText(null).toString());
+                    if (columnPlaces != null && adapter != null && query != null) {
+                        //When we've got all the restaurant
+                        //Then we add all of them to our cursor to show it as suggestions to the user
+
+
+                        String placeName = String.valueOf(prediction.getPrimaryText(null));
+                        String placeAddress = String.valueOf(prediction.getSecondaryText(null));
+
+                        if (placeName.toLowerCase().contains(query.toLowerCase()) || query.isEmpty())
+                            cursor.addRow(new Object[]{y, placeName, placeAddress});
+
+
+                        y++;
+
+                        adapter.changeCursor(cursor);
+
+                        if (searchView != null)
+                            searchView.setSuggestionsAdapter(adapter);
+                    }
+                }
+            }
+        }).addOnFailureListener(e -> {
+
+        });
+*/
+
         RestaurantNearbyBank.getInstance(getContext(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
                 //When we've got all the restaurant
