@@ -87,12 +87,12 @@ public class RestaurantNearbyBank {
         return INSTANCE;
     }
 
-    private void setRestaurantName(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+    private void getAndSetRestaurantName(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
         String name = jsonObject.getString(Constants.NAME);
         restaurant.setName(name);
     }
 
-    private void setRestaurantImageUrl(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+    private void getAndSetRestaurantImageUrl(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
         String imageReference = "";
         JSONArray photoArray = jsonObject.getJSONArray(Constants.PHOTOS);
         for (int z = 0; z < photoArray.length(); z++){
@@ -109,7 +109,7 @@ public class RestaurantNearbyBank {
             restaurant.setImageUrl(imageUrl);
     }
 
-    private void setRestaurantRating(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+    private void getAndSetRestaurantRating(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
         float rating = jsonObject.getInt(Constants.RATING);
         int favorableOpinion = 0;
 
@@ -123,7 +123,7 @@ public class RestaurantNearbyBank {
         restaurant.setFavorableOpinion(favorableOpinion);
     }
 
-    private void setRestaurantPositionAndAddress(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+    private void getAndSetRestaurantPositionAndAddress(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
         JSONObject geometry = jsonObject.getJSONObject(Constants.GEOMETRY);
         JSONObject location = geometry.getJSONObject(Constants.LOCATION);
 
@@ -135,6 +135,11 @@ public class RestaurantNearbyBank {
 
         String address = getStreetAddressFromPositions(position);
         restaurant.setAddress(address);
+    }
+
+    private void getAndSetRestaurantPlaceID(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+        String placeId = jsonObject.getString(Constants.PLACE_ID);
+        restaurant.setPlaceId(placeId);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -159,19 +164,16 @@ public class RestaurantNearbyBank {
                             }
 
                             if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
-                                setRestaurantName(restaurant, resultObject);
-                                setRestaurantPositionAndAddress(restaurant, resultObject);
-                                setRestaurantImageUrl(restaurant, resultObject);
-                                setRestaurantRating(restaurant, resultObject);
-
-
-                                String placeId = resultObject.getString(Constants.PLACE_ID);
-                                restaurant.setPlaceId(placeId);
+                                getAndSetRestaurantName(restaurant, resultObject);
+                                getAndSetRestaurantPositionAndAddress(restaurant, resultObject);
+                                getAndSetRestaurantImageUrl(restaurant, resultObject);
+                                getAndSetRestaurantRating(restaurant, resultObject);
+                                getAndSetRestaurantPlaceID(restaurant, resultObject);
 
                                 if (mGoogleMap != null)
                                     addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), restaurant.getName(), restaurant.getAddress());
 
-                                setMoreRestaurantDetails(restaurant, placeId, listResponseCallback);
+                                setMoreRestaurantDetails(restaurant, restaurant.getPlaceId(), listResponseCallback);
                             }
                         }
 
