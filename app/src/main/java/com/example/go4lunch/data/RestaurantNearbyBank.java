@@ -87,6 +87,28 @@ public class RestaurantNearbyBank {
         return INSTANCE;
     }
 
+    private void setRestaurantName(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+        String name = jsonObject.getString(Constants.NAME);
+        restaurant.setName(name);
+    }
+
+    private void setRestaurantImageUrl(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+        String imageReference = "";
+        JSONArray photoArray = jsonObject.getJSONArray(Constants.PHOTOS);
+        for (int z = 0; z < photoArray.length(); z++){
+            JSONObject photoObject = photoArray.getJSONObject(z);
+            imageReference = photoObject.getString(Constants.PHOTO_REFERENCE);
+        }
+
+        String imageUrl = Constants.PLACE_PHOTO_SEARCH_URL +
+                "maxwidth=" + Constants.PHOTO_MAX_WIDTH +
+                "&photoreference=" + imageReference +
+                "&key=" + mContext.getString(R.string.google_maps_key);
+
+        if (!imageReference.equals(""))
+            restaurant.setImageUrl(imageUrl);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -97,8 +119,11 @@ public class RestaurantNearbyBank {
                         JSONArray results = response.getJSONArray(Constants.RESULTS);
                         int length = results.length();
                         for (int i = 0; i < length; i++) {
+                            Restaurant restaurant = new Restaurant();
+
                             JSONObject resultObject = results.getJSONObject(i);
-                            String name = resultObject.getString(Constants.NAME);
+//                            String name = resultObject.getString(Constants.NAME);
+                            setRestaurantName(restaurant, resultObject);
 
                             JSONObject geometry = resultObject.getJSONObject(Constants.GEOMETRY);
                             JSONObject location = geometry.getJSONObject(Constants.LOCATION);
@@ -115,17 +140,18 @@ public class RestaurantNearbyBank {
 
                             if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
 
-                                String photoReference = "";
-                                JSONArray photoArray = resultObject.getJSONArray(Constants.PHOTOS);
-                                for (int z = 0; z < photoArray.length(); z++){
-                                    JSONObject photoObject = photoArray.getJSONObject(z);
-                                    photoReference = photoObject.getString(Constants.PHOTO_REFERENCE);
-                                }
-
-                                String photoUrl = Constants.PLACE_PHOTO_SEARCH_URL +
-                                        "maxwidth=" + Constants.PHOTO_MAX_WIDTH +
-                                        "&photoreference=" + photoReference +
-                                        "&key=" + mContext.getString(R.string.google_maps_key);
+//                                String photoReference = "";
+//                                JSONArray photoArray = resultObject.getJSONArray(Constants.PHOTOS);
+//                                for (int z = 0; z < photoArray.length(); z++){
+//                                    JSONObject photoObject = photoArray.getJSONObject(z);
+//                                    photoReference = photoObject.getString(Constants.PHOTO_REFERENCE);
+//                                }
+//
+//                                String photoUrl = Constants.PLACE_PHOTO_SEARCH_URL +
+//                                        "maxwidth=" + Constants.PHOTO_MAX_WIDTH +
+//                                        "&photoreference=" + photoReference +
+//                                        "&key=" + mContext.getString(R.string.google_maps_key);
+                                setRestaurantImageUrl(restaurant, resultObject);
 
                                 float rating = resultObject.getInt(Constants.RATING);
                                 int favorableOpinion = 0;
@@ -141,17 +167,16 @@ public class RestaurantNearbyBank {
                                 String placeId = resultObject.getString(Constants.PLACE_ID);
                                 String address = getStreetAddressFromPositions(position);
 
-                                Restaurant restaurant = new Restaurant();
-                                restaurant.setName(name);
+//                                restaurant.setName(name);
                                 restaurant.setAddress(address);
                                 restaurant.setPosition(position);
                                 restaurant.setPlaceId(placeId);
                                 restaurant.setFavorableOpinion(favorableOpinion);
-                                if (!photoReference.equals(""))
-                                    restaurant.setImageUrl(photoUrl);
+//                                if (!photoReference.equals(""))
+//                                    restaurant.setImageUrl(photoUrl);
 
                                 if (mGoogleMap != null)
-                                    addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), name, restaurant.getAddress());
+                                    addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), restaurant.getName(), restaurant.getAddress());
 
                                 setMoreRestaurantDetails(restaurant, placeId, length, i, listResponseCallback);
                             }
@@ -164,7 +189,6 @@ public class RestaurantNearbyBank {
                 error -> Log.d("VOLLEY", "onErrorResponse: " + error.getMessage()));
 
         mRequestQueue.add(jsonObjectRequest);
-
     }
 
      /*private PlacesClient placesClient;
