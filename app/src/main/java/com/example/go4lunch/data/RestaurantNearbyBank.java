@@ -169,7 +169,6 @@ public class RestaurantNearbyBank {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
@@ -229,7 +228,55 @@ public class RestaurantNearbyBank {
                 Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.TYPES);
     }*/
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    private MyOpeningHours castOpeningHoursToMyOpeningHours(OpeningHours openingHours){
+        MyOpeningHours myOpeningHours = new MyOpeningHours();
+
+        if (openingHours != null){
+            int size = openingHours.getPeriods().size();
+            boolean isOpen = isOpenToday(openingHours);
+            String currentDayOfWeek = LocalDate.now().getDayOfWeek().toString();
+
+            for (int i = 0; i < size; i++) {
+                if (i+1 < size ) {
+                    Period period = openingHours.getPeriods().get(i);
+                    Period nextPeriod = openingHours.getPeriods().get(i+1);
+                    String openDay = Objects.requireNonNull(period.getOpen()).getDay().toString();
+                    String nextOpenDay = Objects.requireNonNull(nextPeriod.getOpen()).getDay().toString();
+
+                    LocalTime firstOpeningTime = period.getOpen().getTime();
+                    LocalTime lastOpeningTime = nextPeriod.getOpen().getTime();
+                    LocalTime firstClosingTime = Objects.requireNonNull(period.getClose()).getTime();
+                    LocalTime lastClosingTime = Objects.requireNonNull(nextPeriod.getClose()).getTime();
+
+                    if (isOpen) {
+                        myOpeningHours.setOpenToday(true);
+                        if (openDay.equals(currentDayOfWeek) && nextOpenDay.equals(currentDayOfWeek)){
+                            myOpeningHours.setFirstOpeningTime(firstOpeningTime);
+                            myOpeningHours.setFirstClosingTime(firstClosingTime);
+                            myOpeningHours.setLastClosingTime(lastOpeningTime);
+                            myOpeningHours.setLastClosingTime(lastClosingTime);
+                        }
+                        else if (openDay.equals(currentDayOfWeek)){
+                            myOpeningHours.setFirstOpeningTime(firstOpeningTime);
+                            myOpeningHours.setFirstClosingTime(firstClosingTime);
+                            myOpeningHours.setLastClosingTime(firstOpeningTime);
+                            myOpeningHours.setLastClosingTime(firstClosingTime);
+                        }
+                    }
+                    else
+                        myOpeningHours.setOpenToday(false);
+                }
+            }
+        }
+
+        return myOpeningHours;
+    }
+
+    private void getAndSetRestaurantMyOpeningHours(Restaurant restaurant, OpeningHours openingHours){
+        restaurant.setOpeningHours(castOpeningHoursToMyOpeningHours(openingHours));
+    }
+
+
     private void setMoreRestaurantDetails(Restaurant restaurant, String placeId, ListAsyncResponse listResponseCallback){
         /*String detailsUrl = Constants.PLACE_DETAILS_SEARCH_URL +
                 "place_id=" + placeId +
@@ -244,64 +291,18 @@ public class RestaurantNearbyBank {
         List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
         FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields);
 
-        /*if (!mRestaurantList.isEmpty())
-            mRestaurantList = new ArrayList<>();*/
 
         placesClient.fetchPlace(fetchPlaceRequest)
                 .addOnSuccessListener(response -> {
                     Place place = response.getPlace();
-
-                    OpeningHours openingHours = place.getOpeningHours();
-                    String phoneNumber = place.getPhoneNumber();
                     Uri website = place.getWebsiteUri();
-                    String name = place.getName();
+                    String phoneNumber = place.getPhoneNumber();
+                    OpeningHours openingHours = place.getOpeningHours();
 
-                    Log.d("HOURS", "setMoreRestaurantDetails: " + name + " : " + openingHours);
-
-                    String currentDayOfWeek = LocalDate.now().getDayOfWeek().toString();
-                    MyOpeningHours myOpeningHours = new MyOpeningHours();
-
-                    if (openingHours != null){
-                        int size = openingHours.getPeriods().size();
-                        boolean isOpen = isOpenToday(openingHours);
-
-
-                        for (int i = 0; i < size; i++) {
-                            if (i+1 < size ) {
-                                Period period = openingHours.getPeriods().get(i);
-                                Period nextPeriod = openingHours.getPeriods().get(i+1);
-                                String openDay = Objects.requireNonNull(period.getOpen()).getDay().toString();
-                                String nextOpenDay = Objects.requireNonNull(nextPeriod.getOpen()).getDay().toString();
-
-                                LocalTime firstOpeningTime = period.getOpen().getTime();
-                                LocalTime lastOpeningTime = nextPeriod.getOpen().getTime();
-                                LocalTime firstClosingTime = Objects.requireNonNull(period.getClose()).getTime();
-                                LocalTime lastClosingTime = Objects.requireNonNull(nextPeriod.getClose()).getTime();
-
-                                if (isOpen) {
-                                    myOpeningHours.setOpenToday(true);
-                                    if (openDay.equals(currentDayOfWeek) && nextOpenDay.equals(currentDayOfWeek)){
-                                        myOpeningHours.setFirstOpeningTime(firstOpeningTime);
-                                        myOpeningHours.setFirstClosingTime(firstClosingTime);
-                                        myOpeningHours.setLastClosingTime(lastOpeningTime);
-                                        myOpeningHours.setLastClosingTime(lastClosingTime);
-                                    }
-                                    else if (openDay.equals(currentDayOfWeek)){
-                                        myOpeningHours.setFirstOpeningTime(firstOpeningTime);
-                                        myOpeningHours.setFirstClosingTime(firstClosingTime);
-                                        myOpeningHours.setLastClosingTime(firstOpeningTime);
-                                        myOpeningHours.setLastClosingTime(firstClosingTime);
-                                    }
-                                }
-                                else
-                                    myOpeningHours.setOpenToday(false);
-                            }
-                        }
-                    }
+                    getAndSetRestaurantMyOpeningHours(restaurant, openingHours);
 
                     restaurant.setPhoneNumber(phoneNumber);
                     restaurant.setWebsiteUrl(website);
-                    restaurant.setOpeningHours(myOpeningHours);
                     if (place.getLatLng() != null)
                         restaurant.setDistanceFromDeviceLocation(getHowFarFrom(place.getLatLng()));
 
@@ -357,7 +358,6 @@ public class RestaurantNearbyBank {
         return (int) deviceLocation.distanceTo(destinationLocation);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private boolean isOpenToday(OpeningHours placeOpeningHour){
         boolean isOpen = false;
         String currentDayOfWeek = LocalDate.now().getDayOfWeek().toString();
