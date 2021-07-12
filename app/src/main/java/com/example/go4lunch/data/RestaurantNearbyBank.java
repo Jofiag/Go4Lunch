@@ -123,6 +123,20 @@ public class RestaurantNearbyBank {
         restaurant.setFavorableOpinion(favorableOpinion);
     }
 
+    private void setRestaurantPositionAndAddress(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+        JSONObject geometry = jsonObject.getJSONObject(Constants.GEOMETRY);
+        JSONObject location = geometry.getJSONObject(Constants.LOCATION);
+
+        double lat = location.getDouble(Constants.LATITUDE);
+        double lng = location.getDouble(Constants.LONGITUDE);
+
+        LatLng position = new LatLng(lat, lng);
+        restaurant.setPosition(position);
+
+        String address = getStreetAddressFromPositions(position);
+        restaurant.setAddress(address);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -136,13 +150,6 @@ public class RestaurantNearbyBank {
                             Restaurant restaurant = new Restaurant();
 
                             JSONObject resultObject = results.getJSONObject(i);
-                            setRestaurantName(restaurant, resultObject);
-
-                            JSONObject geometry = resultObject.getJSONObject(Constants.GEOMETRY);
-                            JSONObject location = geometry.getJSONObject(Constants.LOCATION);
-                            double lat = location.getDouble(Constants.LATITUDE);
-                            double lng = location.getDouble(Constants.LONGITUDE);
-                            LatLng position = new LatLng(lat, lng);
 
                             JSONArray typeArray = resultObject.getJSONArray(Constants.TYPE);
                             List<String> typeList = new ArrayList<>();
@@ -152,16 +159,13 @@ public class RestaurantNearbyBank {
                             }
 
                             if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
-
+                                setRestaurantName(restaurant, resultObject);
+                                setRestaurantPositionAndAddress(restaurant, resultObject);
                                 setRestaurantImageUrl(restaurant, resultObject);
                                 setRestaurantRating(restaurant, resultObject);
 
 
                                 String placeId = resultObject.getString(Constants.PLACE_ID);
-                                String address = getStreetAddressFromPositions(position);
-
-                                restaurant.setAddress(address);
-                                restaurant.setPosition(position);
                                 restaurant.setPlaceId(placeId);
 
                                 if (mGoogleMap != null)
