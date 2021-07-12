@@ -130,11 +130,13 @@ public class RestaurantNearbyBank {
                                         "&key=" + mContext.getString(R.string.google_maps_key);
 
                                 float rating = resultObject.getInt(Constants.RATING);
-                                int favorableOpinion;
+                                int favorableOpinion = 0;
 
-                                if (rating >= 3)
+                                if (rating >= 4)
                                     favorableOpinion = 3;
-                                else
+                                else if(rating == 3)
+                                    favorableOpinion = 2;
+                                else if (rating < 3)
                                     favorableOpinion = (int) rating;
 
 
