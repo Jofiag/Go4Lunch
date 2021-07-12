@@ -54,7 +54,7 @@ public class RestaurantNearbyBank {
     private final Context mContext;
     private final RequestQueue mRequestQueue;
     private final OnMarkerClicked mMarkerClickedCallback;
-    private List<Restaurant> mRestaurantList = new ArrayList<>();
+    private final List<Restaurant> mRestaurantList = new ArrayList<>();
     @SuppressLint("StaticFieldLeak")
     private static RestaurantNearbyBank INSTANCE;
 
@@ -93,8 +93,6 @@ public class RestaurantNearbyBank {
                 response -> {
                     Log.d("URL", "getRestaurantNearbyList: " + url);
                     try {
-                        /*if (!mRestaurantList.isEmpty())
-                            mRestaurantList = new ArrayList<>();*/
 
                         JSONArray results = response.getJSONArray(Constants.RESULTS);
                         int length = results.length();
