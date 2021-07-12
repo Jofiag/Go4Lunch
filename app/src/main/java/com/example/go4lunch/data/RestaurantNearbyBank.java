@@ -97,8 +97,8 @@ public class RestaurantNearbyBank {
                             mRestaurantList = new ArrayList<>();*/
 
                         JSONArray results = response.getJSONArray(Constants.RESULTS);
-                        int restaurantIndex = 0;
-                        for (int i = 0; i < results.length(); i++) {
+                        int length = results.length();
+                        for (int i = 0; i < length; i++) {
                             JSONObject resultObject = results.getJSONObject(i);
                             String name = resultObject.getString(Constants.NAME);
 
@@ -152,34 +152,12 @@ public class RestaurantNearbyBank {
                                 if (!photoReference.equals(""))
                                     restaurant.setImageUrl(photoUrl);
 
-//                                Log.d("DETAILS", "getRestaurantNearbyList: ID = " + placeId);
-//                                Log.d("DETAILS", "getRestaurantNearbyList: PLACES = " + url);
-
-                                setMoreRestaurantDetails(restaurant, placeId, listResponseCallback);
-
-                                mRestaurantList.add(restaurant);
-
                                 if (mGoogleMap != null)
-                                    addMarkerOnPosition(mGoogleMap, position, name, restaurantIndex);
+                                    addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), name, restaurant.getAddress());
 
-                                restaurantIndex++;
+                                setMoreRestaurantDetails(restaurant, placeId, length, i, listResponseCallback);
                             }
                         }
-
-                        /*if (listResponseCallback != null)
-                            listResponseCallback.processFinished(mRestaurantList);*/
-
-                        /*if (mMarkerClickedCallback != null && mGoogleMap != null) {
-                            mGoogleMap.setOnMarkerClickListener(marker -> {
-                                int tag = -2;
-                                if (marker.getTag() != null)
-                                    tag = (Integer)marker.getTag();
-                                if (tag != -1) //if the marker doesn't correspond to the device location
-                                    mMarkerClickedCallback.onMarkerClickedGetRestaurant(mRestaurantList.get(tag));
-
-                                return false;
-                            });
-                        }*/
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -230,7 +208,7 @@ public class RestaurantNearbyBank {
     }*/
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void setMoreRestaurantDetails(Restaurant restaurant, String placeId, ListAsyncResponse listResponseCallback){
+    private void setMoreRestaurantDetails(Restaurant restaurant, String placeId, int length, int placeIndex, ListAsyncResponse listResponseCallback){
         /*String detailsUrl = Constants.PLACE_DETAILS_SEARCH_URL +
                 "place_id=" + placeId +
                 "&key=" + mContext.getString(R.string.google_maps_key);*/
@@ -244,8 +222,8 @@ public class RestaurantNearbyBank {
         List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
         FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields);
 
-        if (!mRestaurantList.isEmpty())
-            mRestaurantList = new ArrayList<>();
+        /*if (!mRestaurantList.isEmpty())
+            mRestaurantList = new ArrayList<>();*/
 
         placesClient.fetchPlace(fetchPlaceRequest)
                 .addOnSuccessListener(response -> {
@@ -307,24 +285,42 @@ public class RestaurantNearbyBank {
 
                     mRestaurantList.add(restaurant);
 
-
                     if (mMarkerClickedCallback != null && mGoogleMap != null) {
                         mGoogleMap.setOnMarkerClickListener(marker -> {
-                            int tag = -2;
-                            if (marker.getTag() != null)
-                                tag = (Integer)marker.getTag();
-                            if (tag != -1){ //if the marker doesn't correspond to the device location
-                                Restaurant restaurantSelected = mRestaurantList.get(tag);
-                                RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurantSelected);
-                                mMarkerClickedCallback.onMarkerClickedGetRestaurant(restaurantSelected);
+                            if (!Objects.equals(marker.getTag(), Constants.DEVICE_POSITION)){ //if the marker doesn't correspond to the device location
+                                for (Restaurant restaurant1 : mRestaurantList) {
+                                    if (restaurant1.getAddress().equals(marker.getTag())) {
+                                        RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant1);
+                                        mMarkerClickedCallback.onMarkerClickedGetRestaurant(restaurant1);
+                                    }
+                                }
                             }
 
                             return false;
                         });
                     }
 
-                    if (listResponseCallback != null)
+                    //if we're at the and of the json result (that's mean we've got all restaurants) AND we call for the restaurant list
+                    if (placeIndex == length - 1 && listResponseCallback != null) {
+                        //then we set the markerClickListener
+                        if (mMarkerClickedCallback != null && mGoogleMap != null) {
+                            mGoogleMap.setOnMarkerClickListener(marker -> {
+                                if (!Objects.equals(marker.getTag(), Constants.DEVICE_POSITION)){ //if the marker doesn't correspond to the device location
+                                    for (Restaurant restaurant1 : mRestaurantList) {
+                                        if (restaurant1.getAddress().equals(marker.getTag())) {
+                                            RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant1);
+                                            mMarkerClickedCallback.onMarkerClickedGetRestaurant(restaurant1);
+                                        }
+                                    }
+                                }
+
+                                return false;
+                            });
+                        }
+
+                        //and we send the list
                         listResponseCallback.processFinished(mRestaurantList);
+                    }
                 });
 
     }
@@ -375,11 +371,11 @@ public class RestaurantNearbyBank {
         return address;
     }
 
-    private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, int restaurantIndex){
+    private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, String restaurantAddress){
         Objects.requireNonNull(googleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))))
-        .setTag(restaurantIndex);
+        .setTag(restaurantAddress);
     }
 }

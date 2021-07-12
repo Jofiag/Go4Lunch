@@ -332,7 +332,7 @@ public class RestaurantMapViewFragment extends Fragment {
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
 
         if (position == devicePosition && marker != null)
-            marker.setTag(-1);          //when the tag equals -1 we know its the device location, so that we won't start the RestaurantDetailsActivity when the user click on his position.
+            marker.setTag(Constants.DEVICE_POSITION);          //when the tag equals -1 we know its the device location, so that we won't start the RestaurantDetailsActivity when the user click on his position.
     }
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
