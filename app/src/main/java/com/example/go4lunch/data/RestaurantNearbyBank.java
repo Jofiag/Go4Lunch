@@ -109,6 +109,20 @@ public class RestaurantNearbyBank {
             restaurant.setImageUrl(imageUrl);
     }
 
+    private void setRestaurantRating(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
+        float rating = jsonObject.getInt(Constants.RATING);
+        int favorableOpinion = 0;
+
+        if (rating >= 4)
+            favorableOpinion = 3;
+        else if(rating == 3)
+            favorableOpinion = 2;
+        else if (rating < 3)
+            favorableOpinion = (int) rating;
+
+        restaurant.setFavorableOpinion(favorableOpinion);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -140,16 +154,7 @@ public class RestaurantNearbyBank {
                             if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
 
                                 setRestaurantImageUrl(restaurant, resultObject);
-
-                                float rating = resultObject.getInt(Constants.RATING);
-                                int favorableOpinion = 0;
-
-                                if (rating >= 4)
-                                    favorableOpinion = 3;
-                                else if(rating == 3)
-                                    favorableOpinion = 2;
-                                else if (rating < 3)
-                                    favorableOpinion = (int) rating;
+                                setRestaurantRating(restaurant, resultObject);
 
 
                                 String placeId = resultObject.getString(Constants.PLACE_ID);
@@ -158,7 +163,6 @@ public class RestaurantNearbyBank {
                                 restaurant.setAddress(address);
                                 restaurant.setPosition(position);
                                 restaurant.setPlaceId(placeId);
-                                restaurant.setFavorableOpinion(favorableOpinion);
 
                                 if (mGoogleMap != null)
                                     addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), restaurant.getName(), restaurant.getAddress());
