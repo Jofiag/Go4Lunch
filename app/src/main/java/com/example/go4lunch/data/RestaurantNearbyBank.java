@@ -153,22 +153,35 @@ public class RestaurantNearbyBank {
         return  typeList;
     }
 
+    private void getAndSetRestaurantAttributes(Restaurant restaurant, JSONObject jsonObject, List<String> typeList, ListAsyncResponse listResponseCallback) throws JSONException {
+        if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
+            getAndSetRestaurantName(restaurant, jsonObject);
+            getAndSetRestaurantPositionAndAddress(restaurant, jsonObject);
+
+            if (mGoogleMap != null)
+                addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), restaurant.getName(), restaurant.getAddress());
+
+            getAndSetRestaurantImageUrl(restaurant, jsonObject);
+            getAndSetRestaurantRating(restaurant, jsonObject);
+            getAndSetRestaurantPlaceID(restaurant, jsonObject);
+
+            setMoreRestaurantDetails(restaurant, restaurant.getPlaceId(), listResponseCallback);
+        }
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
-                    Log.d("URL", "getRestaurantNearbyList: " + url);
                     try {
-
                         JSONArray results = response.getJSONArray(Constants.RESULTS);
                         int length = results.length();
                         for (int i = 0; i < length; i++) {
                             Restaurant restaurant = new Restaurant();
-
                             JSONObject resultObject = results.getJSONObject(i);
-                            List<String> typeList = getPlaceTypeList(resultObject);
+                            getAndSetRestaurantAttributes(restaurant, resultObject, getPlaceTypeList(resultObject), listResponseCallback);
 
-                            if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
+                            /*if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
                                 getAndSetRestaurantName(restaurant, resultObject);
                                 getAndSetRestaurantPositionAndAddress(restaurant, resultObject);
 
@@ -180,7 +193,7 @@ public class RestaurantNearbyBank {
                                 getAndSetRestaurantPlaceID(restaurant, resultObject);
 
                                 setMoreRestaurantDetails(restaurant, restaurant.getPlaceId(), listResponseCallback);
-                            }
+                            }*/
                         }
 
                     } catch (JSONException e) {
