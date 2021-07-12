@@ -323,7 +323,7 @@ public class RestaurantNearbyBank {
                     }
 
                     //if we're at the and of the json result (that's mean we've got all restaurants) AND we call for the restaurant list
-                    if (placeIndex == length - 1 && listResponseCallback != null) {
+                    if (/*placeIndex == length - 1 &&*/ listResponseCallback != null) {
                         //then we set the markerClickListener
                         if (mMarkerClickedCallback != null && mGoogleMap != null) {
                             mGoogleMap.setOnMarkerClickListener(marker -> {
