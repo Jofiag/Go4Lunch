@@ -165,7 +165,7 @@ public class RestaurantMapViewFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 ZoomOnRestaurantSearched(mGoogleMap, query);
-                showAllRestaurantNearby(mGoogleMap);
+                showAllRestaurantNearbyWithMarker(mGoogleMap);
                 addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
                 return true;    //return true so that the fragment won't be restart
             }
@@ -237,10 +237,10 @@ public class RestaurantMapViewFragment extends Fragment {
             devicePosition = locationApi.getPositionFromLocation();
             mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
             locationButton.setOnClickListener(v -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
-            showAllTextView.setOnClickListener(v -> showAllRestaurantNearby(mGoogleMap));
+            showAllTextView.setOnClickListener(v -> showAllRestaurantNearbyWithMarker(mGoogleMap));
             addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
             url = urlApi.getUrlThroughDeviceLocation();
-            showAllRestaurantNearby(mGoogleMap);
+            showAllRestaurantNearbyWithMarker(mGoogleMap);
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 11));
         }
         else
@@ -401,7 +401,7 @@ public class RestaurantMapViewFragment extends Fragment {
             Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
     }
 
-    private void showAllRestaurantNearby(GoogleMap googleMap){
+    private void showAllRestaurantNearbyWithMarker(GoogleMap googleMap){
         RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
         });
