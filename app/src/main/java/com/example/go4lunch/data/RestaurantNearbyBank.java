@@ -171,12 +171,13 @@ public class RestaurantNearbyBank {
                             if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
                                 getAndSetRestaurantName(restaurant, resultObject);
                                 getAndSetRestaurantPositionAndAddress(restaurant, resultObject);
-                                getAndSetRestaurantImageUrl(restaurant, resultObject);
-                                getAndSetRestaurantRating(restaurant, resultObject);
-                                getAndSetRestaurantPlaceID(restaurant, resultObject);
 
                                 if (mGoogleMap != null)
                                     addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), restaurant.getName(), restaurant.getAddress());
+
+                                getAndSetRestaurantImageUrl(restaurant, resultObject);
+                                getAndSetRestaurantRating(restaurant, resultObject);
+                                getAndSetRestaurantPlaceID(restaurant, resultObject);
 
                                 setMoreRestaurantDetails(restaurant, restaurant.getPlaceId(), listResponseCallback);
                             }
