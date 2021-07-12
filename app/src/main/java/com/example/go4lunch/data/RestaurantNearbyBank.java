@@ -122,7 +122,6 @@ public class RestaurantNearbyBank {
                             Restaurant restaurant = new Restaurant();
 
                             JSONObject resultObject = results.getJSONObject(i);
-//                            String name = resultObject.getString(Constants.NAME);
                             setRestaurantName(restaurant, resultObject);
 
                             JSONObject geometry = resultObject.getJSONObject(Constants.GEOMETRY);
@@ -140,17 +139,6 @@ public class RestaurantNearbyBank {
 
                             if (typeList.contains(Constants.RESTAURANT) && !typeList.contains(Constants.LODGING)){
 
-//                                String photoReference = "";
-//                                JSONArray photoArray = resultObject.getJSONArray(Constants.PHOTOS);
-//                                for (int z = 0; z < photoArray.length(); z++){
-//                                    JSONObject photoObject = photoArray.getJSONObject(z);
-//                                    photoReference = photoObject.getString(Constants.PHOTO_REFERENCE);
-//                                }
-//
-//                                String photoUrl = Constants.PLACE_PHOTO_SEARCH_URL +
-//                                        "maxwidth=" + Constants.PHOTO_MAX_WIDTH +
-//                                        "&photoreference=" + photoReference +
-//                                        "&key=" + mContext.getString(R.string.google_maps_key);
                                 setRestaurantImageUrl(restaurant, resultObject);
 
                                 float rating = resultObject.getInt(Constants.RATING);
@@ -167,18 +155,15 @@ public class RestaurantNearbyBank {
                                 String placeId = resultObject.getString(Constants.PLACE_ID);
                                 String address = getStreetAddressFromPositions(position);
 
-//                                restaurant.setName(name);
                                 restaurant.setAddress(address);
                                 restaurant.setPosition(position);
                                 restaurant.setPlaceId(placeId);
                                 restaurant.setFavorableOpinion(favorableOpinion);
-//                                if (!photoReference.equals(""))
-//                                    restaurant.setImageUrl(photoUrl);
 
                                 if (mGoogleMap != null)
                                     addMarkerOnPosition(mGoogleMap, restaurant.getPosition(), restaurant.getName(), restaurant.getAddress());
 
-                                setMoreRestaurantDetails(restaurant, placeId, length, i, listResponseCallback);
+                                setMoreRestaurantDetails(restaurant, placeId, listResponseCallback);
                             }
                         }
 
@@ -230,7 +215,7 @@ public class RestaurantNearbyBank {
     }*/
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void setMoreRestaurantDetails(Restaurant restaurant, String placeId, int length, int placeIndex, ListAsyncResponse listResponseCallback){
+    private void setMoreRestaurantDetails(Restaurant restaurant, String placeId, ListAsyncResponse listResponseCallback){
         /*String detailsUrl = Constants.PLACE_DETAILS_SEARCH_URL +
                 "place_id=" + placeId +
                 "&key=" + mContext.getString(R.string.google_maps_key);*/
@@ -323,7 +308,7 @@ public class RestaurantNearbyBank {
                     }
 
                     //if we're at the and of the json result (that's mean we've got all restaurants) AND we call for the restaurant list
-                    if (/*placeIndex == length - 1 &&*/ listResponseCallback != null) {
+                    if (listResponseCallback != null) {
                         //then we set the markerClickListener
                         if (mMarkerClickedCallback != null && mGoogleMap != null) {
                             mGoogleMap.setOnMarkerClickListener(marker -> {
