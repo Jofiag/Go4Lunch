@@ -117,7 +117,7 @@ public class RestaurantMapViewFragment extends Fragment {
         Log.d("ORDER", "onViewCreated: ");
 
         setLocationManagerAndListener();
-        requestLocationIfPermissionIsGranted(null);
+        requestLocationIfPermissionIsGranted();
         initializeSearchViewNeeded();
     }
 
@@ -165,9 +165,9 @@ public class RestaurantMapViewFragment extends Fragment {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public boolean onQueryTextSubmit(String query) {
-                ZoomOnRestaurantSearched(mGoogleMap, query);
-                showAllRestaurantNearbyWithMarker(mGoogleMap);
-                addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
+                ZoomOnRestaurantSearched(query);
+                showAllRestaurantNearbyWithMarker();
+                addMarkerOnPosition(devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
                 return true;    //return true so that the fragment won't be restart
             }
 
@@ -231,17 +231,17 @@ public class RestaurantMapViewFragment extends Fragment {
         Log.d("ORDER", "setGoogleMap: ");
 
         mGoogleMap = googleMap;
-        requestLocationIfPermissionIsGranted(mGoogleMap);
+        requestLocationIfPermissionIsGranted();
 
         if (deviceLocation != null) {
             locationApi.setLocation(deviceLocation);
             devicePosition = locationApi.getPositionFromLocation();
             mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
             locationButton.setOnClickListener(v -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
-            showAllTextView.setOnClickListener(v -> showAllRestaurantNearbyWithMarker(mGoogleMap));
-            addMarkerOnPosition(mGoogleMap, devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
+            showAllTextView.setOnClickListener(v -> showAllRestaurantNearbyWithMarker());
+            addMarkerOnPosition(devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
             url = urlApi.getUrlThroughDeviceLocation();
-            showAllRestaurantNearbyWithMarker(mGoogleMap);
+            showAllRestaurantNearbyWithMarker();
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 14));
         }
         else
@@ -313,8 +313,8 @@ public class RestaurantMapViewFragment extends Fragment {
         return result;
     }
 
-    private void addMarkerOnPosition(GoogleMap googleMap, LatLng position, String title, float color){
-        Marker marker = googleMap.addMarker(new MarkerOptions()
+    private void addMarkerOnPosition(LatLng position, String title, float color){
+        Marker marker = mGoogleMap.addMarker(new MarkerOptions()
                 .position(position)
                 .title(title)
                 .icon(BitmapDescriptorFactory.defaultMarker(color)));
@@ -326,7 +326,7 @@ public class RestaurantMapViewFragment extends Fragment {
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> {
                 if (result)
-                    requestLocationIfPermissionIsGranted(null);
+                    requestLocationIfPermissionIsGranted();
                 else
                     requestPermissionWithinDialog();
             }
@@ -358,14 +358,14 @@ public class RestaurantMapViewFragment extends Fragment {
         };
     }
 
-    private void requestLocationIfPermissionIsGranted(GoogleMap googleMap) {
+    private void requestLocationIfPermissionIsGranted() {
         if (requireContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 600000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             locationApi.setLocation(deviceLocation);
 
-            if (googleMap != null) {
-                googleMap.setMyLocationEnabled(true);
+            if (mGoogleMap != null) {
+                mGoogleMap.setMyLocationEnabled(true);
             }
         }
         else{
@@ -380,7 +380,7 @@ public class RestaurantMapViewFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Location permission disable")
                 .setMessage("You denied the location permission. It is required to show your location. Do you want to grant the permission")
-                .setPositiveButton("YES", (dialog, which) -> requestLocationIfPermissionIsGranted(null))
+                .setPositiveButton("YES", (dialog, which) -> requestLocationIfPermissionIsGranted())
                 .setNegativeButton("NO", null)
                 .create()
                 .show();
@@ -402,26 +402,25 @@ public class RestaurantMapViewFragment extends Fragment {
             Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
     }
 
-    private void showAllRestaurantNearbyWithMarker(GoogleMap googleMap){
+    private void showAllRestaurantNearbyWithMarker(){
         LoadingDialog dialog  = LoadingDialog.getInstance(getActivity());
         dialog.startLoadingDialog();
-        RestaurantNearbyBank.getInstance(getActivity(), googleMap).getRestaurantNearbyList(url, restaurantList -> dialog.dismissLoadingDialog());
+        RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> dialog.dismissLoadingDialog());
     }
 
-    private void ZoomOnRestaurantSearched(GoogleMap googleMap, String query){
-        if (googleMap != null){
-            googleMap.clear();                  // Removing all marker added
+    private void ZoomOnRestaurantSearched(String query){
+        if (mGoogleMap != null){
 //            url = getUrl(deviceLocation);      // Getting url to get information about nearby restaurant on google maps.
             url = urlApi.getUrlThroughDeviceLocation();
 
-            RestaurantNearbyBank.getInstance(getActivity(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
+            RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
 
                 for (Restaurant restaurant : restaurantList) {
                     LatLng restaurantPosition = restaurant.getPosition();
                     //Zooming on the restaurant clicked
                     if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 20));
-                        addMarkerOnPosition(mGoogleMap, restaurantPosition, restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
+                        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 20));
+                        addMarkerOnPosition(restaurantPosition, restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
                     }
 
                     getFromQuery(query, NAME);
