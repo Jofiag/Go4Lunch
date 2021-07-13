@@ -1,6 +1,6 @@
 package com.example.go4lunch.adapter;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -31,11 +31,11 @@ import java.util.List;
 
 public class RestaurantRecyclerViewAdapter extends RecyclerView.Adapter<RestaurantRecyclerViewAdapter.MyViewHolder>
 implements Filterable {
-    private final Context context;
+    private final Activity activity;
     private final List<Restaurant> restaurantList;
 
-    public RestaurantRecyclerViewAdapter(Context context, List<Restaurant> restaurantList) {
-        this.context = context;
+    public RestaurantRecyclerViewAdapter(Activity activity, List<Restaurant> restaurantList) {
+        this.activity = activity;
         this.restaurantList = restaurantList;
     }
 
@@ -91,7 +91,7 @@ implements Filterable {
         holder.restaurantNameTextView.setText(restaurant.getName());
         holder.itemView.setOnClickListener(v -> {
             RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant);
-            context.startActivity(new Intent(context, RestaurantDetailsActivity.class));
+            activity.startActivity(new Intent(activity, RestaurantDetailsActivity.class));
         });
 
     }
@@ -169,10 +169,10 @@ implements Filterable {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                String url = RestaurantListUrlApi.getInstance(context).getUrlThroughDeviceLocation();
+                String url = RestaurantListUrlApi.getInstance(activity).getUrlThroughDeviceLocation();
                 FilterResults filterResults = new FilterResults();
 
-                RestaurantNearbyBank.getInstance(context, null).getRestaurantNearbyList(url,
+                RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url,
                         restaurantList -> filterResults.values = getFilteredList(constraint, restaurantList));
 
                 return filterResults;

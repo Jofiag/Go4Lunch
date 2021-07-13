@@ -1,6 +1,5 @@
 package com.example.go4lunch.fragment;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -52,12 +51,12 @@ public class WorkmateListViewFragment extends Fragment {
         recyclerView = view.findViewById(R.id.workmate_list_recycler_view);
 
 //        List<Workmate> workmateList = new ArrayList<>();
-        Context context = view.getContext();
+//        Activity context = view.getContext();
 
-        workmateAdapter = new WorkmateRecyclerViewAdapter(context, workmateList);
+        workmateAdapter = new WorkmateRecyclerViewAdapter(getActivity(), workmateList);
 
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(workmateAdapter);
 
         return view;

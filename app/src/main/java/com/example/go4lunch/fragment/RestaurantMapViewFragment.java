@@ -402,7 +402,7 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     private void showAllRestaurantNearbyWithMarker(GoogleMap googleMap){
-        RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
+        RestaurantNearbyBank.getInstance(getActivity(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
         });
     }
@@ -413,7 +413,7 @@ public class RestaurantMapViewFragment extends Fragment {
 //            url = getUrl(deviceLocation);      // Getting url to get information about nearby restaurant on google maps.
             url = urlApi.getUrlThroughDeviceLocation();
 
-            RestaurantNearbyBank.getInstance(getContext(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
+            RestaurantNearbyBank.getInstance(getActivity(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
 
                 for (Restaurant restaurant : restaurantList) {
                     LatLng restaurantPosition = restaurant.getPosition();
@@ -497,7 +497,7 @@ public class RestaurantMapViewFragment extends Fragment {
         });
 */
 
-        RestaurantNearbyBank.getInstance(getContext(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
+        RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
                 //When we've got all the restaurant
                 if (!restaurantList.isEmpty()) {

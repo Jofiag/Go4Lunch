@@ -8,7 +8,8 @@ import android.view.LayoutInflater;
 import com.example.go4lunch.R;
 
 public class LoadingDialog {
-    private LoadingDialog INSTANCE;
+    @SuppressLint("StaticFieldLeak")
+    private static LoadingDialog INSTANCE;
 
     private final Activity activity;
     private final AlertDialog.Builder builder;
@@ -21,7 +22,7 @@ public class LoadingDialog {
         initializeDialogBuilder();
     }
 
-    public LoadingDialog getInstance(Activity activity){
+    public static LoadingDialog getInstance(Activity activity){
         if (INSTANCE == null)
             INSTANCE = new LoadingDialog(activity);
 

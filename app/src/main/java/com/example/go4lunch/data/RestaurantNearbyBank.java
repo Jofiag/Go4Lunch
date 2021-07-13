@@ -1,6 +1,7 @@
 package com.example.go4lunch.data;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
@@ -15,6 +16,7 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.model.MyOpeningHours;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
+import com.example.go4lunch.util.LoadingDialog;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -47,38 +49,42 @@ public class RestaurantNearbyBank {
         void onMarkerClickedGetRestaurant(Restaurant restaurant);
     }
 
+    @SuppressLint("StaticFieldLeak")
+    private static LoadingDialog loadingDialog;
     private static GoogleMap mGoogleMap;
-    private final Context mContext;
+    private final Activity mActivity;
     private final RequestQueue mRequestQueue;
     private final OnMarkerClicked mMarkerClickedCallback;
     private final List<Restaurant> mRestaurantList = new ArrayList<>();
     @SuppressLint("StaticFieldLeak")
     private static RestaurantNearbyBank INSTANCE;
 
-    public RestaurantNearbyBank(Context context, GoogleMap googleMap) {
-        mContext = context;
+    public RestaurantNearbyBank(Activity activity, GoogleMap googleMap) {
+        mActivity = activity;
         mGoogleMap = googleMap;
-        mMarkerClickedCallback = (OnMarkerClicked) context;
-        mRequestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
+        mMarkerClickedCallback = (OnMarkerClicked) activity;
+        mRequestQueue = RequestQueueSingleton.getInstance(activity).getRequestQueue();
+        loadingDialog = LoadingDialog.getInstance(mActivity);
     }
 
-    public RestaurantNearbyBank(Context context) {
-        mContext = context;
-        mMarkerClickedCallback = (OnMarkerClicked) context;
-        mRequestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
+    public RestaurantNearbyBank(Activity activity) {
+        mActivity = activity;
+        mMarkerClickedCallback = (OnMarkerClicked) activity;
+        mRequestQueue = RequestQueueSingleton.getInstance(activity).getRequestQueue();
+        loadingDialog = LoadingDialog.getInstance(mActivity);
     }
 
-    public static synchronized RestaurantNearbyBank getInstance(Context context, GoogleMap googleMap){
+    public static synchronized RestaurantNearbyBank getInstance(Activity activity, GoogleMap googleMap){
 //        if (INSTANCE != null){
 //            if (googleMap != null && mGoogleMap == null)
-//                INSTANCE = new RestaurantNearbyBank(context, googleMap);
+//                INSTANCE = new RestaurantNearbyBank(activity, googleMap);
 //        }
 
 //        if (INSTANCE == null) {
             if (googleMap == null)
-                INSTANCE = new RestaurantNearbyBank(context);
+                INSTANCE = new RestaurantNearbyBank(activity);
             else
-                INSTANCE = new RestaurantNearbyBank(context, googleMap);
+                INSTANCE = new RestaurantNearbyBank(activity, googleMap);
 //        }
 
         return INSTANCE;
@@ -86,6 +92,7 @@ public class RestaurantNearbyBank {
 
 
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
+        loadingDialog.startLoadingDialog();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
@@ -120,7 +127,7 @@ public class RestaurantNearbyBank {
             String imageUrl = Constants.PLACE_PHOTO_SEARCH_URL +
                     "maxwidth=" + Constants.PHOTO_MAX_WIDTH +
                     "&photoreference=" + imageReference +
-                    "&key=" + mContext.getString(R.string.google_maps_key);
+                    "&key=" + mActivity.getString(R.string.google_maps_key);
 
             if (!imageReference.equals(""))
                 restaurant.setImageUrl(imageUrl);
@@ -153,7 +160,7 @@ public class RestaurantNearbyBank {
         }
         private String getStreetAddressFromPositions(LatLng position) {
         String address = "";
-        Geocoder geocoder = new Geocoder(mContext);
+        Geocoder geocoder = new Geocoder(mActivity);
         List<Address> addressList;
 
         try {
@@ -211,9 +218,9 @@ public class RestaurantNearbyBank {
     //        Log.d("DETAILS", "getOpeningHours: DETAILS = " + detailsUrl);
 
             if(!Places.isInitialized())
-                Places.initialize(Objects.requireNonNull(mContext), mContext.getString(R.string.google_maps_key));
+                Places.initialize(Objects.requireNonNull(mActivity), mActivity.getString(R.string.google_maps_key));
 
-            PlacesClient placesClient = Places.createClient(Objects.requireNonNull(mContext));
+            PlacesClient placesClient = Places.createClient(Objects.requireNonNull(mActivity));
             List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
             FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields);
 
@@ -307,7 +314,7 @@ public class RestaurantNearbyBank {
                     restaurant.setDistanceFromDeviceLocation(getHowFarFrom(place.getLatLng()));
             }
         private int getHowFarFrom(LatLng destination){
-        Location deviceLocation = LocationApi.getInstance(mContext).getLocation();
+        Location deviceLocation = LocationApi.getInstance(mActivity).getLocation();
         Location destinationLocation = new Location("");
         destinationLocation.setLatitude(destination.latitude);
         destinationLocation.setLongitude(destination.longitude);
@@ -350,6 +357,7 @@ public class RestaurantNearbyBank {
                         });
                     }
 
+                    loadingDialog.dismissLoadingDialog();
                     //and we send the list
                     listResponseCallback.processFinished(mRestaurantList);
                 }

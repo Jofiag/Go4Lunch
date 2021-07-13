@@ -1,6 +1,6 @@
 package com.example.go4lunch.fragment;
 
-import android.content.Context;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,7 +36,7 @@ public class RestaurantListViewFragment extends Fragment{
     private RestaurantRecyclerViewAdapter restaurantAdapter;
 
     private String url;
-    private Context context;
+    private Activity activity;
 
     private RecyclerView recyclerView;
 
@@ -49,8 +49,8 @@ public class RestaurantListViewFragment extends Fragment{
         setHasOptionsMenu(true);
         super.onCreate(savedInstanceState);
 
-        context = getContext();
-        url = RestaurantListUrlApi.getInstance(getContext()).getUrlThroughDeviceLocation();
+        activity = getActivity();
+        url = RestaurantListUrlApi.getInstance(getActivity()).getUrlThroughDeviceLocation();
 
         /*initializePlaces();
         initializePredictionRequestAndPlaceFields();*/
@@ -62,10 +62,10 @@ public class RestaurantListViewFragment extends Fragment{
 
         recyclerView = view.findViewById(R.id.restaurant_list_recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
-        RestaurantNearbyBank.getInstance(context, null).getRestaurantNearbyList(url, restaurantList -> {
-            restaurantAdapter = new RestaurantRecyclerViewAdapter(context, restaurantList);
+        RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
+            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
             recyclerView.setAdapter(restaurantAdapter);
             restaurantAdapter.notifyDataSetChanged();
         });
@@ -116,14 +116,14 @@ public class RestaurantListViewFragment extends Fragment{
     }
 
     private void filterList(String query){
-        RestaurantNearbyBank.getInstance(context, null).getRestaurantNearbyList(url, restaurantList -> {
+        RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
             List<Restaurant> listFiltered = new ArrayList<>();
 
             for (Restaurant restaurant : restaurantList)
                 if (restaurant.getName().toLowerCase().contains(query.toLowerCase()))
                     listFiltered.add(restaurant);
 
-            restaurantAdapter = new RestaurantRecyclerViewAdapter(context, listFiltered);
+            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, listFiltered);
             recyclerView.setAdapter(restaurantAdapter);
             restaurantAdapter.notifyDataSetChanged();
 
