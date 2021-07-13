@@ -41,6 +41,7 @@ import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
+import com.example.go4lunch.util.LoadingDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -402,9 +403,9 @@ public class RestaurantMapViewFragment extends Fragment {
     }
 
     private void showAllRestaurantNearbyWithMarker(GoogleMap googleMap){
-        RestaurantNearbyBank.getInstance(getActivity(), googleMap).getRestaurantNearbyList(url, restaurantList -> {
-
-        });
+        LoadingDialog dialog  = LoadingDialog.getInstance(getActivity());
+        dialog.startLoadingDialog();
+        RestaurantNearbyBank.getInstance(getActivity(), googleMap).getRestaurantNearbyList(url, restaurantList -> dialog.dismissLoadingDialog());
     }
 
     private void ZoomOnRestaurantSearched(GoogleMap googleMap, String query){

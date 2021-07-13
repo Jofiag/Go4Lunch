@@ -22,6 +22,7 @@ import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
+import com.example.go4lunch.util.LoadingDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,10 +65,14 @@ public class RestaurantListViewFragment extends Fragment{
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
+        LoadingDialog dialog  = LoadingDialog.getInstance(getActivity());
+        dialog.startLoadingDialog();
+
         RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
             restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
             recyclerView.setAdapter(restaurantAdapter);
             restaurantAdapter.notifyDataSetChanged();
+            dialog.dismissLoadingDialog();
         });
 
         /*RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, new RestaurantBank.ListAsyncResponse() {

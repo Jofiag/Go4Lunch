@@ -92,7 +92,6 @@ public class RestaurantNearbyBank {
 
 
     public void getRestaurantNearbyList(String url, final ListAsyncResponse listResponseCallback){
-        loadingDialog.startLoadingDialog();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
@@ -357,7 +356,6 @@ public class RestaurantNearbyBank {
                         });
                     }
 
-                    loadingDialog.dismissLoadingDialog();
                     //and we send the list
                     listResponseCallback.processFinished(mRestaurantList);
                 }
