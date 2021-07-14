@@ -97,26 +97,6 @@ public class HomepageActivity extends AppCompatActivity
 
             return true;
         });
-//        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-//            int id = item.getItemId();
-//
-//            switch (id){
-//                case R.id.restaurant_map_view_item:
-//                    myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
-//                    attachNewFragment(new RestaurantMapViewFragment());
-//                    return true;
-//                case R.id.restaurant_list_view_item:
-//                    myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
-//                    attachNewFragment(new RestaurantListViewFragment());
-//                    return true;
-//                case R.id.workmate_list_view_item:
-//                    myToolbar.setTitle(Constants.AVAILABLE_WORKMATES_TITLE_TEXT);
-//                    attachNewFragment(new WorkmateListViewFragment());
-//                    return true;
-//            }
-//
-//            return false;
-//        });
     }
 
     private void initializeFragment(){

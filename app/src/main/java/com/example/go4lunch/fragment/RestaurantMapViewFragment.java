@@ -10,7 +10,6 @@ import android.database.MatrixCursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.util.Log;
@@ -28,7 +27,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.cursoradapter.widget.CursorAdapter;
@@ -162,16 +160,14 @@ public class RestaurantMapViewFragment extends Fragment {
         searchView.setSubmitButtonEnabled(true);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public boolean onQueryTextSubmit(String query) {
                 ZoomOnRestaurantSearched(query);
-                showAllRestaurantNearbyWithMarker();
+                addMarkerToAllRestaurants();
                 addMarkerOnPosition(devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
                 return true;    //return true so that the fragment won't be restart
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Show suggestion
@@ -235,13 +231,13 @@ public class RestaurantMapViewFragment extends Fragment {
 
         if (deviceLocation != null) {
             locationApi.setLocation(deviceLocation);
+            url = urlApi.getUrlThroughDeviceLocation();
             devicePosition = locationApi.getPositionFromLocation();
             mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
             locationButton.setOnClickListener(v -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
-            showAllTextView.setOnClickListener(v -> showAllRestaurantNearbyWithMarker());
+            showAllTextView.setOnClickListener(v -> addMarkerToAllRestaurants());
             addMarkerOnPosition(devicePosition, "My position : " + locationApi.getStreetAddressFromPositions(), BitmapDescriptorFactory.HUE_RED);
-            url = urlApi.getUrlThroughDeviceLocation();
-            showAllRestaurantNearbyWithMarker();
+            addMarkerToAllRestaurants();
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 14));
         }
         else
@@ -402,7 +398,7 @@ public class RestaurantMapViewFragment extends Fragment {
             Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
     }
 
-    private void showAllRestaurantNearbyWithMarker(){
+    private void addMarkerToAllRestaurants(){
         LoadingDialog dialog  = LoadingDialog.getInstance(getActivity());
         dialog.startLoadingDialog();
         RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> dialog.dismissLoadingDialog());
