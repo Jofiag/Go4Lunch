@@ -71,9 +71,9 @@ public class HomepageActivity extends AppCompatActivity
 
     @SuppressLint("NonConstantResourceId")
     private void setBottomNavigationView(){
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
 
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
             switch (id){
                 case R.id.restaurant_map_view_item:
                     myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
@@ -88,9 +88,28 @@ public class HomepageActivity extends AppCompatActivity
                     attachNewFragment(new WorkmateListViewFragment());
                     return true;
             }
-
             return false;
         });
+//        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+//            int id = item.getItemId();
+//
+//            switch (id){
+//                case R.id.restaurant_map_view_item:
+//                    myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
+//                    attachNewFragment(new RestaurantMapViewFragment());
+//                    return true;
+//                case R.id.restaurant_list_view_item:
+//                    myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
+//                    attachNewFragment(new RestaurantListViewFragment());
+//                    return true;
+//                case R.id.workmate_list_view_item:
+//                    myToolbar.setTitle(Constants.AVAILABLE_WORKMATES_TITLE_TEXT);
+//                    attachNewFragment(new WorkmateListViewFragment());
+//                    return true;
+//            }
+//
+//            return false;
+//        });
     }
 
     private void attachNewFragment(Fragment newFragment){
@@ -100,7 +119,7 @@ public class HomepageActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        fragmentTransaction.replace(R.id.other_fragment_container_homepage_activity, newFragment)
+        fragmentTransaction.replace(R.id.fragment_container_homepage_activity, newFragment)
                 .commit();
     }
 

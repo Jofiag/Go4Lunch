@@ -2,7 +2,6 @@ package com.example.go4lunch.data;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -16,7 +15,6 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.model.MyOpeningHours;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
-import com.example.go4lunch.util.LoadingDialog;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -49,8 +47,6 @@ public class RestaurantNearbyBank {
         void onMarkerClickedGetRestaurant(Restaurant restaurant);
     }
 
-    @SuppressLint("StaticFieldLeak")
-    private static LoadingDialog loadingDialog;
     private static GoogleMap mGoogleMap;
     private final Activity mActivity;
     private final RequestQueue mRequestQueue;
@@ -64,28 +60,17 @@ public class RestaurantNearbyBank {
         mGoogleMap = googleMap;
         mMarkerClickedCallback = (OnMarkerClicked) activity;
         mRequestQueue = RequestQueueSingleton.getInstance(activity).getRequestQueue();
-        loadingDialog = LoadingDialog.getInstance(mActivity);
     }
 
     public RestaurantNearbyBank(Activity activity) {
         mActivity = activity;
         mMarkerClickedCallback = (OnMarkerClicked) activity;
         mRequestQueue = RequestQueueSingleton.getInstance(activity).getRequestQueue();
-        loadingDialog = LoadingDialog.getInstance(mActivity);
     }
 
     public static synchronized RestaurantNearbyBank getInstance(Activity activity, GoogleMap googleMap){
-//        if (INSTANCE != null){
-//            if (googleMap != null && mGoogleMap == null)
-//                INSTANCE = new RestaurantNearbyBank(activity, googleMap);
-//        }
-
-//        if (INSTANCE == null) {
-            if (googleMap == null)
-                INSTANCE = new RestaurantNearbyBank(activity);
-            else
-                INSTANCE = new RestaurantNearbyBank(activity, googleMap);
-//        }
+        if (INSTANCE == null)
+            INSTANCE = new RestaurantNearbyBank(activity, googleMap);
 
         return INSTANCE;
     }
