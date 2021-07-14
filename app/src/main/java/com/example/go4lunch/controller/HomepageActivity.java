@@ -37,6 +37,11 @@ public class HomepageActivity extends AppCompatActivity
     private NavigationView myNavigationView;
     private BottomNavigationView bottomNavigationView;
 
+    private Fragment selectedFragment;
+    private Fragment restaurantMapViewFragment;
+    private Fragment restaurantListViewFragment;
+    private Fragment workmateListViewFragment;
+
     private Restaurant restaurantChosen;
     private User user;
 
@@ -47,11 +52,13 @@ public class HomepageActivity extends AppCompatActivity
 
         setReferences();
 
+        initializeFragment();
+
         user = new User(); //TODO : get user connected from firebase
 
         restaurantChosen = user.getRestaurantChosen();
 
-        attachNewFragment(new RestaurantMapViewFragment());// Showing the RestaurantMapViewFragment when first start the activity
+        attachNewFragment(restaurantMapViewFragment);// Showing the RestaurantMapViewFragment when first start the activity
 
         setBottomNavigationView();
 
@@ -69,26 +76,26 @@ public class HomepageActivity extends AppCompatActivity
         bottomNavigationView = findViewById(R.id.bottom_navigation_view);
     }
 
-    @SuppressLint("NonConstantResourceId")
     private void setBottomNavigationView(){
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            switch (id){
-                case R.id.restaurant_map_view_item:
-                    myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
-                    attachNewFragment(new RestaurantMapViewFragment());
-                    return true;
-                case R.id.restaurant_list_view_item:
-                    myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
-                    attachNewFragment(new RestaurantListViewFragment());
-                    return true;
-                case R.id.workmate_list_view_item:
-                    myToolbar.setTitle(Constants.AVAILABLE_WORKMATES_TITLE_TEXT);
-                    attachNewFragment(new WorkmateListViewFragment());
-                    return true;
+            if (id == R.id.restaurant_map_view_item){
+                myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
+                selectedFragment = restaurantMapViewFragment;
             }
-            return false;
+            else if (id == R.id.restaurant_list_view_item){
+                myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
+                selectedFragment = restaurantListViewFragment;
+            }
+            else if (id == R.id.workmate_list_view_item){
+                myToolbar.setTitle(Constants.AVAILABLE_WORKMATES_TITLE_TEXT);
+                selectedFragment = workmateListViewFragment;
+            }
+
+            attachNewFragment(selectedFragment);
+
+            return true;
         });
 //        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
 //            int id = item.getItemId();
@@ -110,6 +117,12 @@ public class HomepageActivity extends AppCompatActivity
 //
 //            return false;
 //        });
+    }
+
+    private void initializeFragment(){
+        restaurantMapViewFragment = new RestaurantMapViewFragment();
+        restaurantListViewFragment = new RestaurantListViewFragment();
+        workmateListViewFragment = new WorkmateListViewFragment();
     }
 
     private void attachNewFragment(Fragment newFragment){
