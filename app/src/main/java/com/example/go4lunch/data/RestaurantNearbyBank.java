@@ -68,8 +68,8 @@ public class RestaurantNearbyBank {
         mRequestQueue = RequestQueueSingleton.getInstance(activity).getRequestQueue();
     }
 
-    public static synchronized RestaurantNearbyBank getInstance(Activity activity, GoogleMap googleMap){
-        if (INSTANCE == null)
+    public static /*synchronized*/ RestaurantNearbyBank getInstance(Activity activity, GoogleMap googleMap){
+//        if (INSTANCE == null)
             INSTANCE = new RestaurantNearbyBank(activity, googleMap);
 
         return INSTANCE;

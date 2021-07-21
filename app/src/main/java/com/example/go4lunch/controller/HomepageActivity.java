@@ -1,6 +1,5 @@
 package com.example.go4lunch.controller;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -13,7 +12,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
@@ -37,10 +35,14 @@ public class HomepageActivity extends AppCompatActivity
     private NavigationView myNavigationView;
     private BottomNavigationView bottomNavigationView;
 
-    private Fragment selectedFragment;
-    private Fragment restaurantMapViewFragment;
-    private Fragment restaurantListViewFragment;
-    private Fragment workmateListViewFragment;
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
+    private String fragmentTag;
+
+    private final Fragment restaurantMapViewFragment = new RestaurantMapViewFragment();
+    private final Fragment restaurantListViewFragment = new RestaurantListViewFragment();
+    private final Fragment workmateListViewFragment = new WorkmateListViewFragment();
+    private Fragment fragmentToShow;
+    private Fragment activeFragment;
 
     private Restaurant restaurantChosen;
     private User user;
@@ -48,17 +50,15 @@ public class HomepageActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_homepage);
-
         setReferences();
-
-        initializeFragment();
 
         user = new User(); //TODO : get user connected from firebase
 
         restaurantChosen = user.getRestaurantChosen();
 
-        attachNewFragment(restaurantMapViewFragment);// Showing the RestaurantMapViewFragment when first start the activity
+        addFragments();
 
         setBottomNavigationView();
 
@@ -76,64 +76,53 @@ public class HomepageActivity extends AppCompatActivity
         bottomNavigationView = findViewById(R.id.bottom_navigation_view);
     }
 
-    private void setBottomNavigationView(){
+    private void addFragments(){
+        activeFragment = restaurantMapViewFragment;
 
+        fragmentManager.beginTransaction()
+                .add(R.id.fragment_container_homepage_activity, workmateListViewFragment, Constants.WORKMATE_LIST_FRAGMENT)
+                .hide(workmateListViewFragment)
+                .commit();
+
+        fragmentManager.beginTransaction()
+                .add(R.id.fragment_container_homepage_activity, restaurantListViewFragment, Constants.RESTAURANT_LIST_FRAGMENT)
+                .hide(restaurantListViewFragment)
+                .commit();
+
+        fragmentManager.beginTransaction()
+                .add(R.id.fragment_container_homepage_activity, activeFragment, Constants.RESTAURANT_MAP_VIEW_FRAGMENT)
+                .commit();
+    }
+
+    private void showFragment(){
+        fragmentManager.beginTransaction().hide(activeFragment).show(fragmentToShow).commit();
+        activeFragment = fragmentToShow;
+    }
+
+    private void setBottomNavigationView(){
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.restaurant_map_view_item){
                 myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
-                selectedFragment = restaurantMapViewFragment;
+                fragmentTag = Constants.RESTAURANT_MAP_VIEW_FRAGMENT;
+                fragmentToShow = restaurantMapViewFragment;
             }
             else if (id == R.id.restaurant_list_view_item){
                 myToolbar.setTitle(Constants.IM_HUNGRY_TITLE_TEXT);
-                selectedFragment = restaurantListViewFragment;
+                fragmentTag = Constants.RESTAURANT_LIST_FRAGMENT;
+                fragmentToShow = restaurantListViewFragment;
             }
             else if (id == R.id.workmate_list_view_item){
                 myToolbar.setTitle(Constants.AVAILABLE_WORKMATES_TITLE_TEXT);
-                selectedFragment = workmateListViewFragment;
+                fragmentTag = Constants.WORKMATE_LIST_FRAGMENT;
+                fragmentToShow = workmateListViewFragment;
             }
 
-            attachNewFragment(selectedFragment);
+            showFragment();
 
             return true;
         });
     }
-
-    private void initializeFragment(){
-        restaurantMapViewFragment = new RestaurantMapViewFragment();
-        restaurantListViewFragment = new RestaurantListViewFragment();
-        workmateListViewFragment = new WorkmateListViewFragment();
-    }
-
-    private void attachNewFragment(Fragment newFragment){
-        /*mapViewFrameLayout.setVisibility(View.GONE);
-        otherFrameLayout.setVisibility(View.VISIBLE);*/
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        fragmentTransaction.replace(R.id.fragment_container_homepage_activity, newFragment)
-                .commit();
-    }
-
-    /*private void getMapViewFragmentIfExist(){
-        otherFrameLayout.setVisibility(View.GONE);
-        mapViewFrameLayout.setVisibility(View.VISIBLE);
-
-        FragmentManager fragmentManager =  getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        // Here we are getting the fragment from the manager, but if it's not created before it's going to be null
-        Fragment mapViewFragment = fragmentManager.findFragmentById(R.id.map_view_container_homepage_activity);
-
-        // If the fragment doesn't exist, then we create a new one
-        if (mapViewFragment == null){
-            mapViewFragment = new RestaurantMapViewFragment();
-            fragmentTransaction.replace(R.id.map_view_container_homepage_activity, mapViewFragment)
-                    .commit();
-        }
-
-    }*/
 
     private void setMyToolbarAsAppBar(){
         setSupportActionBar(myToolbar);

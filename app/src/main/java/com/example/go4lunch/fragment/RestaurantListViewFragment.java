@@ -66,8 +66,8 @@ public class RestaurantListViewFragment extends Fragment{
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
         LoadingDialog dialog  = LoadingDialog.getInstance(getActivity());
-        dialog.startLoadingDialog();
 
+        dialog.startLoadingDialog();
         RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
             restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
             recyclerView.setAdapter(restaurantAdapter);
