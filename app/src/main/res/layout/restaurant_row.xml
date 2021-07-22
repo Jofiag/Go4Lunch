@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:backgroundTint="#FFFF"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:targetApi="lollipop">
+    xmlns:tools="http://schemas.android.com/tools">
+<!--    tools:targetApi="lollipop">-->
 
     <RelativeLayout
         android:layout_width="match_parent"

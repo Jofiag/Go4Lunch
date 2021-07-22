@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:backgroundTint="@color/white"
-    tools:context=".fragment.RestaurantListViewFragment"
-    tools:targetApi="lollipop">
+    tools:context=".fragment.RestaurantListViewFragment">
+<!--    tools:targetApi="lollipop">-->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/restaurant_list_recycler_view"

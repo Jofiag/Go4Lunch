@@ -9,8 +9,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -59,21 +61,8 @@ public class RestaurantListViewFragment extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
 
-        recyclerView = view.findViewById(R.id.restaurant_list_recycler_view);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
-        LoadingDialog dialog  = LoadingDialog.getInstance(getActivity());
-
-        dialog.startLoadingDialog();
-        RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
-            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
-            recyclerView.setAdapter(restaurantAdapter);
-            restaurantAdapter.notifyDataSetChanged();
-            dialog.dismissLoadingDialog();
-        });
 
         /*RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, new RestaurantBank.ListAsyncResponse() {
             @Override
@@ -86,7 +75,33 @@ public class RestaurantListViewFragment extends Fragment{
             }
         });*/
 
-        return view;
+        return inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        recyclerView = view.findViewById(R.id.restaurant_list_recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+
+        LoadingDialog dialog  = LoadingDialog.getInstance(activity);
+        dialog.startLoadingDialog();
+
+//        Toast.makeText(activity, "No restaurant found !!!", Toast.LENGTH_SHORT).show();
+
+        url = RestaurantListUrlApi.getInstance(getActivity()).getUrlThroughDeviceLocation();
+
+        RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
+            if (restaurantList.isEmpty())
+                Toast.makeText(activity, "No restaurant found !!!", Toast.LENGTH_SHORT).show();
+            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
+            recyclerView.setAdapter(restaurantAdapter);
+            restaurantAdapter.notifyDataSetChanged();
+        });
+
+        dialog.dismissLoadingDialog();
+
     }
 
     @Override
@@ -94,10 +109,10 @@ public class RestaurantListViewFragment extends Fragment{
         inflater.inflate(R.menu.search_view_menu, menu);
 
         MenuItem searchItem = menu.findItem(R.id.search_item);
+
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         searchView.setQueryHint(Constants.SEARCH_RESTAURANTS_TEXT);
-
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

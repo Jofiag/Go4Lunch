@@ -52,8 +52,6 @@ public class RestaurantNearbyBank {
     private final RequestQueue mRequestQueue;
     private final OnMarkerClicked mMarkerClickedCallback;
     private final List<Restaurant> mRestaurantList = new ArrayList<>();
-    @SuppressLint("StaticFieldLeak")
-    private static RestaurantNearbyBank INSTANCE;
 
     public RestaurantNearbyBank(Activity activity, GoogleMap googleMap) {
         mActivity = activity;
@@ -68,8 +66,12 @@ public class RestaurantNearbyBank {
         mRequestQueue = RequestQueueSingleton.getInstance(activity).getRequestQueue();
     }
 
-    public static /*synchronized*/ RestaurantNearbyBank getInstance(Activity activity, GoogleMap googleMap){
-//        if (INSTANCE == null)
+    public static synchronized RestaurantNearbyBank getInstance(Activity activity, GoogleMap googleMap){
+        RestaurantNearbyBank INSTANCE;
+
+        if (googleMap == null)
+            INSTANCE = new RestaurantNearbyBank(activity);
+        else
             INSTANCE = new RestaurantNearbyBank(activity, googleMap);
 
         return INSTANCE;

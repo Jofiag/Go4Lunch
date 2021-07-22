@@ -47,7 +47,6 @@ implements Filterable {
         return new MyViewHolder(view);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Restaurant restaurant = restaurantList.get(position);
@@ -166,7 +165,6 @@ implements Filterable {
     @Override
     public Filter getFilter() {
         return new Filter() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 String url = RestaurantListUrlApi.getInstance(activity).getUrlThroughDeviceLocation();
