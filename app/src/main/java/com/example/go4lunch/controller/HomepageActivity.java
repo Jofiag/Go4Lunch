@@ -23,7 +23,6 @@ import androidx.fragment.app.FragmentManager;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.LocationApi;
-import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
