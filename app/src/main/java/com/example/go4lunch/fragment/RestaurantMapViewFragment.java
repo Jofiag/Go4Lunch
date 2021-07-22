@@ -53,14 +53,9 @@ import static com.example.go4lunch.util.Constants.NAME;
 public class RestaurantMapViewFragment extends Fragment {
     private final OnMapReadyCallback callback;
 
-//    private LocationApi locationApi;
-//    private RestaurantListUrlApi urlApi;
-
     private ImageButton locationButton;
     private TextView showAllTextView;
 
-//    private LocationManager locationManager;
-//    private LocationListener locationListener;
     private Location deviceLocation;
     private LatLng devicePosition;
 

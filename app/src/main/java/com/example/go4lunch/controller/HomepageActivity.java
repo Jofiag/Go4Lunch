@@ -43,7 +43,6 @@ public class HomepageActivity extends AppCompatActivity
         implements WorkmateRecyclerViewAdapter.OnWorkmateClickListener, RestaurantNearbyBank.OnMarkerClicked {
 
     private LocationApi locationApi;
-    private RestaurantListUrlApi urlApi;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private Location deviceLocation;
@@ -73,18 +72,20 @@ public class HomepageActivity extends AppCompatActivity
         setContentView(R.layout.activity_homepage);
         setReferences();
 
-        locationApi = LocationApi.getInstance(this);
-        urlApi = RestaurantListUrlApi.getInstance(this);
         setLocationManagerAndListener();
         requestLocationIfPermissionIsGranted();
-        url = urlApi.getUrlThroughDeviceLocation();
 
+        locationApi = LocationApi.getInstance(this);
+        url = RestaurantListUrlApi.getInstance(this).getUrlThroughDeviceLocation();
 
         user = new User(); //TODO : get user connected from firebase
 
         restaurantChosen = user.getRestaurantChosen();
 
-        addFragments();
+//        if (checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+//            addFragments();
+//        else
+//            Toast.makeText(this, "Location permission denied !!", Toast.LENGTH_SHORT).show();
 
         setBottomNavigationView();
 
@@ -136,6 +137,7 @@ public class HomepageActivity extends AppCompatActivity
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 600000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             locationApi.setLocation(deviceLocation);
+            addFragments();
 
         }
         else{
