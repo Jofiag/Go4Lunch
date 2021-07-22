@@ -29,10 +29,16 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void signInWithFacebook(){
-        signInFacebookButton.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, HomepageActivity.class)));
+        signInFacebookButton.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, HomepageActivity.class));
+            finish();
+        });
     }
 
     private void signInWithGoogle(){
-        signInGoogleButton.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, HomepageActivity.class)));
+        signInGoogleButton.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, HomepageActivity.class));
+            finish();
+        });
     }
 }

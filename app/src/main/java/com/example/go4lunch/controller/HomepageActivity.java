@@ -23,7 +23,6 @@ import androidx.fragment.app.FragmentManager;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.LocationApi;
-import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
@@ -33,7 +32,6 @@ import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.User;
 import com.example.go4lunch.model.Workmate;
 import com.example.go4lunch.util.Constants;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
@@ -46,8 +44,6 @@ public class HomepageActivity extends AppCompatActivity
     private LocationManager locationManager;
     private LocationListener locationListener;
     private Location deviceLocation;
-    private LatLng devicePosition;
-    private String url;
 
     private Toolbar myToolbar;
     private DrawerLayout myDrawerLayout;
@@ -63,7 +59,7 @@ public class HomepageActivity extends AppCompatActivity
     private Fragment activeFragment;
 
     private Restaurant restaurantChosen;
-    private User user;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,16 +72,10 @@ public class HomepageActivity extends AppCompatActivity
         requestLocationIfPermissionIsGranted();
 
         locationApi = LocationApi.getInstance(this);
-        url = RestaurantListUrlApi.getInstance(this).getUrlThroughDeviceLocation();
 
-        user = new User(); //TODO : get user connected from firebase
+        User user = new User(); //TODO : get user connected from firebase
 
         restaurantChosen = user.getRestaurantChosen();
-
-//        if (checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-//            addFragments();
-//        else
-//            Toast.makeText(this, "Location permission denied !!", Toast.LENGTH_SHORT).show();
 
         setBottomNavigationView();
 
@@ -112,7 +102,6 @@ public class HomepageActivity extends AppCompatActivity
             public void onLocationChanged(Location location) {
                 deviceLocation = location;
                 locationApi.setLocation(location);
-                devicePosition = locationApi.getPositionFromLocation();
             }
 
             @Override
@@ -136,7 +125,7 @@ public class HomepageActivity extends AppCompatActivity
         if (checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 600000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            locationApi.setLocation(deviceLocation);
+            LocationApi.getInstance(this).setLocation(deviceLocation);
             addFragments();
 
         }
@@ -169,22 +158,26 @@ public class HomepageActivity extends AppCompatActivity
         activeFragment = restaurantMapViewFragment;
 
         fragmentManager.beginTransaction()
-                .add(R.id.fragment_container_homepage_activity, workmateListViewFragment)
+                .add(R.id.fragment_container_homepage_activity, workmateListViewFragment, Constants.WORKMATE_LIST_FRAGMENT)
                 .hide(workmateListViewFragment)
                 .commit();
 
         fragmentManager.beginTransaction()
-                .add(R.id.fragment_container_homepage_activity, restaurantListViewFragment)
+                .add(R.id.fragment_container_homepage_activity, restaurantListViewFragment, Constants.RESTAURANT_LIST_FRAGMENT)
                 .hide(restaurantListViewFragment)
                 .commit();
 
         fragmentManager.beginTransaction()
-                .add(R.id.fragment_container_homepage_activity, activeFragment)
+                .add(R.id.fragment_container_homepage_activity, activeFragment, Constants.RESTAURANT_MAP_VIEW_FRAGMENT)
                 .commit();
     }
 
     private void showFragment(){
-        fragmentManager.beginTransaction().hide(activeFragment).show(fragmentToShow).commit();
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(fragmentToShow)
+                .commit();
+
         activeFragment = fragmentToShow;
     }
 
@@ -261,12 +254,19 @@ public class HomepageActivity extends AppCompatActivity
 
 
     @Override
-    //Make sure we close the DrawerLayout when the user click on back button
     public void onBackPressed() {
+        //Make sure we close the DrawerLayout when the user click on back button
         if (myDrawerLayout.isEnabled())
             myDrawerLayout.closeDrawers();
-        else
-            super.onBackPressed();
+
+        //If the actual fragment is the mapview one, close the app
+        if (activeFragment == restaurantMapViewFragment)
+            finish();
+        else{
+            //Go to mapview fragment if it's not the actual fragment
+            fragmentToShow = restaurantMapViewFragment;
+            showFragment();
+        }
     }
 
     private void startRestaurantDetailsActivity(String code, Parcelable parcelable){
