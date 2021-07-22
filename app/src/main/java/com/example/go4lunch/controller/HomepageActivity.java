@@ -23,6 +23,7 @@ import androidx.fragment.app.FragmentManager;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.LocationApi;
+import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
@@ -40,7 +41,6 @@ import static com.example.go4lunch.util.Constants.FINE_LOCATION;
 public class HomepageActivity extends AppCompatActivity
         implements WorkmateRecyclerViewAdapter.OnWorkmateClickListener, RestaurantNearbyBank.OnMarkerClicked {
 
-    private LocationApi locationApi;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private Location deviceLocation;
@@ -71,8 +71,6 @@ public class HomepageActivity extends AppCompatActivity
         setLocationManagerAndListener();
         requestLocationIfPermissionIsGranted();
 
-        locationApi = LocationApi.getInstance(this);
-
         User user = new User(); //TODO : get user connected from firebase
 
         restaurantChosen = user.getRestaurantChosen();
@@ -101,7 +99,7 @@ public class HomepageActivity extends AppCompatActivity
             @Override
             public void onLocationChanged(Location location) {
                 deviceLocation = location;
-                locationApi.setLocation(location);
+                LocationApi.getInstance(HomepageActivity.this).setLocation(location);
             }
 
             @Override
@@ -126,7 +124,10 @@ public class HomepageActivity extends AppCompatActivity
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 600000, 0, locationListener);
             deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             LocationApi.getInstance(this).setLocation(deviceLocation);
-            addFragments();
+            if (deviceLocation != null)
+                addFragments();
+            else
+                Toast.makeText(this, "Location unavailable", Toast.LENGTH_SHORT).show();
 
         }
         else{
