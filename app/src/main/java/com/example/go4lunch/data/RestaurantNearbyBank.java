@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@SuppressLint("StaticFieldLeak")
 public class RestaurantNearbyBank {
     public interface ListAsyncResponse{
         void processFinished(List<Restaurant> restaurantList);
@@ -52,6 +53,7 @@ public class RestaurantNearbyBank {
     private final RequestQueue mRequestQueue;
     private final OnMarkerClicked mMarkerClickedCallback;
     private final List<Restaurant> mRestaurantList = new ArrayList<>();
+    public static RestaurantNearbyBank INSTANCE;
 
     public RestaurantNearbyBank(Activity activity, GoogleMap googleMap) {
         mActivity = activity;
@@ -67,12 +69,14 @@ public class RestaurantNearbyBank {
     }
 
     public static synchronized RestaurantNearbyBank getInstance(Activity activity, GoogleMap googleMap){
-        RestaurantNearbyBank INSTANCE;
-
-        if (googleMap == null)
-            INSTANCE = new RestaurantNearbyBank(activity);
-        else
+        if (INSTANCE == null)
             INSTANCE = new RestaurantNearbyBank(activity, googleMap);
+        else{
+            if (googleMap == null)
+                INSTANCE = new RestaurantNearbyBank(activity);
+            else
+                INSTANCE = new RestaurantNearbyBank(activity, googleMap);
+        }
 
         return INSTANCE;
     }
