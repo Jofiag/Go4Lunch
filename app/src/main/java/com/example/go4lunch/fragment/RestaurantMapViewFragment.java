@@ -32,6 +32,7 @@ import com.example.go4lunch.data.LocationApi;
 import com.example.go4lunch.data.RestaurantListManager;
 import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
+import com.example.go4lunch.data.RestaurantNearbyBank2;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
@@ -173,7 +174,7 @@ public class RestaurantMapViewFragment extends Fragment {
         mGoogleMap.clear();
 
         for (Restaurant restaurant : restaurantList)
-            addMarkerOnPosition(restaurant.getPosition(), restaurant.getName(), restaurant.getAddress(), BitmapDescriptorFactory.HUE_GREEN);
+            addMarkerOnPosition(restaurant.getPosition(), restaurant.getName(), restaurant.getAddress(), BitmapDescriptorFactory.HUE_ORANGE);
 
         mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
         addMarkerOnPosition(devicePosition, LocationApi.getInstance(requireContext()).getStreetAddressFromPositions(), Constants.DEVICE_POSITION, BitmapDescriptorFactory.HUE_RED);
@@ -206,8 +207,7 @@ public class RestaurantMapViewFragment extends Fragment {
         if (mGoogleMap != null){
             url = RestaurantListUrlApi.getInstance(getContext()).getUrlThroughDeviceLocation();
 
-            RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
-
+            RestaurantNearbyBank2.getInstance(requireActivity().getApplication()).getRestaurantList(url, restaurantList -> {
                 for (Restaurant restaurant : restaurantList) {
                     LatLng restaurantPosition = restaurant.getPosition();
                     //Zooming on the restaurant clicked
@@ -218,8 +218,11 @@ public class RestaurantMapViewFragment extends Fragment {
 
                     getFromQuery(query, NAME);
                 }
-
             });
+
+            /*RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
+
+            });*/
         }
     }
 
@@ -266,20 +269,12 @@ public class RestaurantMapViewFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 ZoomOnRestaurantSearched(query);
-//                addMarkerToAllRestaurants();
-                addMarkerOnPosition(devicePosition,
-                        "My position : " + LocationApi.getInstance(getContext()).getStreetAddressFromPositions(),
-                        Constants.DEVICE_POSITION,
-                        BitmapDescriptorFactory.HUE_RED);
-
                 return true;    //return true so that the fragment won't be restart
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                //Show suggestion
                 showSuggestions(newText);
-
                 return false;
             }
         });
@@ -367,7 +362,7 @@ public class RestaurantMapViewFragment extends Fragment {
         return result;
     }
     private void showSuggestions(String query){
-        RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
+        RestaurantNearbyBank2.getInstance(requireActivity().getApplication()).getRestaurantList(url, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
                 //When we've got all the restaurant
                 if (!restaurantList.isEmpty()) {

@@ -59,7 +59,7 @@ public class RestaurantNearbyBank2 {
 
 
 
-    public void startGettingListInBackground(String url, final OnRestaurantListCallback callback){
+    public void getRestaurantList(String url, final OnRestaurantListCallback callback){
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                     response -> {
                         try {

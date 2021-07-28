@@ -51,7 +51,7 @@ public class MyJobService extends android.app.job.JobService {
 
         String url = RestaurantListUrlApi.getInstance(getApplicationContext()).getUrlThroughDeviceLocation();
         RestaurantNearbyBank2 bank = RestaurantNearbyBank2.getInstance(getApplication());
-        bank.startGettingListInBackground(url, this::sendListToTheMainThread);
+        bank.getRestaurantList(url, this::sendListToTheMainThread);
     }
 
     private void sendListToTheMainThread(ArrayList<Restaurant> restaurantArrayList){
