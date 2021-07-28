@@ -22,6 +22,7 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
 import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
+import com.example.go4lunch.data.RestaurantNearbyBank2;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
 import com.example.go4lunch.util.LoadingDialog;
@@ -54,26 +55,10 @@ public class RestaurantListViewFragment extends Fragment{
 
         activity = getActivity();
         url = RestaurantListUrlApi.getInstance(getActivity()).getUrlThroughDeviceLocation();
-
-        /*initializePlaces();
-        initializePredictionRequestAndPlaceFields();*/
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-
-
-        /*RestaurantBank.getInstance().getRestaurantList(placesClient, predictionRequest, placeFields, new RestaurantBank.ListAsyncResponse() {
-            @Override
-            public void processFinished(List<Place> restaurantList) {
-//                restaurantAdapter = new RestaurantRecyclerViewAdapter(context, (Restaurant)restaurantList);
-
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-                recyclerView.setAdapter(restaurantAdapter);
-            }
-        });*/
 
         return inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
     }
@@ -85,14 +70,9 @@ public class RestaurantListViewFragment extends Fragment{
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
-        LoadingDialog dialog  = LoadingDialog.getInstance(activity);
-        dialog.startLoadingDialog();
-
-//        Toast.makeText(activity, "No restaurant found !!!", Toast.LENGTH_SHORT).show();
-
         url = RestaurantListUrlApi.getInstance(getActivity()).getUrlThroughDeviceLocation();
 
-        RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
+        RestaurantNearbyBank2.getInstance(requireActivity().getApplication()).getRestaurantList(url, restaurantList -> {
             if (restaurantList.isEmpty())
                 Toast.makeText(activity, "No restaurant found !!!", Toast.LENGTH_SHORT).show();
             restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
@@ -100,7 +80,13 @@ public class RestaurantListViewFragment extends Fragment{
             restaurantAdapter.notifyDataSetChanged();
         });
 
-        dialog.dismissLoadingDialog();
+        /*RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
+            if (restaurantList.isEmpty())
+                Toast.makeText(activity, "No restaurant found !!!", Toast.LENGTH_SHORT).show();
+            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
+            recyclerView.setAdapter(restaurantAdapter);
+            restaurantAdapter.notifyDataSetChanged();
+        });*/
 
     }
 
@@ -136,7 +122,8 @@ public class RestaurantListViewFragment extends Fragment{
     }
 
     private void filterList(String query){
-        RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
+
+        RestaurantNearbyBank2.getInstance(requireActivity().getApplication()).getRestaurantList(url, restaurantList -> {
             List<Restaurant> listFiltered = new ArrayList<>();
 
             for (Restaurant restaurant : restaurantList)
@@ -148,6 +135,19 @@ public class RestaurantListViewFragment extends Fragment{
             restaurantAdapter.notifyDataSetChanged();
 
         });
+
+        /*RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
+            List<Restaurant> listFiltered = new ArrayList<>();
+
+            for (Restaurant restaurant : restaurantList)
+                if (restaurant.getName().toLowerCase().contains(query.toLowerCase()))
+                    listFiltered.add(restaurant);
+
+            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, listFiltered);
+            recyclerView.setAdapter(restaurantAdapter);
+            restaurantAdapter.notifyDataSetChanged();
+
+        });*/
     }
 
     /*private void initializePlaces(){
