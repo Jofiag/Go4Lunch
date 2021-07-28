@@ -60,11 +60,16 @@ public class Constants {
     public static final String CLOSED = "Closed";
     public static final String CLOSING_SOON = "Closing soon";
     public static final String CLOSED_TODAY = "Closed today";
-    public static final Object DEVICE_POSITION = "My position";
+    public static final String DEVICE_POSITION = "My position";
     public static final String FRAGMENT_KEY = "Fragment";
     public static final String RESTAURANT_LIST_FRAGMENT = "Restaurant listview fragment";
     public static final String WORKMATE_LIST_FRAGMENT = "Workmate listview fragment";
     public static final String RESTAURANT_MAP_VIEW_FRAGMENT = "Restaurant map view fragment";
+    public static final int JOB_ID = 111;
+    public static final String INFO_FROM_OTHER_THREAD = "DATA_FROM_BACKGROUND";
+    public static final String INFO = "INFO";
+    public static final String LIST = "Restaurant list";
+    public static final String SEND_LIST_ACTION = "Send list action";
 
     public static List<Restaurant> getRestaurantList(){
         List<Restaurant> restaurantList = new ArrayList<>();

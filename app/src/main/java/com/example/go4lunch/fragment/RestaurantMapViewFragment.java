@@ -4,9 +4,9 @@ package com.example.go4lunch.fragment;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.location.Location;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.util.Log;
@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,12 +27,14 @@ import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.controller.RestaurantDetailsActivity;
 import com.example.go4lunch.data.LocationApi;
+import com.example.go4lunch.data.RestaurantListManager;
 import com.example.go4lunch.data.RestaurantListUrlApi;
 import com.example.go4lunch.data.RestaurantNearbyBank;
+import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
-import com.example.go4lunch.util.LoadingDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,26 +46,23 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import static com.example.go4lunch.util.Constants.ADDRESS;
 import static com.example.go4lunch.util.Constants.NAME;
 
 public class RestaurantMapViewFragment extends Fragment {
-    private final OnMapReadyCallback callback;
 
-    private ImageButton locationButton;
-    private TextView showAllTextView;
-
-    private Location deviceLocation;
+    private String url;
+    private GoogleMap mGoogleMap;
     private LatLng devicePosition;
-
     private CursorAdapter adapter;
     private String[] columnPlaces;
     private SearchView searchView;
-    private String url;
-
-    private GoogleMap mGoogleMap;
+    private ImageButton locationButton;
+    private RestaurantListManager listManager;
+    private final OnMapReadyCallback callback;
 
     public RestaurantMapViewFragment() {
         callback = this::setGoogleMap;
@@ -73,15 +71,24 @@ public class RestaurantMapViewFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        deviceLocation = LocationApi.getInstance(getContext()).getLocation();
-        devicePosition = LocationApi.getInstance(getContext()).getPositionFromLocation();
-        url = RestaurantListUrlApi.getInstance(getContext()).getUrlThroughDeviceLocation();
-
-        if (savedInstanceState != null)
-            url = savedInstanceState.getString(Constants.URL_KEY);
-
         Log.d("ORDER", "onCreate: ");
+
+        setDevicePositionAndListUrl();
+        showRestaurantsAndSetOnMarkerClickListener();
+        getUrlSaved(savedInstanceState);
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        listManager.registerBroadcastReceiverFromManager(Constants.SEND_LIST_ACTION);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        listManager.unregisterBroadcastReceiverFromManager();
     }
 
     @Nullable
@@ -99,9 +106,121 @@ public class RestaurantMapViewFragment extends Fragment {
         Log.d("ORDER", "onViewCreated: ");
 
         locationButton = view.findViewById(R.id.my_location_button);
-        showAllTextView = view.findViewById(R.id.show_all_text_view);
-
         initializeSearchViewNeeded();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.search_view_menu, menu);
+        setOurSearchView(menu);
+        Log.d("ORDER", "onCreateOptionsMenu: ");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setMapFragment();
+        checkGooglePlayServices();
+        Log.d("ORDER", "onResume: ");
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(Constants.URL_KEY, url);
+    }
+
+
+    private void setMapFragment(){
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_fragment);
+        if (mapFragment != null)
+            mapFragment.getMapAsync(callback);
+    }
+    private void setGoogleMap(GoogleMap googleMap) {
+        Log.d("ORDER", "setGoogleMap: ");
+        mGoogleMap = googleMap;
+        /*if (deviceLocation != null) {
+            mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            locationButton.setOnClickListener(v -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
+
+            addMarkerOnPosition(devicePosition,
+                    "My position : " + LocationApi.getInstance(getContext()).getStreetAddressFromPositions(),
+                    BitmapDescriptorFactory.HUE_RED);
+            addMarkerToAllRestaurants();
+
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 14));
+        }
+        else
+            Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();*/
+    }
+
+    private void setDevicePositionAndListUrl(){
+        devicePosition = LocationApi.getInstance(getContext()).getPositionFromLocation();
+        url = RestaurantListUrlApi.getInstance(getContext()).getUrlThroughDeviceLocation();
+    }
+
+    private void showRestaurantsAndSetOnMarkerClickListener(){
+        listManager = RestaurantListManager.getInstance(requireContext());
+
+        listManager.receiveRestaurantList(restaurantList -> {
+            if (mGoogleMap != null){
+                addMarkerOnAllRestaurantsAndDevicePosition(restaurantList);
+                startRestaurantDetailsActivityWhenMarkerIsClicked(restaurantList);
+            }
+        });
+    }
+    private void addMarkerOnAllRestaurantsAndDevicePosition(@org.jetbrains.annotations.NotNull ArrayList<Restaurant> restaurantList){
+        mGoogleMap.clear();
+
+        for (Restaurant restaurant : restaurantList)
+            addMarkerOnPosition(restaurant.getPosition(), restaurant.getName(), restaurant.getAddress(), BitmapDescriptorFactory.HUE_GREEN);
+
+        mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
+        addMarkerOnPosition(devicePosition, LocationApi.getInstance(requireContext()).getStreetAddressFromPositions(), Constants.DEVICE_POSITION, BitmapDescriptorFactory.HUE_RED);
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 14));
+
+        locationButton.setOnClickListener(v -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 15)));
+    }
+    private void startRestaurantDetailsActivityWhenMarkerIsClicked(@org.jetbrains.annotations.NotNull ArrayList<Restaurant> restaurantList){
+        mGoogleMap.setOnMarkerClickListener(marker -> {
+            for (Restaurant restaurant : restaurantList) {
+                if (restaurant.getAddress().equals(marker.getTag())){
+                    RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant);
+                    startActivity(new Intent(requireActivity(), RestaurantDetailsActivity.class));
+                }
+            }
+
+            return false;
+        });
+    }
+    private void addMarkerOnPosition(LatLng position, String title, String tag, float color){
+        Marker marker = mGoogleMap.addMarker(new MarkerOptions()
+                .position(position)
+                .title(title)
+                .icon(BitmapDescriptorFactory.defaultMarker(color)));
+
+        if (marker != null)
+            marker.setTag(tag);
+    }
+    private void ZoomOnRestaurantSearched(String query){
+        if (mGoogleMap != null){
+            url = RestaurantListUrlApi.getInstance(getContext()).getUrlThroughDeviceLocation();
+
+            RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
+
+                for (Restaurant restaurant : restaurantList) {
+                    LatLng restaurantPosition = restaurant.getPosition();
+                    //Zooming on the restaurant clicked
+                    if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
+                        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 20));
+                        addMarkerOnPosition(restaurantPosition, restaurant.getName(), restaurant.getAddress(), BitmapDescriptorFactory.HUE_ORANGE);
+                    }
+
+                    getFromQuery(query, NAME);
+                }
+
+            });
+        }
     }
 
     private void initializeSearchViewNeeded() {
@@ -124,7 +243,6 @@ public class RestaurantMapViewFragment extends Fragment {
                 viewIds,
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
     }
-
     private void setOurSearchView(Menu menu){
         MenuItem searchItem = menu.findItem(R.id.search_item);
 
@@ -148,9 +266,10 @@ public class RestaurantMapViewFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 ZoomOnRestaurantSearched(query);
-                addMarkerToAllRestaurants();
+//                addMarkerToAllRestaurants();
                 addMarkerOnPosition(devicePosition,
                         "My position : " + LocationApi.getInstance(getContext()).getStreetAddressFromPositions(),
+                        Constants.DEVICE_POSITION,
                         BitmapDescriptorFactory.HUE_RED);
 
                 return true;    //return true so that the fragment won't be restart
@@ -188,53 +307,6 @@ public class RestaurantMapViewFragment extends Fragment {
             }
         });
 
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.search_view_menu, menu);
-        setOurSearchView(menu);
-        Log.d("ORDER", "onCreateOptionsMenu: ");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setMapFragment();
-        checkGooglePlayServices();
-        Log.d("ORDER", "onResume: ");
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString("url", url);
-    }
-
-    private void setGoogleMap(GoogleMap googleMap) {
-        Log.d("ORDER", "setGoogleMap: ");
-
-        mGoogleMap = googleMap;
-
-        if (deviceLocation != null) {
-            mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
-            locationButton.setOnClickListener(v -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 12)));
-            showAllTextView.setOnClickListener(v -> addMarkerToAllRestaurants());
-            addMarkerOnPosition(devicePosition,
-                    "My position : " + LocationApi.getInstance(getContext()).getStreetAddressFromPositions(),
-                    BitmapDescriptorFactory.HUE_RED);
-            addMarkerToAllRestaurants();
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(devicePosition, 14));
-        }
-        else
-            Toast.makeText(getContext(), "Location not available !", Toast.LENGTH_SHORT).show();
-
-    }
-
-    private void setMapFragment(){
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_fragment);
-        if (mapFragment != null)
-            mapFragment.getMapAsync(callback);
     }
 
     private String getFromQuery(String query, String wanted){
@@ -294,133 +366,6 @@ public class RestaurantMapViewFragment extends Fragment {
 
         return result;
     }
-
-    private void addMarkerOnPosition(LatLng position, String title, float color){
-        Marker marker = mGoogleMap.addMarker(new MarkerOptions()
-                .position(position)
-                .title(title)
-                .icon(BitmapDescriptorFactory.defaultMarker(color)));
-
-        if (position == devicePosition && marker != null)
-            marker.setTag(Constants.DEVICE_POSITION);          //when the tag equals -1 we know its the device location, so that we won't start the RestaurantDetailsActivity when the user click on his position.
-    }
-
-//    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-//            new ActivityResultContracts.RequestPermission(), result -> {
-//                if (result)
-//                    requestLocationIfPermissionIsGranted();
-//                else
-//                    requestPermissionWithinDialog();
-//            }
-//    );
-//    private void setLocationManagerAndListener(){
-//        locationManager = (LocationManager) requireContext().getSystemService(LOCATION_SERVICE);
-//        locationListener = new LocationListener() {
-//            @Override
-//            public void onLocationChanged(Location location) {
-//                deviceLocation = location;
-//                locationApi.setLocation(location);
-//                devicePosition = locationApi.getPositionFromLocation();
-//            }
-//
-//            @Override
-//            public void onStatusChanged(String provider, int status, Bundle extras) {
-//
-//            }
-//
-//            @Override
-//            public void onProviderEnabled(String provider) {
-//
-//            }
-//
-//            @Override
-//            public void onProviderDisabled(String provider) {
-//
-//            }
-//        };
-//    }
-//
-//    private void requestLocationIfPermissionIsGranted() {
-//        if (requireContext().checkSelfPermission(FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 600000, 0, locationListener);
-//            deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//            locationApi.setLocation(deviceLocation);
-//
-//            if (mGoogleMap != null) {
-//                mGoogleMap.setMyLocationEnabled(true);
-//            }
-//        }
-//        else{
-//            if (shouldShowRequestPermissionRationale(FINE_LOCATION))
-//                Toast.makeText(getContext(), "Location permission is required", Toast.LENGTH_SHORT).show();
-//
-//            requestPermissionLauncher.launch(FINE_LOCATION);
-//        }
-//
-//    }
-//    private void requestPermissionWithinDialog() {
-//        new AlertDialog.Builder(requireContext())
-//                .setTitle("Location permission disable")
-//                .setMessage("You denied the location permission. It is required to show your location. Do you want to grant the permission")
-//                .setPositiveButton("YES", (dialog, which) -> requestLocationIfPermissionIsGranted())
-//                .setNegativeButton("NO", null)
-//                .create()
-//                .show();
-//    }
-
-    private void checkGooglePlayServices(){
-        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(requireContext());
-
-        if (resultCode != ConnectionResult.SUCCESS){
-            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(requireActivity(), resultCode, resultCode,
-                    dialog -> {
-                        //Here is what we're going to show to the user if the connection has canceled
-                        Toast.makeText(getContext(), "No Google services!!!", Toast.LENGTH_SHORT).show();
-                    });
-            assert googleErrorDialog != null;
-            googleErrorDialog.show();
-        }
-        else
-            Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
-    }
-
-    private void addMarkerToAllRestaurants(){
-        LoadingDialog dialog  = LoadingDialog.getInstance(getActivity());
-        dialog.startLoadingDialog();
-        RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> dialog.dismissLoadingDialog());
-    }
-
-    private void ZoomOnRestaurantSearched(String query){
-        if (mGoogleMap != null){
-            url = RestaurantListUrlApi.getInstance(getContext()).getUrlThroughDeviceLocation();
-
-            RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
-
-                for (Restaurant restaurant : restaurantList) {
-                    LatLng restaurantPosition = restaurant.getPosition();
-                    //Zooming on the restaurant clicked
-                    if (restaurantPosition != null && Objects.equals(restaurant.getAddress(), getFromQuery(query, ADDRESS))) {
-                        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantPosition, 20));
-                        addMarkerOnPosition(restaurantPosition, restaurant.getName(), BitmapDescriptorFactory.HUE_ORANGE);
-                    }
-
-                    getFromQuery(query, NAME);
-                }
-
-            });
-        }
-    }
-
-   /* public static LatLng addDistanceToPosition(LatLng originPosition, long distanceOnLat, long distanceOnLng) {
-        double latOrigin = originPosition.latitude;
-        double lngOrigin = originPosition.longitude;
-
-        double lat = latOrigin + (180 / Math.PI) * (distanceOnLat / 6378137.0);
-        double lng = lngOrigin + (180 / Math.PI) * (distanceOnLng / 6378137.0) / Math.cos(latOrigin);
-
-        return new LatLng(lat, lng);
-    }*/
-
     private void showSuggestions(String query){
         RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> {
             if (columnPlaces != null && adapter != null && query != null) {
@@ -506,8 +451,37 @@ public class RestaurantMapViewFragment extends Fragment {
 */
     }
 
+    private void getUrlSaved(Bundle savedInstanceState){
+        if (savedInstanceState != null)
+            url = savedInstanceState.getString(Constants.URL_KEY);
+    }
+
+    private void checkGooglePlayServices(){
+        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(requireContext());
+
+        if (resultCode != ConnectionResult.SUCCESS){
+            Dialog googleErrorDialog = GoogleApiAvailability.getInstance().getErrorDialog(requireActivity(), resultCode, resultCode,
+                    dialog -> {
+                        //Here is what we're going to show to the user if the connection has canceled
+                        Toast.makeText(getContext(), "No Google services!!!", Toast.LENGTH_SHORT).show();
+                    });
+            assert googleErrorDialog != null;
+            googleErrorDialog.show();
+        }
+        else
+            Log.d("SERVICES", "checkGooglePlayServices: Google services successfully connected!");
+    }
+
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /*private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
+    /*private void addMarkerToAllRestaurants(){
+        LoadingDialog dialog  = LoadingDialog.getInstance(getActivity());
+        dialog.startLoadingDialog();
+        RestaurantNearbyBank.getInstance(getActivity(), mGoogleMap).getRestaurantNearbyList(url, restaurantList -> dialog.dismissLoadingDialog());
+    }*/
+
+    /*private BitmapDescriptor getBitmapFromVectorAssets(Context context, int id){
             Drawable vectorDrawable = ContextCompat.getDrawable(context, id);
             assert vectorDrawable != null;
             vectorDrawable.setBounds(0,0,vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
@@ -537,4 +511,15 @@ public class RestaurantMapViewFragment extends Fragment {
 
             return query;
         }*/
+
+    /* public static LatLng addDistanceToPosition(LatLng originPosition, long distanceOnLat, long distanceOnLng) {
+        double latOrigin = originPosition.latitude;
+        double lngOrigin = originPosition.longitude;
+
+        double lat = latOrigin + (180 / Math.PI) * (distanceOnLat / 6378137.0);
+        double lng = lngOrigin + (180 / Math.PI) * (distanceOnLng / 6378137.0) / Math.cos(latOrigin);
+
+        return new LatLng(lat, lng);
+    }*/
+
 }

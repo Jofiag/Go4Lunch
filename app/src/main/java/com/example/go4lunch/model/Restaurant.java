@@ -27,15 +27,19 @@ public class Restaurant implements Parcelable {
     public Restaurant() {
     }
 
+
     protected Restaurant(Parcel in) {
         name = in.readString();
         address = in.readString();
+        websiteUrl = in.readParcelable(Uri.class.getClassLoader());
+        placeId = in.readString();
         imageUrl = in.readString();
-        phoneNumber = in.readString();
-        foodCountry = in.readString();
-        favorableOpinion = in.readInt();
-        numberOfInterestedWorkmate = in.readInt();
         position = in.readParcelable(LatLng.class.getClassLoader());
+        foodCountry = in.readString();
+        phoneNumber = in.readString();
+        favorableOpinion = in.readInt();
+        workmateList = in.createTypedArrayList(Workmate.CREATOR);
+        numberOfInterestedWorkmate = in.readInt();
         distanceFromDeviceLocation = in.readInt();
     }
 
@@ -155,6 +159,7 @@ public class Restaurant implements Parcelable {
         this.websiteUrl = websiteUrl;
     }
 
+
     @Override
     public int describeContents() {
         return 0;
@@ -164,12 +169,15 @@ public class Restaurant implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeString(address);
+        dest.writeParcelable(websiteUrl, flags);
+        dest.writeString(placeId);
         dest.writeString(imageUrl);
-        dest.writeString(foodCountry);
-        dest.writeInt(favorableOpinion);
-        dest.writeInt(numberOfInterestedWorkmate);
-        dest.writeString(phoneNumber);
         dest.writeParcelable(position, flags);
+        dest.writeString(foodCountry);
+        dest.writeString(phoneNumber);
+        dest.writeInt(favorableOpinion);
+        dest.writeTypedList(workmateList);
+        dest.writeInt(numberOfInterestedWorkmate);
         dest.writeInt(distanceFromDeviceLocation);
     }
 }
