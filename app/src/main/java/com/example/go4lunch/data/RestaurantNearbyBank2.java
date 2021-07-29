@@ -1,6 +1,7 @@
 package com.example.go4lunch.data;
 
-import android.app.Application;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -40,19 +41,20 @@ public class RestaurantNearbyBank2 {
         void onListReady(ArrayList<Restaurant> restaurantList);
     }
 
-    private final Application mApplication;
+    private final Context mContext;
     private final RequestQueue mRequestQueue;
+    @SuppressLint("StaticFieldLeak")
     public static RestaurantNearbyBank2 INSTANCE;
-    private final ArrayList<Restaurant> mRestaurantList = new ArrayList<>();
+    private ArrayList<Restaurant> mRestaurantList = new ArrayList<>();
 
-    public RestaurantNearbyBank2(Application application) {
-        this.mApplication = application;
-        mRequestQueue = RequestQueueSingleton.getInstance(application).getRequestQueue();
+    public RestaurantNearbyBank2(Context context) {
+        this.mContext = context;
+        mRequestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
     }
 
-    public synchronized static RestaurantNearbyBank2 getInstance(Application application){
+    public synchronized static RestaurantNearbyBank2 getInstance(Context context){
         if (INSTANCE == null)
-            INSTANCE = new RestaurantNearbyBank2(application);
+            INSTANCE = new RestaurantNearbyBank2(context);
 
         return INSTANCE;
     }
@@ -93,18 +95,17 @@ public class RestaurantNearbyBank2 {
         }
     }
     private void setDetails(Restaurant restaurant, String placeId, OnRestaurantListCallback callback){
-            /*String detailsUrl = Constants.PLACE_DETAILS_SEARCH_URL +
-                    "place_id=" + placeId +
-                    "&key=" + mContext.getString(R.string.google_maps_key);*/
-
-        //        Log.d("DETAILS", "getOpeningHours: DETAILS = " + detailsUrl);
 
         if(!Places.isInitialized())
-            Places.initialize(Objects.requireNonNull(mApplication), mApplication.getString(R.string.google_maps_key));
+            Places.initialize(Objects.requireNonNull(mContext), mContext.getString(R.string.google_maps_key));
 
-        PlacesClient placesClient = Places.createClient(Objects.requireNonNull(mApplication));
+        PlacesClient placesClient = Places.createClient(Objects.requireNonNull(mContext));
         List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
         FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields);
+
+        if (!mRestaurantList.isEmpty()){
+            mRestaurantList = new ArrayList<>();
+        }
 
 
         placesClient.fetchPlace(fetchPlaceRequest)
@@ -115,11 +116,12 @@ public class RestaurantNearbyBank2 {
                     OpeningHours openingHours = place.getOpeningHours();
 
                     setRestaurantPhoneWebsiteAndMyOpeningHours(restaurant, place, phoneNumber, website, openingHours);
-                    mRestaurantList.add(restaurant);
+
+                    if (!mRestaurantList.contains(restaurant))
+                        mRestaurantList.add(restaurant);
+
                     if (callback != null)
                         callback.onListReady(mRestaurantList);
-//                    setTheOnMarkerClickListener();
-//                    sendListToTheMainThread(mRestaurantList);
                 });
 
     }
@@ -139,7 +141,7 @@ public class RestaurantNearbyBank2 {
         String imageUrl = Constants.PLACE_PHOTO_SEARCH_URL +
                 "maxwidth=" + Constants.PHOTO_MAX_WIDTH +
                 "&photoreference=" + imageReference +
-                "&key=" + mApplication.getString(R.string.google_maps_key);
+                "&key=" + mContext.getString(R.string.google_maps_key);
 
         if (!imageReference.equals(""))
             restaurant.setImageUrl(imageUrl);
@@ -172,7 +174,7 @@ public class RestaurantNearbyBank2 {
     }
     private String getStreetAddressFromPositions(LatLng position) {
         String address = "";
-        Geocoder geocoder = new Geocoder(mApplication);
+        Geocoder geocoder = new Geocoder(mContext);
         List<Address> addressList;
 
         try {
@@ -273,7 +275,7 @@ public class RestaurantNearbyBank2 {
             restaurant.setDistanceFromDeviceLocation(getHowFarFrom(place.getLatLng()));
     }
     private int getHowFarFrom(LatLng destination){
-        Location deviceLocation = LocationApi.getInstance(mApplication).getLocation();
+        Location deviceLocation = LocationApi.getInstance(mContext).getLocation();
         Location destinationLocation = new Location("");
         destinationLocation.setLatitude(destination.latitude);
         destinationLocation.setLongitude(destination.longitude);

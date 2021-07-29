@@ -21,11 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.RestaurantRecyclerViewAdapter;
 import com.example.go4lunch.data.RestaurantListUrlApi;
-import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.data.RestaurantNearbyBank2;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
-import com.example.go4lunch.util.LoadingDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,19 +73,39 @@ public class RestaurantListViewFragment extends Fragment{
         RestaurantNearbyBank2.getInstance(requireActivity().getApplication()).getRestaurantList(url, restaurantList -> {
             if (restaurantList.isEmpty())
                 Toast.makeText(activity, "No restaurant found !!!", Toast.LENGTH_SHORT).show();
-            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
+            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, removeRedundantRestaurant(restaurantList));
             recyclerView.setAdapter(restaurantAdapter);
             restaurantAdapter.notifyDataSetChanged();
         });
 
-        /*RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url, restaurantList -> {
-            if (restaurantList.isEmpty())
-                Toast.makeText(activity, "No restaurant found !!!", Toast.LENGTH_SHORT).show();
-            restaurantAdapter = new RestaurantRecyclerViewAdapter(activity, restaurantList);
-            recyclerView.setAdapter(restaurantAdapter);
-            restaurantAdapter.notifyDataSetChanged();
-        });*/
+    }
 
+    private ArrayList<Restaurant> removeRedundantRestaurant(ArrayList<Restaurant> list){
+        List<Integer> indexList = new ArrayList<>();
+
+
+                    for (int i = 0; i < list.size(); i++) {
+                        Restaurant restaurantC = list.get(i);
+
+                        for (int y = 0; y < list.size(); y++) {
+                            Restaurant restaurantO = list.get(i);
+                            if (i != y){
+                                if (restaurantC == restaurantO)
+                                    indexList.add(y);
+                            }
+                        }
+                    }
+
+                    if (!indexList.isEmpty()) {
+                        for (Integer integer : indexList) {
+                            if (integer < list.size()){
+                                Restaurant restaurantR = list.get(integer);
+                                list.remove(restaurantR);
+                            }
+                        }
+                    }
+
+                    return list;
     }
 
     @Override

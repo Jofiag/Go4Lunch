@@ -31,7 +31,6 @@ import com.example.go4lunch.controller.RestaurantDetailsActivity;
 import com.example.go4lunch.data.LocationApi;
 import com.example.go4lunch.data.RestaurantListManager;
 import com.example.go4lunch.data.RestaurantListUrlApi;
-import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.data.RestaurantNearbyBank2;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.Restaurant;

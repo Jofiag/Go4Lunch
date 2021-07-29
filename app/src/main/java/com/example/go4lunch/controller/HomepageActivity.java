@@ -23,7 +23,6 @@ import androidx.fragment.app.FragmentManager;
 import com.example.go4lunch.R;
 import com.example.go4lunch.adapter.WorkmateRecyclerViewAdapter;
 import com.example.go4lunch.data.LocationApi;
-import com.example.go4lunch.data.RestaurantNearbyBank;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.fragment.RestaurantListViewFragment;
 import com.example.go4lunch.fragment.RestaurantMapViewFragment;
@@ -38,7 +37,7 @@ import com.google.android.material.navigation.NavigationView;
 import static com.example.go4lunch.util.Constants.FINE_LOCATION;
 
 public class HomepageActivity extends AppCompatActivity
-        implements WorkmateRecyclerViewAdapter.OnWorkmateClickListener, RestaurantNearbyBank.OnMarkerClicked {
+        implements WorkmateRecyclerViewAdapter.OnWorkmateClickListener {
 
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -269,9 +268,9 @@ public class HomepageActivity extends AppCompatActivity
         }
     }
 
-    private void startRestaurantDetailsActivity(String code, Parcelable parcelable){
+    private void startRestaurantDetailsActivity(Parcelable parcelable){
         Intent intent = new Intent(HomepageActivity.this, RestaurantDetailsActivity.class);
-        intent.putExtra(code, parcelable);
+        intent.putExtra(Constants.WORKMATE_SELECTED_CODE, parcelable);
         startActivity(intent);
     }
 
@@ -279,13 +278,13 @@ public class HomepageActivity extends AppCompatActivity
     @Override
     public void onWorkmateSelected(Workmate workmate) {
         if (workmate.getRestaurantChosen() != null)
-            startRestaurantDetailsActivity(Constants.WORKMATE_SELECTED_CODE, workmate);
+            startRestaurantDetailsActivity(workmate);
         else
             Toast.makeText(this, Constants.NO_RESTAURANT_TO_SHOW_TEXT, Toast.LENGTH_SHORT).show();
-    }
+    }/*
 
     @Override
     public void onMarkerClickedGetRestaurant(Restaurant restaurant) {
         startRestaurantDetailsActivity(Constants.RESTAURANT_ON_MARKER_CODE, restaurant);
-    }
+    }*/
 }

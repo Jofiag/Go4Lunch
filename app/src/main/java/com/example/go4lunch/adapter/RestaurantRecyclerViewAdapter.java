@@ -2,7 +2,6 @@ package com.example.go4lunch.adapter;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +11,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.R;
 import com.example.go4lunch.controller.RestaurantDetailsActivity;
 import com.example.go4lunch.data.RestaurantListUrlApi;
-import com.example.go4lunch.data.RestaurantNearbyBank;
+import com.example.go4lunch.data.RestaurantNearbyBank2;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.MyOpeningHours;
 import com.example.go4lunch.model.Restaurant;
@@ -170,7 +168,7 @@ implements Filterable {
                 String url = RestaurantListUrlApi.getInstance(activity).getUrlThroughDeviceLocation();
                 FilterResults filterResults = new FilterResults();
 
-                RestaurantNearbyBank.getInstance(activity, null).getRestaurantNearbyList(url,
+                RestaurantNearbyBank2.getInstance(activity.getApplication()).getRestaurantList(url,
                         restaurantList -> filterResults.values = getFilteredList(constraint, restaurantList));
 
                 return filterResults;
