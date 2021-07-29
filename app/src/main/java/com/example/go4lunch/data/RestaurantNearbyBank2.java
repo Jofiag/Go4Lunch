@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@SuppressLint("StaticFieldLeak")
 public class RestaurantNearbyBank2 {
 
     public interface OnRestaurantListCallback{
@@ -43,13 +44,16 @@ public class RestaurantNearbyBank2 {
 
     private final Context mContext;
     private final RequestQueue mRequestQueue;
-    @SuppressLint("StaticFieldLeak")
     public static RestaurantNearbyBank2 INSTANCE;
     private ArrayList<Restaurant> mRestaurantList = new ArrayList<>();
+
+    private PlacesClient placesClient;
+    private List<Place.Field> placeFields;
 
     public RestaurantNearbyBank2(Context context) {
         this.mContext = context;
         mRequestQueue = RequestQueueSingleton.getInstance(context).getRequestQueue();
+        initializePlaceAndPlaceAttributes();
     }
 
     public synchronized static RestaurantNearbyBank2 getInstance(Context context){
@@ -58,7 +62,6 @@ public class RestaurantNearbyBank2 {
 
         return INSTANCE;
     }
-
 
 
     public void getRestaurantList(String url, final OnRestaurantListCallback callback){
@@ -95,18 +98,11 @@ public class RestaurantNearbyBank2 {
         }
     }
     private void setDetails(Restaurant restaurant, String placeId, OnRestaurantListCallback callback){
-
-        if(!Places.isInitialized())
-            Places.initialize(Objects.requireNonNull(mContext), mContext.getString(R.string.google_maps_key));
-
-        PlacesClient placesClient = Places.createClient(Objects.requireNonNull(mContext));
-        List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
         FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields);
 
         if (!mRestaurantList.isEmpty()){
             mRestaurantList = new ArrayList<>();
         }
-
 
         placesClient.fetchPlace(fetchPlaceRequest)
                 .addOnSuccessListener(response -> {
@@ -124,6 +120,13 @@ public class RestaurantNearbyBank2 {
                         callback.onListReady(mRestaurantList);
                 });
 
+    }
+    private void initializePlaceAndPlaceAttributes(){
+        if(!Places.isInitialized())
+            Places.initialize(Objects.requireNonNull(mContext), mContext.getString(R.string.google_maps_key));
+
+        placesClient = Places.createClient(Objects.requireNonNull(mContext));
+        placeFields = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.PHONE_NUMBER, Place.Field.UTC_OFFSET);
     }
 
     private void getAndSetRestaurantName(Restaurant restaurant, JSONObject jsonObject) throws JSONException {
