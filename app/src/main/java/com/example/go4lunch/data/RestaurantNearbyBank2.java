@@ -286,5 +286,4 @@ public class RestaurantNearbyBank2 {
 
         return (int) deviceLocation.distanceTo(destinationLocation);
     }
-
 }
