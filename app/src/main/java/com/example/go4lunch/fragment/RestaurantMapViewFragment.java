@@ -35,6 +35,7 @@ import com.example.go4lunch.data.RestaurantNearbyBank2;
 import com.example.go4lunch.data.RestaurantSelectedApi;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.util.Constants;
+import com.example.go4lunch.util.LoadingDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -247,6 +248,8 @@ public class RestaurantMapViewFragment extends Fragment {
     }
     private void setOurSearchView(Menu menu){
         MenuItem searchItem = menu.findItem(R.id.search_item);
+        LoadingDialog dialog = LoadingDialog.getInstance(requireActivity());
+
 
         SearchManager searchManager = (SearchManager) requireActivity().getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) searchItem.getActionView();
@@ -267,7 +270,12 @@ public class RestaurantMapViewFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                dialog.startLoadingDialog();
+
                 ZoomOnRestaurantSearched(query);
+
+                dialog.dismissLoadingDialog();
+
                 return true;    //return true so that the fragment won't be restart
             }
 
