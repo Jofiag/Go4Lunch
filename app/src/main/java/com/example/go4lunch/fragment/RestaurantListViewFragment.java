@@ -29,18 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RestaurantListViewFragment extends Fragment{
-    /*private PlacesClient placesClient;
-    private AutocompleteSessionToken sessionToken;
-    private RectangularBounds bounds;
-    private FindAutocompletePredictionsRequest predictionRequest;
-    private List<Place.Field> placeFields;*/
-
-    private RestaurantRecyclerViewAdapter restaurantAdapter;
-
     private String url;
     private Activity activity;
-
     private RecyclerView recyclerView;
+    private RestaurantRecyclerViewAdapter restaurantAdapter;
 
     public RestaurantListViewFragment() {
         // Required empty public constructor
@@ -80,34 +72,6 @@ public class RestaurantListViewFragment extends Fragment{
 
     }
 
-    private ArrayList<Restaurant> removeRedundantRestaurant(ArrayList<Restaurant> list){
-        List<Integer> indexList = new ArrayList<>();
-
-
-                    for (int i = 0; i < list.size(); i++) {
-                        Restaurant restaurantC = list.get(i);
-
-                        for (int y = 0; y < list.size(); y++) {
-                            Restaurant restaurantO = list.get(i);
-                            if (i != y){
-                                if (restaurantC == restaurantO)
-                                    indexList.add(y);
-                            }
-                        }
-                    }
-
-                    if (!indexList.isEmpty()) {
-                        for (Integer integer : indexList) {
-                            if (integer < list.size()){
-                                Restaurant restaurantR = list.get(integer);
-                                list.remove(restaurantR);
-                            }
-                        }
-                    }
-
-                    return list;
-    }
-
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.search_view_menu, menu);
@@ -139,6 +103,7 @@ public class RestaurantListViewFragment extends Fragment{
 
     }
 
+
     private void filterList(String query){
 
         RestaurantNearbyBank2.getInstance(requireActivity().getApplication()).getRestaurantList(url, restaurantList -> {
@@ -166,6 +131,34 @@ public class RestaurantListViewFragment extends Fragment{
             restaurantAdapter.notifyDataSetChanged();
 
         });*/
+    }
+
+    private ArrayList<Restaurant> removeRedundantRestaurant(ArrayList<Restaurant> list){
+        List<Integer> indexList = new ArrayList<>();
+
+
+        for (int i = 0; i < list.size(); i++) {
+            Restaurant restaurantC = list.get(i);
+
+            for (int y = 0; y < list.size(); y++) {
+                Restaurant restaurantO = list.get(i);
+                if (i != y){
+                    if (restaurantC == restaurantO)
+                        indexList.add(y);
+                }
+            }
+        }
+
+        if (!indexList.isEmpty()) {
+            for (Integer integer : indexList) {
+                if (integer < list.size()){
+                    Restaurant restaurantR = list.get(integer);
+                    list.remove(restaurantR);
+                }
+            }
+        }
+
+        return list;
     }
 
     /*private void initializePlaces(){

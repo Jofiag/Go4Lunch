@@ -32,6 +32,9 @@ implements Filterable {
     private final Activity activity;
     private final List<Restaurant> restaurantList;
 
+    private MyViewHolder myViewHolder;
+    private Restaurant currentRestaurant;
+
     public RestaurantRecyclerViewAdapter(Activity activity, List<Restaurant> restaurantList) {
         this.activity = activity;
         this.restaurantList = restaurantList;
@@ -47,50 +50,81 @@ implements Filterable {
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        Restaurant restaurant = restaurantList.get(position);
+        myViewHolder = holder;
+        currentRestaurant = restaurantList.get(position);
 
-        MyOpeningHours myOpeningHours = restaurant.getOpeningHours();
+        if (currentRestaurant != null)
+            showRestaurantAttributes();
+    }
+
+    private void showRestaurantAttributes(){
+        myViewHolder.restaurantNameTextView.setText(currentRestaurant.getName());
+
+        showRate();
+        showYellowStar();
+        showHowFarFrom();
+        showRestaurantImage();
+        showRestaurantOpeningHours();
+        showRestaurantFoodCountryAndAddress();
+        saveRestaurantClickedAndStartDetailsActivity();
+    }
+
+    private void showRate(){
+        int interested = 0;
+        if (currentRestaurant.getNumberOfInterestedWorkmate() != 0)
+            interested = currentRestaurant.getNumberOfInterestedWorkmate();
+        myViewHolder.numberOfInterestedWorkmateTextView.setText(MessageFormat.format("({0})", interested));
+    }
+    private void showYellowStar(){
+        int rate = currentRestaurant.getFavorableOpinion();
+        if (rate == 1)
+            myViewHolder.yellowStar1.setVisibility(View.VISIBLE);
+        else if(rate == 2){
+            myViewHolder.yellowStar1.setVisibility(View.VISIBLE);
+            myViewHolder.yellowStar2.setVisibility(View.VISIBLE);
+        }
+        else if ( rate >= 3){
+            myViewHolder.yellowStar1.setVisibility(View.VISIBLE);
+            myViewHolder.yellowStar2.setVisibility(View.VISIBLE);
+            myViewHolder.yellowStar3.setVisibility(View.VISIBLE);
+        }
+    }
+    private void showHowFarFrom(){
+        String distanceFromDeviceLocation = String.format("%sm", currentRestaurant.getDistanceFromDeviceLocation());
+        myViewHolder.howFarFromRestaurantTextView.setText(distanceFromDeviceLocation);
+    }
+    private void showRestaurantImage(){
+        if (currentRestaurant.getImageUrl() != null)
+            Picasso.get().load(currentRestaurant.getImageUrl())
+                    .placeholder(android.R.drawable.stat_sys_download)
+                    .error(android.R.drawable.stat_notify_error)
+                    .resize(154, 154)
+                    .into(myViewHolder.restaurantImage);
+    }
+    private void showRestaurantOpeningHours(){
+        MyOpeningHours myOpeningHours = currentRestaurant.getOpeningHours();
         if (myOpeningHours != null){
             String status = myOpeningHours.getOpeningStatus();
 
             if (status.equals(Constants.CLOSING_SOON))
-                holder.closeTimeTextView.setTextAppearance(R.style.closing_soon_style);
+                myViewHolder.closeTimeTextView.setTextAppearance(R.style.closing_soon_style);
             else
-                holder.closeTimeTextView.setTextAppearance(R.style.no_closing_soon_style);
-
-            holder.closeTimeTextView.setText(status);
+                myViewHolder.closeTimeTextView.setTextAppearance(R.style.no_closing_soon_style);
+            myViewHolder.closeTimeTextView.setText(status);
         }
-
-        String foodCountry = restaurant.getFoodCountry();
+    }
+    private void showRestaurantFoodCountryAndAddress(){
+        String foodCountry = currentRestaurant.getFoodCountry();
         if (foodCountry != null)
-            holder.foodCountryAndAddressTextView.setText(String.format("%s - %s", foodCountry, restaurant.getAddress()));
+            myViewHolder.foodCountryAndAddressTextView.setText(String.format("%s - %s", foodCountry, currentRestaurant.getAddress()));
         else
-            holder.foodCountryAndAddressTextView.setText(String.format("%s",restaurant.getAddress()));
-
-
-        if (restaurant.getImageUrl() != null)
-            Picasso.get().load(restaurant.getImageUrl())
-                    .placeholder(android.R.drawable.stat_sys_download)
-                    .error(android.R.drawable.stat_notify_error)
-                    .resize(154, 154)
-                    .into(holder.restaurantImage);
-
-        showYellowStar(holder, restaurant.getFavorableOpinion());
-
-        String distanceFromDeviceLocation = String.format("%sm", restaurant.getDistanceFromDeviceLocation());
-        holder.howFarFromRestaurantTextView.setText(distanceFromDeviceLocation);
-
-        int interested = 0;
-        if (restaurant.getNumberOfInterestedWorkmate() != 0)
-            interested = restaurant.getNumberOfInterestedWorkmate();
-        holder.numberOfInterestedWorkmateTextView.setText(MessageFormat.format("({0})", interested));
-
-        holder.restaurantNameTextView.setText(restaurant.getName());
-        holder.itemView.setOnClickListener(v -> {
-            RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurant);
+            myViewHolder.foodCountryAndAddressTextView.setText(String.format("%s",currentRestaurant.getAddress()));
+    }
+    private void saveRestaurantClickedAndStartDetailsActivity(){
+        myViewHolder.itemView.setOnClickListener(v -> {
+            RestaurantSelectedApi.getInstance().setRestaurantSelected(currentRestaurant);
             activity.startActivity(new Intent(activity, RestaurantDetailsActivity.class));
         });
-
     }
 
     @Override
@@ -99,20 +133,6 @@ implements Filterable {
             return restaurantList.size();
         else
             return 0;
-    }
-
-    private void showYellowStar(MyViewHolder holder, int favorableOpinion){
-        if (favorableOpinion == 1)
-            holder.yellowStar1.setVisibility(View.VISIBLE);
-        else if(favorableOpinion == 2){
-            holder.yellowStar1.setVisibility(View.VISIBLE);
-            holder.yellowStar2.setVisibility(View.VISIBLE);
-        }
-        else if ( favorableOpinion >= 3){
-            holder.yellowStar1.setVisibility(View.VISIBLE);
-            holder.yellowStar2.setVisibility(View.VISIBLE);
-            holder.yellowStar3.setVisibility(View.VISIBLE);
-        }
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
@@ -153,12 +173,6 @@ implements Filterable {
             numberOfInterestedWorkmateTextView = itemView.findViewById(R.id.number_of_interested_workmate);
         }
     }
-
-//    public void replaceList(List<Restaurant> newList){
-//        restaurantList.clear();
-//        restaurantList.addAll(newList);
-//        notifyDataSetChanged();
-//    }
 
     @Override
     public Filter getFilter() {
