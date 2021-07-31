@@ -54,10 +54,10 @@ implements Filterable {
         currentRestaurant = restaurantList.get(position);
 
         if (currentRestaurant != null)
-            showRestaurantAttributes();
+            showRestaurantAttributes(position);
     }
 
-    private void showRestaurantAttributes(){
+    private void showRestaurantAttributes(int position){
         myViewHolder.restaurantNameTextView.setText(currentRestaurant.getName());
 
         showRate();
@@ -66,7 +66,7 @@ implements Filterable {
         showRestaurantImage();
         showRestaurantOpeningHours();
         showRestaurantFoodCountryAndAddress();
-        saveRestaurantClickedAndStartDetailsActivity();
+        saveRestaurantClickedAndStartDetailsActivity(position);
     }
 
     private void showRate(){
@@ -120,9 +120,9 @@ implements Filterable {
         else
             myViewHolder.foodCountryAndAddressTextView.setText(String.format("%s",currentRestaurant.getAddress()));
     }
-    private void saveRestaurantClickedAndStartDetailsActivity(){
+    private void saveRestaurantClickedAndStartDetailsActivity(int position){
         myViewHolder.itemView.setOnClickListener(v -> {
-            RestaurantSelectedApi.getInstance().setRestaurantSelected(currentRestaurant);
+            RestaurantSelectedApi.getInstance().setRestaurantSelected(restaurantList.get(position));
             activity.startActivity(new Intent(activity, RestaurantDetailsActivity.class));
         });
     }
